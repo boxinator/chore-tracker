@@ -19,6 +19,7 @@
   --lane-unassigned: #f59e0b;
   --lane-1: #10b981;
   --lane-2: #8b5cf6;
+  --lane-3: #ef4444;
   --shadow: 0 18px 42px rgba(41, 55, 91, 0.12);
 }
 
@@ -169,6 +170,10 @@ button {
   box-shadow: var(--shadow);
 }
 
+.lane-empty {
+  justify-content: center;
+}
+
 .lane-header {
   display: flex;
   align-items: flex-start;
@@ -213,6 +218,12 @@ button {
 .lane-list {
   display: grid;
   gap: 12px;
+}
+
+.empty-copy {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.96rem;
 }
 
 .chore-card {
@@ -299,4 +310,3 @@ button {
     text-align: left;
   }
 }
-
