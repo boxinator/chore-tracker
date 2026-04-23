@@ -2,7 +2,7 @@ import express from "express";
 import path from "node:path";
 import { config } from "./config.js";
 import { setupDatabase } from "./db/index.js";
-import { getChildPointTotals, getVisibleChoresForDate } from "./services/dashboard.js";
+import { getDashboardData } from "./services/dashboard.js";
 
 const db = setupDatabase(config.databasePath);
 const app = express();
@@ -18,15 +18,12 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
-app.get("/api/dev/phase1", (_req, res) => {
+app.get("/api/dashboard", (_req, res) => {
   const now = new Date();
   const currentDateLocal = now.toISOString().slice(0, 10);
   const dayOfWeek = now.getDay();
 
-  res.json({
-    totals: getChildPointTotals(db),
-    visibleChores: getVisibleChoresForDate(db, currentDateLocal, dayOfWeek)
-  });
+  res.json(getDashboardData(db, currentDateLocal, dayOfWeek));
 });
 
 if (process.env.NODE_ENV === "production") {

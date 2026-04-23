@@ -70,6 +70,22 @@ button {
   gap: 16px;
 }
 
+.topbar-copy {
+  display: grid;
+  gap: 10px;
+}
+
+.title-block {
+  display: grid;
+  gap: 6px;
+}
+
+.topbar-tools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .eyebrow {
   margin: 0 0 6px;
   text-transform: uppercase;
@@ -84,9 +100,22 @@ button {
 }
 
 .subtitle {
-  margin: 8px 0 0;
+  margin: 0;
   max-width: 56ch;
   color: var(--text-muted);
+}
+
+.board-date {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--border);
+  color: var(--accent-strong);
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .icon-button,
@@ -127,6 +156,11 @@ button {
   background: var(--surface);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
+}
+
+.status-panel.is-error {
+  border-color: rgba(239, 68, 68, 0.28);
+  background: rgba(255, 243, 243, 0.82);
 }
 
 .status-copy,
@@ -172,6 +206,10 @@ button {
 
 .lane-empty {
   justify-content: center;
+}
+
+.lane-skeleton {
+  justify-content: flex-start;
 }
 
 .lane-header {
@@ -224,6 +262,47 @@ button {
   margin: 0;
   color: var(--text-muted);
   font-size: 0.96rem;
+}
+
+.skeleton,
+.skeleton-card {
+  position: relative;
+  overflow: hidden;
+  background: rgba(131, 145, 173, 0.14);
+}
+
+.skeleton::after,
+.skeleton-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.48),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton {
+  border-radius: 10px;
+}
+
+.skeleton-title {
+  width: 58%;
+  height: 24px;
+}
+
+.skeleton-subtitle {
+  width: 38%;
+  height: 16px;
+}
+
+.skeleton-card {
+  height: 100px;
+  border-radius: 14px;
 }
 
 .chore-card {
@@ -306,7 +385,17 @@ button {
     align-items: stretch;
   }
 
+  .topbar-tools {
+    justify-content: space-between;
+  }
+
   .status-meta {
     text-align: left;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
   }
 }

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import type { DatabaseConnection } from "../db/connection.js";
 import { createTestDatabase } from "../db/test-helpers.js";
-import { getChildPointTotals, getVisibleChoresForDate } from "./dashboard.js";
+import { getChildPointTotals, getDashboardData, getVisibleChoresForDate } from "./dashboard.js";
 
 let db: DatabaseConnection | null = null;
 
@@ -146,6 +146,88 @@ describe("getVisibleChoresForDate", () => {
         assigneeChildId: "child-2",
         isCompletedToday: true,
         scheduledDays: []
+      }
+    ]);
+  });
+});
+
+describe("getDashboardData", () => {
+  it("groups visible chores into unassigned and per-child dashboard lanes", () => {
+    const fixtureDb = createBaseFixture();
+    const now = "2026-04-23T08:00:00.000Z";
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chores (
+          id,
+          title,
+          description,
+          point_value,
+          assignee_child_id,
+          is_active,
+          created_at,
+          updated_at
+        ) VALUES
+          ('assigned-1', 'Feed cat', 'Kitchen', 4, 'child-1', 1, @now, @now),
+          ('assigned-2', 'Laundry', 'Bedroom', 7, 'child-2', 1, @now, @now),
+          ('unassigned-1', 'Recycling', 'Outside', 8, NULL, 1, @now, @now)
+      `
+    ).run({ now });
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO ledger_entries (
+          id,
+          event_type,
+          child_id,
+          child_name_snapshot,
+          source_type,
+          source_id,
+          source_name_snapshot,
+          point_delta,
+          timestamp
+        ) VALUES
+          ('ledger-1', 'bonus_seed', 'child-1', 'Sample Child 1', 'system', 'seed', 'Seed Bonus', 10, @now)
+      `
+    ).run({ now });
+
+    const dashboard = getDashboardData(fixtureDb, "2026-04-23", 4);
+
+    expect(dashboard.currentDateLocal).toBe("2026-04-23");
+    expect(dashboard.dayOfWeek).toBe(4);
+    expect(dashboard.unassignedChores.map((chore) => chore.id)).toEqual(["unassigned-1"]);
+    expect(dashboard.children).toEqual([
+      {
+        id: "child-1",
+        name: "Sample Child 1",
+        totalPoints: 10,
+        chores: [
+          {
+            id: "assigned-1",
+            title: "Feed cat",
+            description: "Kitchen",
+            pointValue: 4,
+            assigneeChildId: "child-1",
+            isCompletedToday: false,
+            scheduledDays: []
+          }
+        ]
+      },
+      {
+        id: "child-2",
+        name: "Sample Child 2",
+        totalPoints: 0,
+        chores: [
+          {
+            id: "assigned-2",
+            title: "Laundry",
+            description: "Bedroom",
+            pointValue: 7,
+            assigneeChildId: "child-2",
+            isCompletedToday: false,
+            scheduledDays: []
+          }
+        ]
       }
     ]);
   });

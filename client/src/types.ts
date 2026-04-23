@@ -1,0 +1,31 @@
+export type HealthResponse = {
+  status: string;
+  timestamp: string;
+  app: string;
+  databasePath: string;
+};
+
+export type VisibleChore = {
+  id: string;
+  title: string;
+  description: string;
+  pointValue: number;
+  assigneeChildId: string | null;
+  isCompletedToday: boolean;
+  scheduledDays: number[];
+};
+
+export type DashboardChild = {
+  id: string;
+  name: string;
+  totalPoints: number;
+  chores: VisibleChore[];
+};
+
+export type DashboardResponse = {
+  currentDateLocal: string;
+  dayOfWeek: number;
+  unassignedChores: VisibleChore[];
+  children: DashboardChild[];
+};
+
