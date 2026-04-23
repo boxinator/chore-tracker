@@ -29,3 +29,10 @@ export type DashboardResponse = {
   children: DashboardChild[];
 };
 
+export type CreateChoreInput = {
+  title: string;
+  description: string;
+  pointValue: number;
+  assigneeChildId: string | null;
+  scheduleDays: number[];
+};

@@ -2,6 +2,12 @@ import express from "express";
 import path from "node:path";
 import { config } from "./config.js";
 import { setupDatabase } from "./db/index.js";
+import {
+  ChoreValidationError,
+  createChore,
+  deleteChore,
+  parseCreateChoreInput
+} from "./services/chores.js";
 import { getDashboardData } from "./services/dashboard.js";
 
 const db = setupDatabase(config.databasePath);
@@ -24,6 +30,35 @@ app.get("/api/dashboard", (_req, res) => {
   const dayOfWeek = now.getDay();
 
   res.json(getDashboardData(db, currentDateLocal, dayOfWeek));
+});
+
+app.post("/api/chores", (req, res) => {
+  try {
+    const input = parseCreateChoreInput(req.body);
+    const chore = createChore(db, input);
+    res.status(201).json(chore);
+  } catch (error) {
+    if (error instanceof ChoreValidationError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to create chore" });
+  }
+});
+
+app.delete("/api/chores/:id", (req, res) => {
+  try {
+    deleteChore(db, req.params.id);
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof ChoreValidationError) {
+      res.status(404).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to delete chore" });
+  }
 });
 
 if (process.env.NODE_ENV === "production") {

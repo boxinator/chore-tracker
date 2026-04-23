@@ -1,11 +1,20 @@
 type ChoreCardProps = {
+  id: string;
   title: string;
   points: number;
   meta: string;
   done?: boolean;
+  onDelete?: (id: string) => void;
 };
 
-export function ChoreCard({ title, points, meta, done = false }: ChoreCardProps) {
+export function ChoreCard({
+  id,
+  title,
+  points,
+  meta,
+  done = false,
+  onDelete
+}: ChoreCardProps) {
   return (
     <article className={`chore-card${done ? " is-done" : ""}`}>
       <div className="chore-topline">
@@ -24,11 +33,22 @@ export function ChoreCard({ title, points, meta, done = false }: ChoreCardProps)
 
       <div className="chore-footer">
         <span className="points-pill">{points} pts</span>
-        <button className="text-button" type="button">
-          Details
-        </button>
+        <div className="card-actions">
+          {onDelete && (
+            <button
+              className="icon-text-button danger-button"
+              type="button"
+              aria-label={`Delete ${title}`}
+              onClick={() => onDelete(id)}
+            >
+              Del
+            </button>
+          )}
+          <button className="text-button" type="button">
+            Details
+          </button>
+        </div>
       </div>
     </article>
   );
 }
-

@@ -247,6 +247,16 @@ button {
   border-radius: 12px;
 }
 
+.primary-button,
+.secondary-button,
+.icon-text-button,
+.modal-close {
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 0;
+}
+
 .reward-button {
   background: rgba(40, 87, 197, 0.12);
   color: var(--accent-strong);
@@ -374,6 +384,150 @@ button {
   font-weight: 700;
 }
 
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-text-button {
+  background: rgba(23, 32, 51, 0.08);
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.danger-button {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b42318;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(18, 27, 44, 0.38);
+  z-index: 10;
+}
+
+.modal {
+  width: min(560px, 100%);
+  max-height: min(92vh, 860px);
+  overflow: auto;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow);
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal-eyebrow {
+  margin: 0 0 6px;
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.modal-header h2 {
+  margin: 0;
+}
+
+.modal-close {
+  background: rgba(23, 32, 51, 0.08);
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.modal-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.field,
+.field-row {
+  display: grid;
+  gap: 8px;
+}
+
+.field span {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.field-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: #fff;
+  color: #172033;
+}
+
+.weekday-picker {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.weekday-button {
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.weekday-button.is-selected {
+  background: rgba(40, 87, 197, 0.12);
+  border-color: rgba(40, 87, 197, 0.35);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.secondary-button {
+  background: rgba(23, 32, 51, 0.08);
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.primary-button {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+.primary-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.form-error {
+  margin: 0;
+  color: #b42318;
+  font-weight: 700;
+}
+
 @media (max-width: 720px) {
   .app-shell {
     padding: 16px;
@@ -387,6 +541,10 @@ button {
 
   .topbar-tools {
     justify-content: space-between;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
   }
 
   .status-meta {

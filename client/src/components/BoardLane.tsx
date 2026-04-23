@@ -16,6 +16,7 @@ type BoardLaneProps = {
   items: LaneItem[];
   emptyMessage: string;
   showRewards?: boolean;
+  onDelete?: (id: string) => void;
 };
 
 export function BoardLane({
@@ -25,7 +26,8 @@ export function BoardLane({
   subtitle,
   items,
   emptyMessage,
-  showRewards = false
+  showRewards = false,
+  onDelete
 }: BoardLaneProps) {
   return (
     <section key={id} className="lane" style={{ ["--lane-accent" as string]: accent }}>
@@ -46,10 +48,12 @@ export function BoardLane({
         {items.map((item) => (
           <ChoreCard
             key={item.id}
+            id={item.id}
             title={item.title}
             points={item.points}
             meta={item.meta}
             done={item.done}
+            onDelete={onDelete}
           />
         ))}
 
@@ -58,4 +62,3 @@ export function BoardLane({
     </section>
   );
 }
-

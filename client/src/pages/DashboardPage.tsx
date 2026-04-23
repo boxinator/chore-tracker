@@ -1,5 +1,7 @@
 import type { DashboardResponse, HealthResponse, VisibleChore } from "../types";
+import { AddChoreModal } from "../components/AddChoreModal";
 import { BoardLane } from "../components/BoardLane";
+import type { CreateChoreInput } from "../types";
 
 type LaneItem = {
   id: string;
@@ -24,6 +26,13 @@ type DashboardPageProps = {
   dashboardData: DashboardResponse | null;
   loading: boolean;
   error: string | null;
+  addModalOpen: boolean;
+  addSubmitting: boolean;
+  addError: string | null;
+  onOpenAddModal: () => void;
+  onCloseAddModal: () => void;
+  onSubmitChore: (input: CreateChoreInput) => Promise<void>;
+  onDeleteChore: (id: string) => Promise<void>;
 };
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -91,7 +100,14 @@ export function DashboardPage({
   health,
   dashboardData,
   loading,
-  error
+  error,
+  addModalOpen,
+  addSubmitting,
+  addError,
+  onOpenAddModal,
+  onCloseAddModal,
+  onSubmitChore,
+  onDeleteChore
 }: DashboardPageProps) {
   const lanes = buildLanes(dashboardData);
 
@@ -112,7 +128,12 @@ export function DashboardPage({
           <div className="board-date" aria-label="Current board date">
             {formatBoardDate(dashboardData)}
           </div>
-          <button className="icon-button" type="button" aria-label="Add chore">
+          <button
+            className="icon-button"
+            type="button"
+            aria-label="Add chore"
+            onClick={onOpenAddModal}
+          >
             +
           </button>
         </div>
@@ -179,10 +200,20 @@ export function DashboardPage({
               items={lane.items}
               emptyMessage={lane.emptyMessage}
               showRewards={lane.showRewards}
+              onDelete={onDeleteChore}
             />
           ))}
       </main>
+
+      {addModalOpen && dashboardData && (
+        <AddChoreModal
+          children={dashboardData.children}
+          submitting={addSubmitting}
+          error={addError}
+          onClose={onCloseAddModal}
+          onSubmit={onSubmitChore}
+        />
+      )}
     </div>
   );
 }
-
