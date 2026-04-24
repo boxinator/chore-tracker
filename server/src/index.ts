@@ -4,6 +4,12 @@ import { config } from "./config.js";
 import { setupDatabase } from "./db/index.js";
 import { getCurrentLocalDateString } from "./utils/dates.js";
 import {
+  listActiveRewards,
+  parseRedeemRewardInput,
+  redeemReward,
+  RewardValidationError
+} from "./services/rewards.js";
+import {
   ChoreValidationError,
   assignChore,
   completeChore,
@@ -114,6 +120,24 @@ app.post("/api/chores/:id/uncomplete", (req, res) => {
     }
 
     res.status(500).json({ error: "Failed to uncomplete chore" });
+  }
+});
+
+app.get("/api/rewards", (_req, res) => {
+  res.json({ rewards: listActiveRewards(db) });
+});
+
+app.post("/api/rewards/:id/redeem", (req, res) => {
+  try {
+    const input = parseRedeemRewardInput(req.body);
+    res.json(redeemReward(db, req.params.id, input.childId));
+  } catch (error) {
+    if (error instanceof RewardValidationError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to redeem reward" });
   }
 });
 

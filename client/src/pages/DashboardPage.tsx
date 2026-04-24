@@ -7,6 +7,7 @@ import type {
 } from "../types";
 import { AddChoreModal } from "../components/AddChoreModal";
 import { BoardLane } from "../components/BoardLane";
+import { RewardModal } from "../components/RewardModal";
 
 type LaneItem = {
   id: string;
@@ -40,6 +41,14 @@ type DashboardPageProps = {
   onDeleteChore: (id: string) => Promise<void>;
   onAssignChore: (id: string, childId: string) => Promise<void>;
   onToggleComplete: (id: string, done: boolean) => Promise<void>;
+  rewardModalChildId: string | null;
+  rewards: Reward[];
+  rewardsLoading: boolean;
+  rewardsError: string | null;
+  redeemResult: RedeemRewardResult | null;
+  onOpenRewards: (childId: string) => void;
+  onCloseRewards: () => void;
+  onRedeemReward: (rewardId: string) => Promise<void>;
 };
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -116,11 +125,20 @@ export function DashboardPage({
   onSubmitChore,
   onDeleteChore,
   onAssignChore,
-  onToggleComplete
+  onToggleComplete,
+  rewardModalChildId,
+  rewards,
+  rewardsLoading,
+  rewardsError,
+  redeemResult,
+  onOpenRewards,
+  onCloseRewards,
+  onRedeemReward
 }: DashboardPageProps) {
   const lanes = buildLanes(dashboardData);
   const assignOptions: AssignChildOption[] =
     dashboardData?.children.map((child) => ({ id: child.id, name: child.name })) ?? [];
+  const rewardChild = dashboardData?.children.find((child) => child.id === rewardModalChildId) ?? null;
 
   return (
     <div className="app-shell">
@@ -211,6 +229,7 @@ export function DashboardPage({
               items={lane.items}
               emptyMessage={lane.emptyMessage}
               showRewards={lane.showRewards}
+              onOpenRewards={lane.showRewards ? () => onOpenRewards(lane.id) : undefined}
               onDelete={onDeleteChore}
               onToggleComplete={onToggleComplete}
               assignOptions={lane.id === "unassigned" ? assignOptions : undefined}
@@ -226,6 +245,18 @@ export function DashboardPage({
           error={addError}
           onClose={onCloseAddModal}
           onSubmit={onSubmitChore}
+        />
+      )}
+
+      {rewardChild && (
+        <RewardModal
+          child={rewardChild}
+          rewards={rewards}
+          submitting={rewardsLoading}
+          error={rewardsError}
+          redeemResult={redeemResult}
+          onClose={onCloseRewards}
+          onRedeem={onRedeemReward}
         />
       )}
     </div>

@@ -17,6 +17,7 @@ type BoardLaneProps = {
   items: LaneItem[];
   emptyMessage: string;
   showRewards?: boolean;
+  onOpenRewards?: () => void;
   onDelete?: (id: string) => void;
   onToggleComplete?: (id: string, done: boolean) => void;
   assignOptions?: AssignChildOption[];
@@ -31,6 +32,7 @@ export function BoardLane({
   items,
   emptyMessage,
   showRewards = false,
+  onOpenRewards,
   onDelete,
   onToggleComplete,
   assignOptions,
@@ -45,7 +47,7 @@ export function BoardLane({
         </div>
 
         {showRewards && (
-          <button className="reward-button" type="button">
+          <button className="reward-button" type="button" onClick={onOpenRewards}>
             Rewards
           </button>
         )}

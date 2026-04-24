@@ -41,3 +41,20 @@ export type AssignChildOption = {
   id: string;
   name: string;
 };
+
+export type Reward = {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;
+  isActive: boolean;
+};
+
+export type RewardsResponse = {
+  rewards: Reward[];
+};
+
+export type RedeemRewardResult = {
+  previousTotal: number;
+  newTotal: number;
+};

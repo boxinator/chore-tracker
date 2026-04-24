@@ -520,6 +520,67 @@ button {
   gap: 10px;
 }
 
+.reward-balance {
+  margin-top: 16px;
+  font-weight: 700;
+  color: var(--accent-strong);
+}
+
+.reward-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.reward-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fff;
+  text-align: left;
+}
+
+.reward-card strong,
+.reward-detail-copy h3 {
+  display: block;
+  margin: 0 0 4px;
+}
+
+.reward-card p,
+.reward-detail-copy p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.reward-card.is-disabled {
+  opacity: 0.5;
+}
+
+.reward-detail {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.reward-equation {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  color: var(--accent-strong);
+}
+
+.reward-success {
+  margin: 0;
+  font-weight: 700;
+  color: #0a7b57;
+}
+
 .secondary-button {
   background: rgba(23, 32, 51, 0.08);
   color: var(--accent-strong);

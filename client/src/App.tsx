@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { DashboardPage } from "./pages/DashboardPage";
-import type { CreateChoreInput, DashboardResponse, HealthResponse } from "./types";
+import type {
+  CreateChoreInput,
+  DashboardResponse,
+  HealthResponse,
+  RedeemRewardResult,
+  Reward,
+  RewardsResponse
+} from "./types";
 
 async function apiFetch(input: RequestInfo | URL, init?: RequestInit) {
   return fetch(input, {
@@ -17,6 +24,11 @@ export function App() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addSubmitting, setAddSubmitting] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
+  const [rewardModalChildId, setRewardModalChildId] = useState<string | null>(null);
+  const [rewards, setRewards] = useState<Reward[]>([]);
+  const [rewardsLoading, setRewardsLoading] = useState(false);
+  const [rewardsError, setRewardsError] = useState<string | null>(null);
+  const [redeemResult, setRedeemResult] = useState<RedeemRewardResult | null>(null);
 
   const fetchData = async () => {
     try {
@@ -46,6 +58,17 @@ export function App() {
   useEffect(() => {
     void fetchData();
   }, []);
+
+  const fetchRewards = async () => {
+    const response = await apiFetch("/api/rewards");
+
+    if (!response.ok) {
+      throw new Error(`Rewards failed with ${response.status}`);
+    }
+
+    const payload = (await response.json()) as RewardsResponse;
+    setRewards(payload.rewards);
+  };
 
   const handleSubmitChore = async (input: CreateChoreInput) => {
     try {
@@ -123,6 +146,51 @@ export function App() {
     await fetchData();
   };
 
+  const handleOpenRewards = async (childId: string) => {
+    try {
+      setRewardsError(null);
+      setRedeemResult(null);
+      setRewardsLoading(true);
+      setRewardModalChildId(childId);
+      await fetchRewards();
+    } catch (err) {
+      setRewardsError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setRewardsLoading(false);
+    }
+  };
+
+  const handleRedeemReward = async (rewardId: string) => {
+    if (!rewardModalChildId) {
+      return;
+    }
+
+    try {
+      setRewardsLoading(true);
+      setRewardsError(null);
+
+      const response = await apiFetch(`/api/rewards/${rewardId}/redeem`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ childId: rewardModalChildId })
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? `Redeem reward failed with ${response.status}`);
+      }
+
+      setRedeemResult((await response.json()) as RedeemRewardResult);
+      await fetchData();
+    } catch (err) {
+      setRewardsError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setRewardsLoading(false);
+    }
+  };
+
   return (
     <DashboardPage
       health={health}
@@ -148,6 +216,22 @@ export function App() {
       onDeleteChore={handleDeleteChore}
       onAssignChore={handleAssignChore}
       onToggleComplete={handleToggleComplete}
+      rewardModalChildId={rewardModalChildId}
+      rewards={rewards}
+      rewardsLoading={rewardsLoading}
+      rewardsError={rewardsError}
+      redeemResult={redeemResult}
+      onOpenRewards={handleOpenRewards}
+      onCloseRewards={() => {
+        if (rewardsLoading) {
+          return;
+        }
+
+        setRewardModalChildId(null);
+        setRewardsError(null);
+        setRedeemResult(null);
+      }}
+      onRedeemReward={handleRedeemReward}
     />
   );
 }
