@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import { DashboardPage } from "./pages/DashboardPage";
 import type { CreateChoreInput, DashboardResponse, HealthResponse } from "./types";
 
+async function apiFetch(input: RequestInfo | URL, init?: RequestInit) {
+  return fetch(input, {
+    cache: "no-store",
+    ...init
+  });
+}
+
 export function App() {
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(null);
@@ -14,8 +21,8 @@ export function App() {
   const fetchData = async () => {
     try {
       const [healthResponse, dashboardResponse] = await Promise.all([
-        fetch("/api/health"),
-        fetch("/api/dashboard")
+        apiFetch("/api/health"),
+        apiFetch("/api/dashboard")
       ]);
 
       if (!healthResponse.ok) {
@@ -45,7 +52,7 @@ export function App() {
       setAddSubmitting(true);
       setAddError(null);
 
-      const response = await fetch("/api/chores", {
+      const response = await apiFetch("/api/chores", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -72,11 +79,44 @@ export function App() {
       return;
     }
 
-    const response = await fetch(`/api/chores/${id}`, { method: "DELETE" });
+    const response = await apiFetch(`/api/chores/${id}`, { method: "DELETE" });
 
     if (!response.ok) {
       const payload = (await response.json().catch(() => null)) as { error?: string } | null;
       setError(payload?.error ?? `Delete chore failed with ${response.status}`);
+      return;
+    }
+
+    await fetchData();
+  };
+
+  const handleAssignChore = async (id: string, childId: string) => {
+    const response = await apiFetch(`/api/chores/${id}/assign`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ childId })
+    });
+
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+      setError(payload?.error ?? `Assign chore failed with ${response.status}`);
+      return;
+    }
+
+    await fetchData();
+  };
+
+  const handleToggleComplete = async (id: string, done: boolean) => {
+    const endpoint = done ? "uncomplete" : "complete";
+    const response = await apiFetch(`/api/chores/${id}/${endpoint}`, {
+      method: "POST"
+    });
+
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+      setError(payload?.error ?? `Update chore failed with ${response.status}`);
       return;
     }
 
@@ -106,6 +146,8 @@ export function App() {
       }}
       onSubmitChore={handleSubmitChore}
       onDeleteChore={handleDeleteChore}
+      onAssignChore={handleAssignChore}
+      onToggleComplete={handleToggleComplete}
     />
   );
 }

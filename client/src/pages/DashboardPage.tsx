@@ -1,7 +1,12 @@
-import type { DashboardResponse, HealthResponse, VisibleChore } from "../types";
+import type {
+  AssignChildOption,
+  CreateChoreInput,
+  DashboardResponse,
+  HealthResponse,
+  VisibleChore
+} from "../types";
 import { AddChoreModal } from "../components/AddChoreModal";
 import { BoardLane } from "../components/BoardLane";
-import type { CreateChoreInput } from "../types";
 
 type LaneItem = {
   id: string;
@@ -33,6 +38,8 @@ type DashboardPageProps = {
   onCloseAddModal: () => void;
   onSubmitChore: (input: CreateChoreInput) => Promise<void>;
   onDeleteChore: (id: string) => Promise<void>;
+  onAssignChore: (id: string, childId: string) => Promise<void>;
+  onToggleComplete: (id: string, done: boolean) => Promise<void>;
 };
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -107,9 +114,13 @@ export function DashboardPage({
   onOpenAddModal,
   onCloseAddModal,
   onSubmitChore,
-  onDeleteChore
+  onDeleteChore,
+  onAssignChore,
+  onToggleComplete
 }: DashboardPageProps) {
   const lanes = buildLanes(dashboardData);
+  const assignOptions: AssignChildOption[] =
+    dashboardData?.children.map((child) => ({ id: child.id, name: child.name })) ?? [];
 
   return (
     <div className="app-shell">
@@ -201,6 +212,9 @@ export function DashboardPage({
               emptyMessage={lane.emptyMessage}
               showRewards={lane.showRewards}
               onDelete={onDeleteChore}
+              onToggleComplete={onToggleComplete}
+              assignOptions={lane.id === "unassigned" ? assignOptions : undefined}
+              onAssign={lane.id === "unassigned" ? onAssignChore : undefined}
             />
           ))}
       </main>

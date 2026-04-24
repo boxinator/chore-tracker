@@ -1,4 +1,5 @@
 import { ChoreCard } from "./ChoreCard";
+import type { AssignChildOption } from "../types";
 
 type LaneItem = {
   id: string;
@@ -17,6 +18,9 @@ type BoardLaneProps = {
   emptyMessage: string;
   showRewards?: boolean;
   onDelete?: (id: string) => void;
+  onToggleComplete?: (id: string, done: boolean) => void;
+  assignOptions?: AssignChildOption[];
+  onAssign?: (id: string, childId: string) => void;
 };
 
 export function BoardLane({
@@ -27,7 +31,10 @@ export function BoardLane({
   items,
   emptyMessage,
   showRewards = false,
-  onDelete
+  onDelete,
+  onToggleComplete,
+  assignOptions,
+  onAssign
 }: BoardLaneProps) {
   return (
     <section key={id} className="lane" style={{ ["--lane-accent" as string]: accent }}>
@@ -54,6 +61,9 @@ export function BoardLane({
             meta={item.meta}
             done={item.done}
             onDelete={onDelete}
+            onToggleComplete={onToggleComplete}
+            assignOptions={assignOptions}
+            onAssign={onAssign}
           />
         ))}
 

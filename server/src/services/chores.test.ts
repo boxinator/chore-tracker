@@ -3,10 +3,14 @@ import type { DatabaseConnection } from "../db/connection.js";
 import { createTestDatabase } from "../db/test-helpers.js";
 import { getDashboardData } from "./dashboard.js";
 import {
+  assignChore,
   ChoreValidationError,
+  completeChore,
   createChore,
   deleteChore,
   parseCreateChoreInput
+  ,
+  uncompleteChore
 } from "./chores.js";
 
 let db: DatabaseConnection | null = null;
@@ -112,3 +116,106 @@ describe("deleteChore", () => {
   });
 });
 
+describe("assignChore", () => {
+  it("assigns an unassigned chore to a child", () => {
+    const fixtureDb = createBaseFixture();
+    const now = "2026-04-23T08:00:00.000Z";
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chores (
+          id,
+          title,
+          description,
+          point_value,
+          assignee_child_id,
+          is_active,
+          created_at,
+          updated_at
+        ) VALUES
+          ('chore-1', 'Clear table', '', 5, NULL, 1, @now, @now)
+      `
+    ).run({ now });
+
+    assignChore(fixtureDb, "chore-1", "child-2");
+
+    const dashboard = getDashboardData(fixtureDb, "2026-04-23", 4);
+    expect(dashboard.children[1]?.chores[0]?.id).toBe("chore-1");
+  });
+});
+
+describe("completeChore and uncompleteChore", () => {
+  it("blocks completion for unassigned chores", () => {
+    const fixtureDb = createBaseFixture();
+    const now = "2026-04-23T08:00:00.000Z";
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chores (
+          id,
+          title,
+          description,
+          point_value,
+          assignee_child_id,
+          is_active,
+          created_at,
+          updated_at
+        ) VALUES
+          ('chore-1', 'Clear table', '', 5, NULL, 1, @now, @now)
+      `
+    ).run({ now });
+
+    expect(() => completeChore(fixtureDb, "chore-1", "2026-04-23", 4)).toThrow(
+      ChoreValidationError
+    );
+  });
+
+  it("completes and uncompletes a chore with ledger reversals", () => {
+    const fixtureDb = createBaseFixture();
+    const now = "2026-04-23T08:00:00.000Z";
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chores (
+          id,
+          title,
+          description,
+          point_value,
+          assignee_child_id,
+          is_active,
+          created_at,
+          updated_at
+        ) VALUES
+          ('chore-1', 'Clear table', '', 5, 'child-1', 1, @now, @now)
+      `
+    ).run({ now });
+
+    completeChore(fixtureDb, "chore-1", "2026-04-23", 4);
+
+    let dashboard = getDashboardData(fixtureDb, "2026-04-23", 4);
+    expect(dashboard.children[0]?.totalPoints).toBe(5);
+    expect(dashboard.children[0]?.chores[0]?.isCompletedToday).toBe(true);
+
+    uncompleteChore(fixtureDb, "chore-1", "2026-04-23");
+
+    dashboard = getDashboardData(fixtureDb, "2026-04-23", 4);
+    expect(dashboard.children[0]?.totalPoints).toBe(0);
+    expect(dashboard.children[0]?.chores[0]?.isCompletedToday).toBe(false);
+
+    const ledgerEntries = fixtureDb
+      .prepare(
+        `
+          SELECT event_type, point_delta
+          FROM ledger_entries
+          WHERE child_id = 'child-1'
+          ORDER BY timestamp ASC
+        `
+      )
+      .all() as Array<{ event_type: string; point_delta: number }>;
+
+    expect(ledgerEntries).toEqual([
+      { event_type: "chore_complete", point_delta: 5 },
+      { event_type: "chore_uncomplete", point_delta: -5 }
+    ]);
+  });
+});

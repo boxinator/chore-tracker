@@ -2,11 +2,16 @@ import express from "express";
 import path from "node:path";
 import { config } from "./config.js";
 import { setupDatabase } from "./db/index.js";
+import { getCurrentLocalDateString } from "./utils/dates.js";
 import {
   ChoreValidationError,
+  assignChore,
+  completeChore,
   createChore,
   deleteChore,
-  parseCreateChoreInput
+  parseAssignChoreInput,
+  parseCreateChoreInput,
+  uncompleteChore
 } from "./services/chores.js";
 import { getDashboardData } from "./services/dashboard.js";
 
@@ -14,6 +19,12 @@ const db = setupDatabase(config.databasePath);
 const app = express();
 
 app.use(express.json());
+app.use("/api", (_req, res, next) => {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  next();
+});
 
 app.get("/api/health", (_req, res) => {
   res.json({
@@ -26,7 +37,7 @@ app.get("/api/health", (_req, res) => {
 
 app.get("/api/dashboard", (_req, res) => {
   const now = new Date();
-  const currentDateLocal = now.toISOString().slice(0, 10);
+  const currentDateLocal = getCurrentLocalDateString(now);
   const dayOfWeek = now.getDay();
 
   res.json(getDashboardData(db, currentDateLocal, dayOfWeek));
@@ -58,6 +69,51 @@ app.delete("/api/chores/:id", (req, res) => {
     }
 
     res.status(500).json({ error: "Failed to delete chore" });
+  }
+});
+
+app.patch("/api/chores/:id/assign", (req, res) => {
+  try {
+    const input = parseAssignChoreInput(req.body);
+    assignChore(db, req.params.id, input.childId);
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof ChoreValidationError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to assign chore" });
+  }
+});
+
+app.post("/api/chores/:id/complete", (req, res) => {
+  try {
+    const now = new Date();
+    completeChore(db, req.params.id, getCurrentLocalDateString(now), now.getDay());
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof ChoreValidationError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to complete chore" });
+  }
+});
+
+app.post("/api/chores/:id/uncomplete", (req, res) => {
+  try {
+    const now = new Date();
+    uncompleteChore(db, req.params.id, getCurrentLocalDateString(now));
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof ChoreValidationError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to uncomplete chore" });
   }
 });
 

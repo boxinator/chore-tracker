@@ -36,3 +36,8 @@ export type CreateChoreInput = {
   assigneeChildId: string | null;
   scheduleDays: number[];
 };
+
+export type AssignChildOption = {
+  id: string;
+  name: string;
+};
