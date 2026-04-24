@@ -184,6 +184,11 @@ export function App() {
 
       setRedeemResult((await response.json()) as RedeemRewardResult);
       await fetchData();
+      window.setTimeout(() => {
+        setRewardModalChildId(null);
+        setRewardsError(null);
+        setRedeemResult(null);
+      }, 700);
     } catch (err) {
       setRewardsError(err instanceof Error ? err.message : "Unknown error");
     } finally {
