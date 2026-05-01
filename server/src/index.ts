@@ -144,7 +144,7 @@ app.post("/api/rewards/:id/redeem", (req, res) => {
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(config.clientDistDir));
 
-  app.get("*", (req, res, next) => {
+  app.get("/{*path}", (req, res, next) => {
     if (req.path.startsWith("/api/")) {
       next();
       return;

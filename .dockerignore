@@ -1,11 +1,11 @@
 node_modules
 dist
 client-dist
-*.log
-.env
-.env.*
 data
 test-results
 playwright-report
 e2e/.tmp
 .docker-tmp
+*.log
+.git
+.gitignore

@@ -1,0 +1,26 @@
+services:
+  chore-tracker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chore-tracker
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATA_DIR: /data
+      TZ: America/Los_Angeles
+    volumes:
+      - chore_tracker_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/api/health').then(r=>{if(!r.ok) process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  chore_tracker_data:
+
