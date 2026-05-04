@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { DashboardPage } from "./pages/DashboardPage";
 import type {
+  Child,
+  ChildInput,
+  ChildrenResponse,
   CreateChoreInput,
   DashboardResponse,
   HealthResponse,
@@ -8,6 +11,7 @@ import type {
   HistoryResponse,
   RedeemRewardResult,
   Reward,
+  RewardInput,
   RewardsResponse,
   UpdateChoreInput
 } from "./types";
@@ -33,6 +37,12 @@ export function App() {
   const [assignmentPendingChoreId, setAssignmentPendingChoreId] = useState<string | null>(null);
   const [highlightedChoreId, setHighlightedChoreId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [manageModalOpen, setManageModalOpen] = useState(false);
+  const [manageLoading, setManageLoading] = useState(false);
+  const [manageSaving, setManageSaving] = useState(false);
+  const [manageError, setManageError] = useState<string | null>(null);
+  const [managedChildren, setManagedChildren] = useState<Child[]>([]);
+  const [managedRewards, setManagedRewards] = useState<Reward[]>([]);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [historyEntries, setHistoryEntries] = useState<HistoryEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -95,6 +105,28 @@ export function App() {
 
     const payload = (await response.json()) as RewardsResponse;
     setRewards(payload.rewards);
+  };
+
+  const fetchChildren = async () => {
+    const response = await apiFetch("/api/children");
+
+    if (!response.ok) {
+      throw new Error(`Children failed with ${response.status}`);
+    }
+
+    const payload = (await response.json()) as ChildrenResponse;
+    setManagedChildren(payload.children);
+  };
+
+  const fetchManagedRewards = async () => {
+    const response = await apiFetch("/api/rewards?includeInactive=1");
+
+    if (!response.ok) {
+      throw new Error(`Rewards failed with ${response.status}`);
+    }
+
+    const payload = (await response.json()) as RewardsResponse;
+    setManagedRewards(payload.rewards);
   };
 
   const fetchHistory = async () => {
@@ -254,6 +286,151 @@ export function App() {
     }
   };
 
+  const refreshManagementData = async () => {
+    await Promise.all([fetchChildren(), fetchManagedRewards()]);
+  };
+
+  const handleOpenManage = async () => {
+    try {
+      setManageModalOpen(true);
+      setManageLoading(true);
+      setManageError(null);
+      await refreshManagementData();
+    } catch (err) {
+      setManageError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setManageLoading(false);
+    }
+  };
+
+  const handleCreateChild = async (input: ChildInput) => {
+    try {
+      setManageSaving(true);
+      setManageError(null);
+
+      const response = await apiFetch("/api/children", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input)
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? `Create child failed with ${response.status}`);
+      }
+
+      await Promise.all([fetchData(), refreshManagementData()]);
+      showSuccess("Kid added");
+    } catch (err) {
+      setManageError(err instanceof Error ? err.message : "Unknown error");
+      throw err;
+    } finally {
+      setManageSaving(false);
+    }
+  };
+
+  const handleUpdateChild = async (childId: string, input: ChildInput) => {
+    try {
+      setManageSaving(true);
+      setManageError(null);
+
+      const response = await apiFetch(`/api/children/${childId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input)
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? `Update child failed with ${response.status}`);
+      }
+
+      await Promise.all([fetchData(), refreshManagementData()]);
+      showSuccess("Kid updated");
+    } catch (err) {
+      setManageError(err instanceof Error ? err.message : "Unknown error");
+      throw err;
+    } finally {
+      setManageSaving(false);
+    }
+  };
+
+  const handleCreateReward = async (input: RewardInput) => {
+    try {
+      setManageSaving(true);
+      setManageError(null);
+
+      const response = await apiFetch("/api/rewards", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input)
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? `Create reward failed with ${response.status}`);
+      }
+
+      await Promise.all([fetchRewards(), refreshManagementData()]);
+      showSuccess("Reward added");
+    } catch (err) {
+      setManageError(err instanceof Error ? err.message : "Unknown error");
+      throw err;
+    } finally {
+      setManageSaving(false);
+    }
+  };
+
+  const handleUpdateReward = async (rewardId: string, input: RewardInput) => {
+    try {
+      setManageSaving(true);
+      setManageError(null);
+
+      const response = await apiFetch(`/api/rewards/${rewardId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input)
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? `Update reward failed with ${response.status}`);
+      }
+
+      await Promise.all([fetchRewards(), refreshManagementData()]);
+      showSuccess("Reward updated");
+    } catch (err) {
+      setManageError(err instanceof Error ? err.message : "Unknown error");
+      throw err;
+    } finally {
+      setManageSaving(false);
+    }
+  };
+
+  const handleDeactivateReward = async (rewardId: string) => {
+    try {
+      setManageSaving(true);
+      setManageError(null);
+
+      const response = await apiFetch(`/api/rewards/${rewardId}`, {
+        method: "DELETE"
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? `Deactivate reward failed with ${response.status}`);
+      }
+
+      await Promise.all([fetchRewards(), refreshManagementData()]);
+      showSuccess("Reward deactivated");
+    } catch (err) {
+      setManageError(err instanceof Error ? err.message : "Unknown error");
+      throw err;
+    } finally {
+      setManageSaving(false);
+    }
+  };
+
   const handleRedeemReward = async (rewardId: string) => {
     if (!rewardModalChildId) {
       return;
@@ -318,11 +495,33 @@ export function App() {
       detailError={detailError}
       highlightedChoreId={highlightedChoreId}
       successMessage={successMessage}
+      manageModalOpen={manageModalOpen}
+      manageChildren={managedChildren}
+      manageRewards={managedRewards}
+      manageLoading={manageLoading}
+      manageSaving={manageSaving}
+      manageError={manageError}
       onOpenDetails={(id) => {
         setError(null);
         setDetailError(null);
         setDetailModalChoreId(id);
       }}
+      onOpenManage={() => {
+        void handleOpenManage();
+      }}
+      onCloseManage={() => {
+        if (manageSaving) {
+          return;
+        }
+
+        setManageModalOpen(false);
+        setManageError(null);
+      }}
+      onCreateChild={handleCreateChild}
+      onUpdateChild={handleUpdateChild}
+      onCreateReward={handleCreateReward}
+      onUpdateReward={handleUpdateReward}
+      onDeactivateReward={handleDeactivateReward}
       onCloseDetails={() => {
         if (detailSubmitting) {
           return;

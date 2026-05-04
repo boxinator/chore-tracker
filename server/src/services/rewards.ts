@@ -6,6 +6,12 @@ const redeemRewardSchema = z.object({
   childId: z.string().trim().min(1)
 });
 
+const rewardInputSchema = z.object({
+  name: z.string().trim().min(1).max(80),
+  description: z.string().max(1000).optional().default(""),
+  cost: z.coerce.number().int().min(1).max(1000)
+});
+
 export type Reward = {
   id: string;
   name: string;
@@ -15,6 +21,7 @@ export type Reward = {
 };
 
 export type RedeemRewardInput = z.infer<typeof redeemRewardSchema>;
+export type RewardInput = z.infer<typeof rewardInputSchema>;
 
 export class RewardValidationError extends Error {}
 
@@ -26,6 +33,19 @@ export function parseRedeemRewardInput(input: unknown): RedeemRewardInput {
   }
 
   return result.data;
+}
+
+export function parseRewardInput(input: unknown): RewardInput {
+  const result = rewardInputSchema.safeParse(input);
+
+  if (!result.success) {
+    throw new RewardValidationError(result.error.issues[0]?.message ?? "Invalid reward input");
+  }
+
+  return {
+    ...result.data,
+    description: result.data.description?.trim() ?? ""
+  };
 }
 
 export function listActiveRewards(db: DatabaseConnection): Reward[] {
@@ -44,6 +64,73 @@ export function listActiveRewards(db: DatabaseConnection): Reward[] {
       `
     )
     .all() as Reward[];
+}
+
+export function listAllRewards(db: DatabaseConnection): Reward[] {
+  return db
+    .prepare(
+      `
+        SELECT
+          id,
+          name,
+          description,
+          cost,
+          is_active as isActive
+        FROM rewards
+        ORDER BY is_active DESC, cost ASC, name ASC
+      `
+    )
+    .all() as Reward[];
+}
+
+export function createReward(db: DatabaseConnection, input: RewardInput) {
+  const rewardId = `reward-${crypto.randomUUID()}`;
+  const now = new Date().toISOString();
+
+  db.prepare(
+    `
+      INSERT INTO rewards (id, name, description, cost, is_active, created_at, updated_at)
+      VALUES (?, ?, ?, ?, 1, ?, ?)
+    `
+  ).run(rewardId, input.name, input.description, input.cost, now, now);
+
+  return { id: rewardId };
+}
+
+export function updateReward(db: DatabaseConnection, rewardId: string, input: RewardInput) {
+  const existing = db
+    .prepare("SELECT id FROM rewards WHERE id = ? LIMIT 1")
+    .get(rewardId) as { id: string } | undefined;
+
+  if (!existing) {
+    throw new RewardValidationError("Reward not found");
+  }
+
+  db.prepare(
+    `
+      UPDATE rewards
+      SET name = ?, description = ?, cost = ?, updated_at = ?
+      WHERE id = ?
+    `
+  ).run(input.name, input.description, input.cost, new Date().toISOString(), rewardId);
+}
+
+export function deactivateReward(db: DatabaseConnection, rewardId: string) {
+  const existing = db
+    .prepare("SELECT id FROM rewards WHERE id = ? AND is_active = 1 LIMIT 1")
+    .get(rewardId) as { id: string } | undefined;
+
+  if (!existing) {
+    throw new RewardValidationError("Reward not found");
+  }
+
+  db.prepare(
+    `
+      UPDATE rewards
+      SET is_active = 0, updated_at = ?
+      WHERE id = ?
+    `
+  ).run(new Date().toISOString(), rewardId);
 }
 
 export function redeemReward(db: DatabaseConnection, rewardId: string, childId: string) {
@@ -125,4 +212,3 @@ export function redeemReward(db: DatabaseConnection, rewardId: string, childId: 
     newTotal: pointsRow.total - reward.cost
   };
 }
-

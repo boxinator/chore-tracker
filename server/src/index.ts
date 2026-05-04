@@ -4,12 +4,24 @@ import { config } from "./config.js";
 import { setupDatabase } from "./db/index.js";
 import { getCurrentLocalDateString } from "./utils/dates.js";
 import {
+  createReward,
+  deactivateReward,
+  listAllRewards,
   listActiveRewards,
+  parseRewardInput,
   parseRedeemRewardInput,
   redeemReward,
-  RewardValidationError
+  RewardValidationError,
+  updateReward
 } from "./services/rewards.js";
 import { listRecentHistory } from "./services/history.js";
+import {
+  ChildValidationError,
+  createChild,
+  listChildren,
+  parseChildInput,
+  updateChild
+} from "./services/children.js";
 import {
   ChoreValidationError,
   assignChore,
@@ -50,6 +62,37 @@ app.get("/api/dashboard", (_req, res) => {
   const dayOfWeek = now.getDay();
 
   res.json(getDashboardData(db, currentDateLocal, dayOfWeek));
+});
+
+app.get("/api/children", (_req, res) => {
+  res.json({ children: listChildren(db) });
+});
+
+app.post("/api/children", (req, res) => {
+  try {
+    res.status(201).json(createChild(db, parseChildInput(req.body)));
+  } catch (error) {
+    if (error instanceof ChildValidationError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to create child" });
+  }
+});
+
+app.patch("/api/children/:id", (req, res) => {
+  try {
+    updateChild(db, req.params.id, parseChildInput(req.body));
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof ChildValidationError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to update child" });
+  }
 });
 
 app.post("/api/chores", (req, res) => {
@@ -141,8 +184,11 @@ app.post("/api/chores/:id/uncomplete", (req, res) => {
   }
 });
 
-app.get("/api/rewards", (_req, res) => {
-  res.json({ rewards: listActiveRewards(db) });
+app.get("/api/rewards", (req, res) => {
+  const includeInactive =
+    req.query.includeInactive === "1" || req.query.includeInactive === "true";
+
+  res.json({ rewards: includeInactive ? listAllRewards(db) : listActiveRewards(db) });
 });
 
 app.get("/api/history/recent", (req, res) => {
@@ -166,6 +212,47 @@ app.post("/api/rewards/:id/redeem", (req, res) => {
     }
 
     res.status(500).json({ error: "Failed to redeem reward" });
+  }
+});
+
+app.post("/api/rewards", (req, res) => {
+  try {
+    res.status(201).json(createReward(db, parseRewardInput(req.body)));
+  } catch (error) {
+    if (error instanceof RewardValidationError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to create reward" });
+  }
+});
+
+app.patch("/api/rewards/:id", (req, res) => {
+  try {
+    updateReward(db, req.params.id, parseRewardInput(req.body));
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof RewardValidationError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to update reward" });
+  }
+});
+
+app.delete("/api/rewards/:id", (req, res) => {
+  try {
+    deactivateReward(db, req.params.id);
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof RewardValidationError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to deactivate reward" });
   }
 });
 

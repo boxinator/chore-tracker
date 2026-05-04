@@ -44,6 +44,16 @@ export type AssignChildOption = {
   name: string;
 };
 
+export type Child = {
+  id: string;
+  name: string;
+  sortOrder: number;
+};
+
+export type ChildInput = {
+  name: string;
+};
+
 export type Reward = {
   id: string;
   name: string;
@@ -66,6 +76,16 @@ export type HistoryEntry = {
 
 export type RewardsResponse = {
   rewards: Reward[];
+};
+
+export type ChildrenResponse = {
+  children: Child[];
+};
+
+export type RewardInput = {
+  name: string;
+  description: string;
+  cost: number;
 };
 
 export type HistoryResponse = {

@@ -1,7 +1,16 @@
 import { afterEach, describe, expect, it } from "vitest";
 import type { DatabaseConnection } from "../db/connection.js";
 import { createTestDatabase } from "../db/test-helpers.js";
-import { listActiveRewards, redeemReward, RewardValidationError } from "./rewards.js";
+import {
+  createReward,
+  deactivateReward,
+  listActiveRewards,
+  listAllRewards,
+  parseRewardInput,
+  redeemReward,
+  RewardValidationError,
+  updateReward
+} from "./rewards.js";
 
 let db: DatabaseConnection | null = null;
 
@@ -41,6 +50,36 @@ describe("listActiveRewards", () => {
       "reward-2",
       "reward-1"
     ]);
+  });
+});
+
+describe("reward management", () => {
+  it("creates, updates, and deactivates rewards", () => {
+    const fixtureDb = createBaseFixture();
+
+    const created = createReward(
+      fixtureDb,
+      parseRewardInput({ name: "Pizza Pick", description: "Choose pizza night", cost: 16 })
+    );
+
+    updateReward(
+      fixtureDb,
+      created.id,
+      parseRewardInput({ name: "Pizza Night Pick", description: "Choose pizza", cost: 18 })
+    );
+
+    const rewardsAfterUpdate = listAllRewards(fixtureDb);
+    expect(rewardsAfterUpdate.find((reward) => reward.id === created.id)).toMatchObject({
+      name: "Pizza Night Pick",
+      description: "Choose pizza",
+      cost: 18,
+      isActive: 1
+    });
+
+    deactivateReward(fixtureDb, created.id);
+
+    expect(listActiveRewards(fixtureDb).find((reward) => reward.id === created.id)).toBeUndefined();
+    expect(listAllRewards(fixtureDb).find((reward) => reward.id === created.id)?.isActive).toBe(0);
   });
 });
 
@@ -92,4 +131,3 @@ describe("redeemReward", () => {
     expect(() => redeemReward(fixtureDb, "reward-1", "child-1")).toThrow(RewardValidationError);
   });
 });
-

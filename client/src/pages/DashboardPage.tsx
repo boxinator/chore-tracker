@@ -1,11 +1,14 @@
 import type {
   AssignChildOption,
+  Child,
+  ChildInput,
   CreateChoreInput,
   DashboardResponse,
   HealthResponse,
   HistoryEntry,
   RedeemRewardResult,
   Reward,
+  RewardInput,
   UpdateChoreInput,
   VisibleChore
 } from "../types";
@@ -13,6 +16,7 @@ import { AddChoreModal } from "../components/AddChoreModal";
 import { BoardLane } from "../components/BoardLane";
 import { ChoreDetailModal } from "../components/ChoreDetailModal";
 import { HistoryModal } from "../components/HistoryModal";
+import { ManageModal } from "../components/ManageModal";
 import { RewardModal } from "../components/RewardModal";
 
 type LaneItem = {
@@ -52,7 +56,20 @@ type DashboardPageProps = {
   detailError: string | null;
   highlightedChoreId: string | null;
   successMessage: string | null;
+  manageModalOpen: boolean;
+  manageChildren: Child[];
+  manageRewards: Reward[];
+  manageLoading: boolean;
+  manageSaving: boolean;
+  manageError: string | null;
   onOpenDetails: (id: string) => void;
+  onOpenManage: () => void;
+  onCloseManage: () => void;
+  onCreateChild: (input: ChildInput) => Promise<void>;
+  onUpdateChild: (childId: string, input: ChildInput) => Promise<void>;
+  onCreateReward: (input: RewardInput) => Promise<void>;
+  onUpdateReward: (rewardId: string, input: RewardInput) => Promise<void>;
+  onDeactivateReward: (rewardId: string) => Promise<void>;
   onCloseDetails: () => void;
   onSubmitChoreUpdate: (id: string, input: UpdateChoreInput) => Promise<void>;
   onDeleteChore: (id: string) => Promise<void>;
@@ -155,7 +172,20 @@ export function DashboardPage({
   detailError,
   highlightedChoreId,
   successMessage,
+  manageModalOpen,
+  manageChildren,
+  manageRewards,
+  manageLoading,
+  manageSaving,
+  manageError,
   onOpenDetails,
+  onOpenManage,
+  onCloseManage,
+  onCreateChild,
+  onUpdateChild,
+  onCreateReward,
+  onUpdateReward,
+  onDeactivateReward,
   onCloseDetails,
   onSubmitChoreUpdate,
   onDeleteChore,
@@ -200,7 +230,7 @@ export function DashboardPage({
       <header className="topbar">
         <div className="topbar-copy">
           <div className="title-block">
-            <p className="eyebrow">Phase 13</p>
+            <p className="eyebrow">Phase 14</p>
             <h1>Chore Tracker</h1>
           </div>
           <p className="subtitle">
@@ -209,6 +239,9 @@ export function DashboardPage({
         </div>
 
         <div className="topbar-tools">
+          <button className="text-button toolbar-button" type="button" onClick={onOpenManage}>
+            Manage
+          </button>
           <button className="text-button toolbar-button" type="button" onClick={onOpenHistory}>
             History
           </button>
@@ -332,6 +365,22 @@ export function DashboardPage({
           loading={historyLoading}
           error={historyError}
           onClose={onCloseHistory}
+        />
+      )}
+
+      {manageModalOpen && (
+        <ManageModal
+          children={manageChildren}
+          rewards={manageRewards}
+          loading={manageLoading}
+          error={manageError}
+          saving={manageSaving}
+          onClose={onCloseManage}
+          onCreateChild={onCreateChild}
+          onUpdateChild={onUpdateChild}
+          onCreateReward={onCreateReward}
+          onUpdateReward={onUpdateReward}
+          onDeactivateReward={onDeactivateReward}
         />
       )}
 
