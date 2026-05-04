@@ -128,9 +128,11 @@ export function seedDatabase(db: DatabaseConnection) {
   const insertScheduleDay = db.prepare(`
     INSERT INTO chore_schedule_days (id, chore_id, day_of_week)
     VALUES (@id, @choreId, @dayOfWeek)
-    ON CONFLICT(id) DO UPDATE SET
-      chore_id = excluded.chore_id,
-      day_of_week = excluded.day_of_week
+  `);
+
+  const deleteScheduleDaysForChore = db.prepare(`
+    DELETE FROM chore_schedule_days
+    WHERE chore_id = ?
   `);
 
   const insertReward = db.prepare(`
@@ -192,6 +194,8 @@ export function seedDatabase(db: DatabaseConnection) {
         createdAt: now,
         updatedAt: now
       });
+
+      deleteScheduleDaysForChore.run(chore.id);
 
       chore.scheduleDays.forEach((dayOfWeek) => {
         insertScheduleDay.run({
