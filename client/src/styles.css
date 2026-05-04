@@ -398,6 +398,7 @@ button {
 .card-actions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -407,14 +408,31 @@ button {
   font-weight: 700;
 }
 
-.assign-select {
+.icon-text-button.is-active {
+  background: rgba(40, 87, 197, 0.12);
+  color: var(--accent-strong);
+}
+
+.assign-chooser {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.assign-chip {
   min-height: 40px;
-  border: 1px solid var(--border);
+  padding: 0 14px;
+  border: 1px solid rgba(40, 87, 197, 0.22);
   border-radius: 12px;
-  padding: 0 10px;
-  background: #fff;
+  background: rgba(40, 87, 197, 0.08);
   color: var(--accent-strong);
   font-weight: 700;
+}
+
+.assign-chip:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .danger-button {

@@ -55,6 +55,7 @@ type DashboardPageProps = {
   onSubmitChoreUpdate: (id: string, input: UpdateChoreInput) => Promise<void>;
   onDeleteChore: (id: string) => Promise<void>;
   onAssignChore: (id: string, childId: string) => Promise<void>;
+  assignmentPendingChoreId: string | null;
   onToggleComplete: (id: string, done: boolean) => Promise<void>;
   historyModalOpen: boolean;
   historyEntries: HistoryEntry[];
@@ -155,6 +156,7 @@ export function DashboardPage({
   onSubmitChoreUpdate,
   onDeleteChore,
   onAssignChore,
+  assignmentPendingChoreId,
   onToggleComplete,
   historyModalOpen,
   historyEntries,
@@ -194,7 +196,7 @@ export function DashboardPage({
       <header className="topbar">
         <div className="topbar-copy">
           <div className="title-block">
-            <p className="eyebrow">Phase 11</p>
+            <p className="eyebrow">Phase 12</p>
             <h1>Chore Tracker</h1>
           </div>
           <p className="subtitle">
@@ -286,6 +288,9 @@ export function DashboardPage({
               onToggleComplete={onToggleComplete}
               assignOptions={lane.id === "unassigned" ? assignOptions : undefined}
               onAssign={lane.id === "unassigned" ? onAssignChore : undefined}
+              assignmentPendingChoreId={
+                lane.id === "unassigned" ? assignmentPendingChoreId : undefined
+              }
               onOpenDetails={onOpenDetails}
             />
           ))}

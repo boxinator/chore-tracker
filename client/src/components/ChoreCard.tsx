@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { AssignChildOption } from "../types";
 
 type ChoreCardProps = {
@@ -11,6 +12,7 @@ type ChoreCardProps = {
   assignOptions?: AssignChildOption[];
   onAssign?: (id: string, childId: string) => void;
   onOpenDetails?: (id: string) => void;
+  assignmentPending?: boolean;
 };
 
 export function ChoreCard({
@@ -23,8 +25,10 @@ export function ChoreCard({
   onToggleComplete,
   assignOptions,
   onAssign,
-  onOpenDetails
+  onOpenDetails,
+  assignmentPending = false
 }: ChoreCardProps) {
+  const [assignMenuOpen, setAssignMenuOpen] = useState(false);
   const canComplete = done || Boolean(onToggleComplete);
   const canAssign = !done && assignOptions && assignOptions.length > 0 && onAssign;
 
@@ -50,27 +54,15 @@ export function ChoreCard({
         <span className="points-pill">{points} pts</span>
         <div className="card-actions">
           {canAssign && (
-            <select
-              className="assign-select"
-              aria-label={`Assign ${title}`}
-              defaultValue=""
-              onChange={(event) => {
-                const childId = event.target.value;
-                if (!childId) {
-                  return;
-                }
-
-                onAssign(id, childId);
-                event.currentTarget.value = "";
-              }}
+            <button
+              className={`icon-text-button${assignMenuOpen ? " is-active" : ""}`}
+              type="button"
+              aria-expanded={assignMenuOpen}
+              disabled={assignmentPending}
+              onClick={() => setAssignMenuOpen((current) => !current)}
             >
-              <option value="">Assign</option>
-              {assignOptions.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.name}
-                </option>
-              ))}
-            </select>
+              {assignmentPending ? "Assigning..." : "Assign"}
+            </button>
           )}
           {onDelete && (
             <button
@@ -87,6 +79,25 @@ export function ChoreCard({
           </button>
         </div>
       </div>
+
+      {canAssign && assignMenuOpen && (
+        <div className="assign-chooser" aria-label={`Choose assignee for ${title}`}>
+          {assignOptions.map((option) => (
+            <button
+              key={option.id}
+              className="assign-chip"
+              type="button"
+              disabled={assignmentPending}
+              onClick={() => {
+                setAssignMenuOpen(false);
+                onAssign(id, option.id);
+              }}
+            >
+              {option.name}
+            </button>
+          ))}
+        </div>
+      )}
     </article>
   );
 }

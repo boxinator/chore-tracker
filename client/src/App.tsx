@@ -30,6 +30,7 @@ export function App() {
   const [detailModalChoreId, setDetailModalChoreId] = useState<string | null>(null);
   const [detailSubmitting, setDetailSubmitting] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
+  const [assignmentPendingChoreId, setAssignmentPendingChoreId] = useState<string | null>(null);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [historyEntries, setHistoryEntries] = useState<HistoryEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -164,21 +165,27 @@ export function App() {
   };
 
   const handleAssignChore = async (id: string, childId: string) => {
-    const response = await apiFetch(`/api/chores/${id}/assign`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ childId })
-    });
+    try {
+      setAssignmentPendingChoreId(id);
 
-    if (!response.ok) {
-      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-      setError(payload?.error ?? `Assign chore failed with ${response.status}`);
-      return;
+      const response = await apiFetch(`/api/chores/${id}/assign`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ childId })
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        setError(payload?.error ?? `Assign chore failed with ${response.status}`);
+        return;
+      }
+
+      await fetchData();
+    } finally {
+      setAssignmentPendingChoreId(null);
     }
-
-    await fetchData();
   };
 
   const handleToggleComplete = async (id: string, done: boolean) => {
@@ -300,6 +307,7 @@ export function App() {
       onSubmitChoreUpdate={handleUpdateChore}
       onDeleteChore={handleDeleteChore}
       onAssignChore={handleAssignChore}
+      assignmentPendingChoreId={assignmentPendingChoreId}
       onToggleComplete={handleToggleComplete}
       historyModalOpen={historyModalOpen}
       historyEntries={historyEntries}
