@@ -520,6 +520,35 @@ button {
   gap: 10px;
 }
 
+.modal-actions-spread {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.detail-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.detail-state {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(40, 87, 197, 0.08);
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.detail-state.is-done {
+  background: rgba(16, 185, 129, 0.12);
+  color: #0a7b57;
+}
+
 .reward-balance {
   margin-top: 16px;
   font-weight: 700;
@@ -625,6 +654,11 @@ button {
 
   .status-meta {
     text-align: left;
+  }
+
+  .modal-actions-spread {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 

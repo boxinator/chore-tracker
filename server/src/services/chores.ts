@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { z } from "zod";
 import type { DatabaseConnection } from "../db/connection.js";
 
-const createChoreSchema = z.object({
+const choreInputSchema = z.object({
   title: z.string().trim().min(1).max(120),
   description: z.string().max(1000).optional().default(""),
   pointValue: z.coerce.number().int().min(1).max(1000),
@@ -14,18 +14,24 @@ const createChoreSchema = z.object({
     .default([])
 });
 
+const createChoreSchema = choreInputSchema;
+const updateChoreSchema = choreInputSchema;
+
 const assignChoreSchema = z.object({
   childId: z.string().trim().min(1)
 });
 
 export type CreateChoreInput = z.infer<typeof createChoreSchema>;
+export type UpdateChoreInput = z.infer<typeof updateChoreSchema>;
 export type AssignChoreInput = z.infer<typeof assignChoreSchema>;
 
 export class ChoreValidationError extends Error {}
 
-export function parseCreateChoreInput(input: unknown): CreateChoreInput {
-  const result = createChoreSchema.safeParse(input);
-
+function normalizeChoreInput(
+  result:
+    | { success: true; data: CreateChoreInput | UpdateChoreInput }
+    | { success: false; error: z.ZodError }
+) {
   if (!result.success) {
     throw new ChoreValidationError(result.error.issues[0]?.message ?? "Invalid chore input");
   }
@@ -35,6 +41,14 @@ export function parseCreateChoreInput(input: unknown): CreateChoreInput {
     description: result.data.description?.trim() ?? "",
     scheduleDays: [...new Set(result.data.scheduleDays)].sort((a, b) => a - b)
   };
+}
+
+export function parseCreateChoreInput(input: unknown): CreateChoreInput {
+  return normalizeChoreInput(createChoreSchema.safeParse(input));
+}
+
+export function parseUpdateChoreInput(input: unknown): UpdateChoreInput {
+  return normalizeChoreInput(updateChoreSchema.safeParse(input));
 }
 
 export function parseAssignChoreInput(input: unknown): AssignChoreInput {
@@ -93,6 +107,56 @@ export function createChore(db: DatabaseConnection, input: CreateChoreInput) {
   transaction();
 
   return { id: choreId };
+}
+
+export function updateChore(db: DatabaseConnection, choreId: string, input: UpdateChoreInput) {
+  const childExistsStatement = db.prepare("SELECT 1 FROM children WHERE id = ? LIMIT 1");
+  if (input.assigneeChildId && !childExistsStatement.get(input.assigneeChildId)) {
+    throw new ChoreValidationError("Selected child does not exist");
+  }
+
+  const choreExists = db
+    .prepare("SELECT id FROM chores WHERE id = ? AND is_active = 1 LIMIT 1")
+    .get(choreId);
+
+  if (!choreExists) {
+    throw new ChoreValidationError("Chore not found");
+  }
+
+  const now = new Date().toISOString();
+  const insertScheduleDay = db.prepare(`
+    INSERT INTO chore_schedule_days (id, chore_id, day_of_week)
+    VALUES (?, ?, ?)
+  `);
+
+  const transaction = db.transaction(() => {
+    db.prepare(
+      `
+        UPDATE chores
+        SET title = ?,
+            description = ?,
+            point_value = ?,
+            assignee_child_id = ?,
+            updated_at = ?
+        WHERE id = ?
+      `
+    ).run(
+      input.title,
+      input.description,
+      input.pointValue,
+      input.assigneeChildId,
+      now,
+      choreId
+    );
+
+    db.prepare("DELETE FROM chore_schedule_days WHERE chore_id = ?").run(choreId);
+
+    for (const dayOfWeek of input.scheduleDays) {
+      insertScheduleDay.run(`schedule-${crypto.randomUUID()}`, choreId, dayOfWeek);
+    }
+  });
+
+  transaction();
 }
 
 export function deleteChore(db: DatabaseConnection, choreId: string) {

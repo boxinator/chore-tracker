@@ -22,6 +22,7 @@ type BoardLaneProps = {
   onToggleComplete?: (id: string, done: boolean) => void;
   assignOptions?: AssignChildOption[];
   onAssign?: (id: string, childId: string) => void;
+  onOpenDetails?: (id: string) => void;
 };
 
 export function BoardLane({
@@ -36,7 +37,8 @@ export function BoardLane({
   onDelete,
   onToggleComplete,
   assignOptions,
-  onAssign
+  onAssign,
+  onOpenDetails
 }: BoardLaneProps) {
   return (
     <section key={id} className="lane" style={{ ["--lane-accent" as string]: accent }}>
@@ -66,6 +68,7 @@ export function BoardLane({
             onToggleComplete={onToggleComplete}
             assignOptions={assignOptions}
             onAssign={onAssign}
+            onOpenDetails={onOpenDetails}
           />
         ))}
 

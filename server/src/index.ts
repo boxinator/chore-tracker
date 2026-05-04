@@ -17,6 +17,8 @@ import {
   deleteChore,
   parseAssignChoreInput,
   parseCreateChoreInput,
+  parseUpdateChoreInput,
+  updateChore,
   uncompleteChore
 } from "./services/chores.js";
 import { getDashboardData } from "./services/dashboard.js";
@@ -61,6 +63,21 @@ app.post("/api/chores", (req, res) => {
     }
 
     res.status(500).json({ error: "Failed to create chore" });
+  }
+});
+
+app.patch("/api/chores/:id", (req, res) => {
+  try {
+    const input = parseUpdateChoreInput(req.body);
+    updateChore(db, req.params.id, input);
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof ChoreValidationError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to update chore" });
   }
 });
 

@@ -3,18 +3,25 @@ import type {
   CreateChoreInput,
   DashboardResponse,
   HealthResponse,
+  RedeemRewardResult,
+  Reward,
+  UpdateChoreInput,
   VisibleChore
 } from "../types";
 import { AddChoreModal } from "../components/AddChoreModal";
 import { BoardLane } from "../components/BoardLane";
+import { ChoreDetailModal } from "../components/ChoreDetailModal";
 import { RewardModal } from "../components/RewardModal";
 
 type LaneItem = {
   id: string;
   title: string;
+  description: string;
   points: number;
   meta: string;
   done?: boolean;
+  assigneeChildId: string | null;
+  scheduledDays: number[];
 };
 
 type Lane = {
@@ -38,6 +45,12 @@ type DashboardPageProps = {
   onOpenAddModal: () => void;
   onCloseAddModal: () => void;
   onSubmitChore: (input: CreateChoreInput) => Promise<void>;
+  detailModalChoreId: string | null;
+  detailSubmitting: boolean;
+  detailError: string | null;
+  onOpenDetails: (id: string) => void;
+  onCloseDetails: () => void;
+  onSubmitChoreUpdate: (id: string, input: UpdateChoreInput) => Promise<void>;
   onDeleteChore: (id: string) => Promise<void>;
   onAssignChore: (id: string, childId: string) => Promise<void>;
   onToggleComplete: (id: string, done: boolean) => Promise<void>;
@@ -66,9 +79,12 @@ function toLaneItem(chore: VisibleChore): LaneItem {
   return {
     id: chore.id,
     title: chore.title,
+    description: chore.description,
     points: chore.pointValue,
     meta: chore.isCompletedToday ? "Completed today" : formatSchedule(chore.scheduledDays),
-    done: chore.isCompletedToday
+    done: chore.isCompletedToday,
+    assigneeChildId: chore.assigneeChildId,
+    scheduledDays: chore.scheduledDays
   };
 }
 
@@ -123,6 +139,12 @@ export function DashboardPage({
   onOpenAddModal,
   onCloseAddModal,
   onSubmitChore,
+  detailModalChoreId,
+  detailSubmitting,
+  detailError,
+  onOpenDetails,
+  onCloseDetails,
+  onSubmitChoreUpdate,
   onDeleteChore,
   onAssignChore,
   onToggleComplete,
@@ -139,13 +161,26 @@ export function DashboardPage({
   const assignOptions: AssignChildOption[] =
     dashboardData?.children.map((child) => ({ id: child.id, name: child.name })) ?? [];
   const rewardChild = dashboardData?.children.find((child) => child.id === rewardModalChildId) ?? null;
+  const allChores = lanes.flatMap((lane) => lane.items);
+  const detailLaneItem = allChores.find((item) => item.id === detailModalChoreId) ?? null;
+  const detailChore = detailLaneItem
+    ? {
+        id: detailLaneItem.id,
+        title: detailLaneItem.title,
+        description: detailLaneItem.description,
+        pointValue: detailLaneItem.points,
+        assigneeChildId: detailLaneItem.assigneeChildId,
+        isCompletedToday: detailLaneItem.done ?? false,
+        scheduledDays: detailLaneItem.scheduledDays
+      }
+    : null;
 
   return (
     <div className="app-shell">
       <header className="topbar">
         <div className="topbar-copy">
           <div className="title-block">
-            <p className="eyebrow">Phase 3</p>
+            <p className="eyebrow">Phase 10</p>
             <h1>Chore Tracker</h1>
           </div>
           <p className="subtitle">
@@ -234,6 +269,7 @@ export function DashboardPage({
               onToggleComplete={onToggleComplete}
               assignOptions={lane.id === "unassigned" ? assignOptions : undefined}
               onAssign={lane.id === "unassigned" ? onAssignChore : undefined}
+              onOpenDetails={onOpenDetails}
             />
           ))}
       </main>
@@ -257,6 +293,18 @@ export function DashboardPage({
           redeemResult={redeemResult}
           onClose={onCloseRewards}
           onRedeem={onRedeemReward}
+        />
+      )}
+
+      {detailChore && dashboardData && (
+        <ChoreDetailModal
+          chore={detailChore}
+          children={dashboardData.children}
+          submitting={detailSubmitting}
+          error={detailError}
+          onClose={onCloseDetails}
+          onDelete={onDeleteChore}
+          onSubmit={onSubmitChoreUpdate}
         />
       )}
     </div>

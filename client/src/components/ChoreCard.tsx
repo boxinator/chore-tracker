@@ -10,6 +10,7 @@ type ChoreCardProps = {
   onToggleComplete?: (id: string, done: boolean) => void;
   assignOptions?: AssignChildOption[];
   onAssign?: (id: string, childId: string) => void;
+  onOpenDetails?: (id: string) => void;
 };
 
 export function ChoreCard({
@@ -21,7 +22,8 @@ export function ChoreCard({
   onDelete,
   onToggleComplete,
   assignOptions,
-  onAssign
+  onAssign,
+  onOpenDetails
 }: ChoreCardProps) {
   const canComplete = done || Boolean(onToggleComplete);
   const canAssign = !done && assignOptions && assignOptions.length > 0 && onAssign;
@@ -80,7 +82,7 @@ export function ChoreCard({
               Del
             </button>
           )}
-          <button className="text-button" type="button">
+          <button className="text-button" type="button" onClick={() => onOpenDetails?.(id)}>
             Details
           </button>
         </div>

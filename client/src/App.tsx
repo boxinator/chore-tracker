@@ -6,7 +6,8 @@ import type {
   HealthResponse,
   RedeemRewardResult,
   Reward,
-  RewardsResponse
+  RewardsResponse,
+  UpdateChoreInput
 } from "./types";
 
 async function apiFetch(input: RequestInfo | URL, init?: RequestInit) {
@@ -24,6 +25,9 @@ export function App() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addSubmitting, setAddSubmitting] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
+  const [detailModalChoreId, setDetailModalChoreId] = useState<string | null>(null);
+  const [detailSubmitting, setDetailSubmitting] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
   const [rewardModalChildId, setRewardModalChildId] = useState<string | null>(null);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [rewardsLoading, setRewardsLoading] = useState(false);
@@ -110,7 +114,36 @@ export function App() {
       return;
     }
 
+    setDetailModalChoreId(null);
+    setDetailError(null);
     await fetchData();
+  };
+
+  const handleUpdateChore = async (id: string, input: UpdateChoreInput) => {
+    try {
+      setDetailSubmitting(true);
+      setDetailError(null);
+
+      const response = await apiFetch(`/api/chores/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(input)
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? `Update chore failed with ${response.status}`);
+      }
+
+      setDetailModalChoreId(null);
+      await fetchData();
+    } catch (err) {
+      setDetailError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setDetailSubmitting(false);
+    }
   };
 
   const handleAssignChore = async (id: string, childId: string) => {
@@ -218,6 +251,23 @@ export function App() {
         setAddModalOpen(false);
       }}
       onSubmitChore={handleSubmitChore}
+      detailModalChoreId={detailModalChoreId}
+      detailSubmitting={detailSubmitting}
+      detailError={detailError}
+      onOpenDetails={(id) => {
+        setError(null);
+        setDetailError(null);
+        setDetailModalChoreId(id);
+      }}
+      onCloseDetails={() => {
+        if (detailSubmitting) {
+          return;
+        }
+
+        setDetailError(null);
+        setDetailModalChoreId(null);
+      }}
+      onSubmitChoreUpdate={handleUpdateChore}
       onDeleteChore={handleDeleteChore}
       onAssignChore={handleAssignChore}
       onToggleComplete={handleToggleComplete}

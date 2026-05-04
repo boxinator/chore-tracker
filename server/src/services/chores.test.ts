@@ -8,8 +8,9 @@ import {
   completeChore,
   createChore,
   deleteChore,
-  parseCreateChoreInput
-  ,
+  parseCreateChoreInput,
+  parseUpdateChoreInput,
+  updateChore,
   uncompleteChore
 } from "./chores.js";
 
@@ -85,6 +86,52 @@ describe("createChore", () => {
       assigneeChildId: "child-1",
       scheduledDays: [4]
     });
+  });
+});
+
+describe("updateChore", () => {
+  it("updates title, description, points, assignment, and schedule days", () => {
+    const fixtureDb = createBaseFixture();
+    const now = "2026-04-23T08:00:00.000Z";
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chores (
+          id,
+          title,
+          description,
+          point_value,
+          assignee_child_id,
+          is_active,
+          created_at,
+          updated_at
+        ) VALUES
+          ('chore-1', 'Clear table', 'After dinner', 5, NULL, 1, @now, @now)
+      `
+    ).run({ now });
+
+    const input = parseUpdateChoreInput({
+      title: " Sweep kitchen ",
+      description: " Quick reset ",
+      pointValue: "7",
+      assigneeChildId: "child-2",
+      scheduleDays: [6, 1, 6]
+    });
+
+    updateChore(fixtureDb, "chore-1", input);
+
+    const dashboard = getDashboardData(fixtureDb, "2026-04-27", 1);
+    expect(dashboard.children[1]?.chores[0]).toMatchObject({
+      id: "chore-1",
+      title: "Sweep kitchen",
+      description: "Quick reset",
+      pointValue: 7,
+      assigneeChildId: "child-2",
+      scheduledDays: [1, 6]
+    });
+
+    const offDayDashboard = getDashboardData(fixtureDb, "2026-04-28", 2);
+    expect(offDayDashboard.children[1]?.chores).toEqual([]);
   });
 });
 
