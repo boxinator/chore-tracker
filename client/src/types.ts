@@ -52,8 +52,24 @@ export type Reward = {
   isActive: boolean;
 };
 
+export type HistoryEntry = {
+  id: string;
+  eventType: string;
+  childId: string;
+  childName: string;
+  sourceType: string;
+  sourceId: string;
+  sourceName: string;
+  pointDelta: number;
+  timestamp: string;
+};
+
 export type RewardsResponse = {
   rewards: Reward[];
+};
+
+export type HistoryResponse = {
+  entries: HistoryEntry[];
 };
 
 export type RedeemRewardResult = {

@@ -3,6 +3,7 @@ import type {
   CreateChoreInput,
   DashboardResponse,
   HealthResponse,
+  HistoryEntry,
   RedeemRewardResult,
   Reward,
   UpdateChoreInput,
@@ -11,6 +12,7 @@ import type {
 import { AddChoreModal } from "../components/AddChoreModal";
 import { BoardLane } from "../components/BoardLane";
 import { ChoreDetailModal } from "../components/ChoreDetailModal";
+import { HistoryModal } from "../components/HistoryModal";
 import { RewardModal } from "../components/RewardModal";
 
 type LaneItem = {
@@ -54,6 +56,12 @@ type DashboardPageProps = {
   onDeleteChore: (id: string) => Promise<void>;
   onAssignChore: (id: string, childId: string) => Promise<void>;
   onToggleComplete: (id: string, done: boolean) => Promise<void>;
+  historyModalOpen: boolean;
+  historyEntries: HistoryEntry[];
+  historyLoading: boolean;
+  historyError: string | null;
+  onOpenHistory: () => void;
+  onCloseHistory: () => void;
   rewardModalChildId: string | null;
   rewards: Reward[];
   rewardsLoading: boolean;
@@ -148,6 +156,12 @@ export function DashboardPage({
   onDeleteChore,
   onAssignChore,
   onToggleComplete,
+  historyModalOpen,
+  historyEntries,
+  historyLoading,
+  historyError,
+  onOpenHistory,
+  onCloseHistory,
   rewardModalChildId,
   rewards,
   rewardsLoading,
@@ -180,7 +194,7 @@ export function DashboardPage({
       <header className="topbar">
         <div className="topbar-copy">
           <div className="title-block">
-            <p className="eyebrow">Phase 10</p>
+            <p className="eyebrow">Phase 11</p>
             <h1>Chore Tracker</h1>
           </div>
           <p className="subtitle">
@@ -189,6 +203,9 @@ export function DashboardPage({
         </div>
 
         <div className="topbar-tools">
+          <button className="text-button toolbar-button" type="button" onClick={onOpenHistory}>
+            History
+          </button>
           <div className="board-date" aria-label="Current board date">
             {formatBoardDate(dashboardData)}
           </div>
@@ -293,6 +310,15 @@ export function DashboardPage({
           redeemResult={redeemResult}
           onClose={onCloseRewards}
           onRedeem={onRedeemReward}
+        />
+      )}
+
+      {historyModalOpen && (
+        <HistoryModal
+          entries={historyEntries}
+          loading={historyLoading}
+          error={historyError}
+          onClose={onCloseHistory}
         />
       )}
 

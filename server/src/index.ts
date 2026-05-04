@@ -9,6 +9,7 @@ import {
   redeemReward,
   RewardValidationError
 } from "./services/rewards.js";
+import { listRecentHistory } from "./services/history.js";
 import {
   ChoreValidationError,
   assignChore,
@@ -142,6 +143,16 @@ app.post("/api/chores/:id/uncomplete", (req, res) => {
 
 app.get("/api/rewards", (_req, res) => {
   res.json({ rewards: listActiveRewards(db) });
+});
+
+app.get("/api/history/recent", (req, res) => {
+  const limitParam = req.query.limit;
+  const limit =
+    typeof limitParam === "string" && Number.isFinite(Number(limitParam))
+      ? Number(limitParam)
+      : 20;
+
+  res.json({ entries: listRecentHistory(db, limit) });
 });
 
 app.post("/api/rewards/:id/redeem", (req, res) => {

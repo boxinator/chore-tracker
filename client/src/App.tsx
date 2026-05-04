@@ -4,6 +4,8 @@ import type {
   CreateChoreInput,
   DashboardResponse,
   HealthResponse,
+  HistoryEntry,
+  HistoryResponse,
   RedeemRewardResult,
   Reward,
   RewardsResponse,
@@ -28,6 +30,10 @@ export function App() {
   const [detailModalChoreId, setDetailModalChoreId] = useState<string | null>(null);
   const [detailSubmitting, setDetailSubmitting] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [historyEntries, setHistoryEntries] = useState<HistoryEntry[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
   const [rewardModalChildId, setRewardModalChildId] = useState<string | null>(null);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [rewardsLoading, setRewardsLoading] = useState(false);
@@ -72,6 +78,17 @@ export function App() {
 
     const payload = (await response.json()) as RewardsResponse;
     setRewards(payload.rewards);
+  };
+
+  const fetchHistory = async () => {
+    const response = await apiFetch("/api/history/recent?limit=20");
+
+    if (!response.ok) {
+      throw new Error(`History failed with ${response.status}`);
+    }
+
+    const payload = (await response.json()) as HistoryResponse;
+    setHistoryEntries(payload.entries);
   };
 
   const handleSubmitChore = async (input: CreateChoreInput) => {
@@ -193,6 +210,19 @@ export function App() {
     }
   };
 
+  const handleOpenHistory = async () => {
+    try {
+      setHistoryModalOpen(true);
+      setHistoryLoading(true);
+      setHistoryError(null);
+      await fetchHistory();
+    } catch (err) {
+      setHistoryError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
   const handleRedeemReward = async (rewardId: string) => {
     if (!rewardModalChildId) {
       return;
@@ -271,6 +301,21 @@ export function App() {
       onDeleteChore={handleDeleteChore}
       onAssignChore={handleAssignChore}
       onToggleComplete={handleToggleComplete}
+      historyModalOpen={historyModalOpen}
+      historyEntries={historyEntries}
+      historyLoading={historyLoading}
+      historyError={historyError}
+      onOpenHistory={() => {
+        void handleOpenHistory();
+      }}
+      onCloseHistory={() => {
+        if (historyLoading) {
+          return;
+        }
+
+        setHistoryModalOpen(false);
+        setHistoryError(null);
+      }}
       rewardModalChildId={rewardModalChildId}
       rewards={rewards}
       rewardsLoading={rewardsLoading}

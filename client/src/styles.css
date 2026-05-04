@@ -247,6 +247,12 @@ button {
   border-radius: 12px;
 }
 
+.toolbar-button {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--border);
+  color: var(--accent-strong);
+}
+
 .primary-button,
 .secondary-button,
 .icon-text-button,
@@ -610,6 +616,56 @@ button {
   color: #0a7b57;
 }
 
+.history-panel {
+  margin-top: 16px;
+}
+
+.history-list {
+  display: grid;
+  gap: 12px;
+}
+
+.history-entry {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.history-copy {
+  min-width: 0;
+}
+
+.history-copy strong {
+  display: block;
+}
+
+.history-copy p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+}
+
+.history-delta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #0a7b57;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.history-delta.is-negative {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b42318;
+}
+
 .secondary-button {
   background: rgba(23, 32, 51, 0.08);
   color: var(--accent-strong);
@@ -646,6 +702,11 @@ button {
 
   .topbar-tools {
     justify-content: space-between;
+  }
+
+  .history-entry {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .field-row {
