@@ -13,6 +13,7 @@ type ChoreCardProps = {
   onAssign?: (id: string, childId: string) => void;
   onOpenDetails?: (id: string) => void;
   assignmentPending?: boolean;
+  highlighted?: boolean;
 };
 
 export function ChoreCard({
@@ -26,14 +27,15 @@ export function ChoreCard({
   assignOptions,
   onAssign,
   onOpenDetails,
-  assignmentPending = false
+  assignmentPending = false,
+  highlighted = false
 }: ChoreCardProps) {
   const [assignMenuOpen, setAssignMenuOpen] = useState(false);
   const canComplete = done || Boolean(onToggleComplete);
   const canAssign = !done && assignOptions && assignOptions.length > 0 && onAssign;
 
   return (
-    <article className={`chore-card${done ? " is-done" : ""}`}>
+    <article className={`chore-card${done ? " is-done" : ""}${highlighted ? " is-highlighted" : ""}`}>
       <div className="chore-topline">
         <button
           className="check-button"

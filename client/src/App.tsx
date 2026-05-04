@@ -31,6 +31,8 @@ export function App() {
   const [detailSubmitting, setDetailSubmitting] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
   const [assignmentPendingChoreId, setAssignmentPendingChoreId] = useState<string | null>(null);
+  const [highlightedChoreId, setHighlightedChoreId] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [historyEntries, setHistoryEntries] = useState<HistoryEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -40,6 +42,20 @@ export function App() {
   const [rewardsLoading, setRewardsLoading] = useState(false);
   const [rewardsError, setRewardsError] = useState<string | null>(null);
   const [redeemResult, setRedeemResult] = useState<RedeemRewardResult | null>(null);
+
+  const showSuccess = (message: string) => {
+    setSuccessMessage(message);
+    window.setTimeout(() => {
+      setSuccessMessage((current) => (current === message ? null : current));
+    }, 2200);
+  };
+
+  const flashChore = (choreId: string) => {
+    setHighlightedChoreId(choreId);
+    window.setTimeout(() => {
+      setHighlightedChoreId((current) => (current === choreId ? null : current));
+    }, 1400);
+  };
 
   const fetchData = async () => {
     try {
@@ -112,6 +128,7 @@ export function App() {
 
       setAddModalOpen(false);
       await fetchData();
+      showSuccess("Chore added");
     } catch (err) {
       setAddError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -135,6 +152,7 @@ export function App() {
     setDetailModalChoreId(null);
     setDetailError(null);
     await fetchData();
+    showSuccess("Chore deleted");
   };
 
   const handleUpdateChore = async (id: string, input: UpdateChoreInput) => {
@@ -157,6 +175,8 @@ export function App() {
 
       setDetailModalChoreId(null);
       await fetchData();
+      flashChore(id);
+      showSuccess("Chore updated");
     } catch (err) {
       setDetailError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -183,6 +203,8 @@ export function App() {
       }
 
       await fetchData();
+      flashChore(id);
+      showSuccess("Chore assigned");
     } finally {
       setAssignmentPendingChoreId(null);
     }
@@ -201,6 +223,8 @@ export function App() {
     }
 
     await fetchData();
+    flashChore(id);
+    showSuccess(done ? "Chore marked active again" : "Chore completed");
   };
 
   const handleOpenRewards = async (childId: string) => {
@@ -254,6 +278,7 @@ export function App() {
 
       setRedeemResult((await response.json()) as RedeemRewardResult);
       await fetchData();
+      showSuccess("Reward redeemed");
       window.setTimeout(() => {
         setRewardModalChildId(null);
         setRewardsError(null);
@@ -291,6 +316,8 @@ export function App() {
       detailModalChoreId={detailModalChoreId}
       detailSubmitting={detailSubmitting}
       detailError={detailError}
+      highlightedChoreId={highlightedChoreId}
+      successMessage={successMessage}
       onOpenDetails={(id) => {
         setError(null);
         setDetailError(null);

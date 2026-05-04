@@ -330,6 +330,12 @@ button {
   border: 1px solid rgba(23, 32, 51, 0.08);
 }
 
+.chore-card.is-highlighted {
+  border-color: rgba(16, 185, 129, 0.44);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.16);
+  animation: celebrate-card 1.2s ease;
+}
+
 .chore-card.is-done {
   opacity: 0.62;
 }
@@ -634,6 +640,41 @@ button {
   color: #0a7b57;
 }
 
+.reward-success-panel {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  text-align: center;
+  animation: celebrate-card 0.9s ease;
+}
+
+.reward-success-panel h3 {
+  margin: 0;
+}
+
+.reward-success-label {
+  margin: 0;
+  color: #0a7b57;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.success-toast {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #0a7b57;
+  font-weight: 700;
+}
+
 .history-panel {
   margin-top: 16px;
 }
@@ -744,5 +785,19 @@ button {
 @keyframes shimmer {
   100% {
     transform: translateX(100%);
+  }
+}
+
+@keyframes celebrate-card {
+  0% {
+    transform: scale(0.985);
+  }
+
+  40% {
+    transform: scale(1.01);
+  }
+
+  100% {
+    transform: scale(1);
   }
 }

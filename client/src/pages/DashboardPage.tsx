@@ -50,6 +50,8 @@ type DashboardPageProps = {
   detailModalChoreId: string | null;
   detailSubmitting: boolean;
   detailError: string | null;
+  highlightedChoreId: string | null;
+  successMessage: string | null;
   onOpenDetails: (id: string) => void;
   onCloseDetails: () => void;
   onSubmitChoreUpdate: (id: string, input: UpdateChoreInput) => Promise<void>;
@@ -151,6 +153,8 @@ export function DashboardPage({
   detailModalChoreId,
   detailSubmitting,
   detailError,
+  highlightedChoreId,
+  successMessage,
   onOpenDetails,
   onCloseDetails,
   onSubmitChoreUpdate,
@@ -196,7 +200,7 @@ export function DashboardPage({
       <header className="topbar">
         <div className="topbar-copy">
           <div className="title-block">
-            <p className="eyebrow">Phase 12</p>
+            <p className="eyebrow">Phase 13</p>
             <h1>Chore Tracker</h1>
           </div>
           <p className="subtitle">
@@ -231,6 +235,9 @@ export function DashboardPage({
             <strong>
               {dashboardData.children.length} kids, {dashboardData.unassignedChores.length} unassigned
             </strong>
+          )}
+          {!loading && !error && successMessage && (
+            <span className="success-toast">{successMessage}</span>
           )}
         </div>
 
@@ -291,6 +298,7 @@ export function DashboardPage({
               assignmentPendingChoreId={
                 lane.id === "unassigned" ? assignmentPendingChoreId : undefined
               }
+              highlightedChoreId={highlightedChoreId}
               onOpenDetails={onOpenDetails}
             />
           ))}

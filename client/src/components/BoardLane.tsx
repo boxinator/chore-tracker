@@ -24,6 +24,7 @@ type BoardLaneProps = {
   onAssign?: (id: string, childId: string) => void;
   onOpenDetails?: (id: string) => void;
   assignmentPendingChoreId?: string | null;
+  highlightedChoreId?: string | null;
 };
 
 export function BoardLane({
@@ -40,7 +41,8 @@ export function BoardLane({
   assignOptions,
   onAssign,
   onOpenDetails,
-  assignmentPendingChoreId
+  assignmentPendingChoreId,
+  highlightedChoreId
 }: BoardLaneProps) {
   return (
     <section key={id} className="lane" style={{ ["--lane-accent" as string]: accent }}>
@@ -72,6 +74,7 @@ export function BoardLane({
             onAssign={onAssign}
             onOpenDetails={onOpenDetails}
             assignmentPending={assignmentPendingChoreId === item.id}
+            highlighted={highlightedChoreId === item.id}
           />
         ))}
 

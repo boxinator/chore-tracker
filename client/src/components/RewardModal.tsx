@@ -72,46 +72,59 @@ export function RewardModal({
 
         {selectedReward && (
           <div className="reward-detail">
-            <button
-              className="secondary-button"
-              type="button"
-              onClick={() => setSelectedRewardId(null)}
-            >
-              Back
-            </button>
-            <div className="reward-detail-copy">
-              <h3>{selectedReward.name}</h3>
-              <p>{selectedReward.description}</p>
-            </div>
-            <div className="reward-equation">
-              <span>{child.totalPoints}</span>
-              <span>-</span>
-              <span>{selectedReward.cost}</span>
-              <span>=</span>
-              <strong>{child.totalPoints - selectedReward.cost}</strong>
-            </div>
+            {!redeemResult && (
+              <>
+                <button
+                  className="secondary-button"
+                  type="button"
+                  onClick={() => setSelectedRewardId(null)}
+                >
+                  Back
+                </button>
+                <div className="reward-detail-copy">
+                  <h3>{selectedReward.name}</h3>
+                  <p>{selectedReward.description}</p>
+                </div>
+                <div className="reward-equation">
+                  <span>{child.totalPoints}</span>
+                  <span>-</span>
+                  <span>{selectedReward.cost}</span>
+                  <span>=</span>
+                  <strong>{child.totalPoints - selectedReward.cost}</strong>
+                </div>
 
-            {redeemResult && (
-              <p className="reward-success">
-                Redeemed: {redeemResult.previousTotal} to {redeemResult.newTotal} pts
-              </p>
+                {error && <p className="form-error">{error}</p>}
+
+                <div className="modal-actions">
+                  <button className="secondary-button" type="button" onClick={onClose}>
+                    Cancel
+                  </button>
+                  <button
+                    className="primary-button"
+                    type="button"
+                    disabled={submitting}
+                    onClick={() => void onRedeem(selectedReward.id)}
+                  >
+                    {submitting ? "Redeeming..." : "Confirm"}
+                  </button>
+                </div>
+              </>
             )}
 
-            {error && <p className="form-error">{error}</p>}
-
-            <div className="modal-actions">
-              <button className="secondary-button" type="button" onClick={onClose}>
-                Cancel
-              </button>
-              <button
-                className="primary-button"
-                type="button"
-                disabled={submitting}
-                onClick={() => void onRedeem(selectedReward.id)}
-              >
-                {submitting ? "Redeeming..." : "Confirm"}
-              </button>
-            </div>
+            {redeemResult && (
+              <div className="reward-success-panel">
+                <p className="reward-success-label">Redeemed</p>
+                <h3>{selectedReward.name}</h3>
+                <div className="reward-equation">
+                  <span>{redeemResult.previousTotal}</span>
+                  <span>-</span>
+                  <span>{selectedReward.cost}</span>
+                  <span>=</span>
+                  <strong>{redeemResult.newTotal}</strong>
+                </div>
+                <p className="reward-success">Nice choice. New total is ready.</p>
+              </div>
+            )}
           </div>
         )}
       </section>
