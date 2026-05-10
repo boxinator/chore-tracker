@@ -37,11 +37,18 @@ type ChoreRow = {
   point_value: number;
   assignee_child_id: string | null;
   completion_id: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 type ScheduleRow = {
   choreId: string;
   dayOfWeek: number;
+};
+
+type InternalVisibleChore = VisibleChore & {
+  createdAt: string;
+  updatedAt: string;
 };
 
 export function getChildPointTotals(db: DatabaseConnection): ChildPointTotal[] {
@@ -61,11 +68,11 @@ export function getChildPointTotals(db: DatabaseConnection): ChildPointTotal[] {
     .all() as ChildPointTotal[];
 }
 
-export function getVisibleChoresForDate(
+function getVisibleChoreRecordsForDate(
   db: DatabaseConnection,
   currentDateLocal: string,
   dayOfWeek: number
-): VisibleChore[] {
+): InternalVisibleChore[] {
   const scheduleRows = db
     .prepare(
       `
@@ -93,7 +100,9 @@ export function getVisibleChoresForDate(
           ch.description,
           ch.point_value,
           ch.assignee_child_id,
-          cc.id as completion_id
+          cc.id as completion_id,
+          ch.created_at,
+          ch.updated_at
         FROM chores ch
         LEFT JOIN chore_completions cc
           ON cc.chore_id = ch.id
@@ -122,8 +131,26 @@ export function getVisibleChoresForDate(
       pointValue: chore.point_value,
       assigneeChildId: chore.assignee_child_id,
       isCompletedToday: chore.completion_id !== null,
-      scheduledDays: scheduleMap.get(chore.id) ?? []
+      scheduledDays: scheduleMap.get(chore.id) ?? [],
+      createdAt: chore.created_at,
+      updatedAt: chore.updated_at
     }));
+}
+
+export function getVisibleChoresForDate(
+  db: DatabaseConnection,
+  currentDateLocal: string,
+  dayOfWeek: number
+): VisibleChore[] {
+  return getVisibleChoreRecordsForDate(db, currentDateLocal, dayOfWeek).map((chore) => ({
+    id: chore.id,
+    title: chore.title,
+    description: chore.description,
+    pointValue: chore.pointValue,
+    assigneeChildId: chore.assigneeChildId,
+    isCompletedToday: chore.isCompletedToday,
+    scheduledDays: chore.scheduledDays
+  }));
 }
 
 export function getDashboardData(
@@ -132,7 +159,7 @@ export function getDashboardData(
   dayOfWeek: number
 ): DashboardData {
   const totals = getChildPointTotals(db);
-  const visibleChores = getVisibleChoresForDate(db, currentDateLocal, dayOfWeek);
+  const visibleChores = getVisibleChoreRecordsForDate(db, currentDateLocal, dayOfWeek);
 
   const choresByChildId = visibleChores.reduce<Map<string, VisibleChore[]>>((map, chore) => {
     if (!chore.assigneeChildId) {
@@ -140,15 +167,44 @@ export function getDashboardData(
     }
 
     const chores = map.get(chore.assigneeChildId) ?? [];
-    chores.push(chore);
+    chores.push({
+      id: chore.id,
+      title: chore.title,
+      description: chore.description,
+      pointValue: chore.pointValue,
+      assigneeChildId: chore.assigneeChildId,
+      isCompletedToday: chore.isCompletedToday,
+      scheduledDays: chore.scheduledDays
+    });
     map.set(chore.assigneeChildId, chores);
     return map;
   }, new Map());
 
+  for (const chores of choresByChildId.values()) {
+    chores.sort((left, right) =>
+      visibleChores
+        .find((chore) => chore.id === right.id)!
+        .updatedAt.localeCompare(visibleChores.find((chore) => chore.id === left.id)!.updatedAt)
+    );
+  }
+
+  const unassignedChores = visibleChores
+    .filter((chore) => chore.assigneeChildId === null)
+    .sort((left, right) => left.createdAt.localeCompare(right.createdAt))
+    .map((chore) => ({
+      id: chore.id,
+      title: chore.title,
+      description: chore.description,
+      pointValue: chore.pointValue,
+      assigneeChildId: chore.assigneeChildId,
+      isCompletedToday: chore.isCompletedToday,
+      scheduledDays: chore.scheduledDays
+    }));
+
   return {
     currentDateLocal,
     dayOfWeek,
-    unassignedChores: visibleChores.filter((chore) => chore.assigneeChildId === null),
+    unassignedChores,
     children: totals.map((child) => ({
       id: child.childId,
       name: child.name,

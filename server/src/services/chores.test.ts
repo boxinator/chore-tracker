@@ -189,6 +189,35 @@ describe("assignChore", () => {
     const dashboard = getDashboardData(fixtureDb, "2026-04-23", 4);
     expect(dashboard.children[1]?.chores[0]?.id).toBe("chore-1");
   });
+
+  it("moves a newly assigned chore to the top of the assignee lane", () => {
+    const fixtureDb = createBaseFixture();
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chores (
+          id,
+          title,
+          description,
+          point_value,
+          assignee_child_id,
+          is_active,
+          created_at,
+          updated_at
+        ) VALUES
+          ('chore-older', 'Older assigned', '', 5, 'child-2', 1, '2026-04-23T08:00:00.000Z', '2026-04-23T08:00:00.000Z'),
+          ('chore-new', 'Newly assigned', '', 5, NULL, 1, '2026-04-23T07:00:00.000Z', '2026-04-23T07:00:00.000Z')
+      `
+    ).run();
+
+    assignChore(fixtureDb, "chore-new", "child-2");
+
+    const dashboard = getDashboardData(fixtureDb, "2026-04-23", 4);
+    expect(dashboard.children[1]?.chores.map((chore) => chore.id)).toEqual([
+      "chore-new",
+      "chore-older"
+    ]);
+  });
 });
 
 describe("completeChore and uncompleteChore", () => {
