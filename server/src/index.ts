@@ -39,6 +39,17 @@ import { getDashboardData } from "./services/dashboard.js";
 const db = setupDatabase(config.databasePath);
 const app = express();
 
+function getEffectiveNow(req: express.Request) {
+  const debugNowHeader = req.get("X-Debug-Now");
+
+  if (!debugNowHeader) {
+    return new Date();
+  }
+
+  const debugNow = new Date(debugNowHeader);
+  return Number.isNaN(debugNow.getTime()) ? new Date() : debugNow;
+}
+
 app.use(express.json());
 app.use("/api", (_req, res, next) => {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
@@ -56,8 +67,8 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
-app.get("/api/dashboard", (_req, res) => {
-  const now = new Date();
+app.get("/api/dashboard", (req, res) => {
+  const now = getEffectiveNow(req);
   const currentDateLocal = getCurrentLocalDateString(now);
   const dayOfWeek = now.getDay();
 
@@ -156,7 +167,7 @@ app.patch("/api/chores/:id/assign", (req, res) => {
 
 app.post("/api/chores/:id/complete", (req, res) => {
   try {
-    const now = new Date();
+    const now = getEffectiveNow(req);
     completeChore(db, req.params.id, getCurrentLocalDateString(now), now.getDay());
     res.status(204).send();
   } catch (error) {
@@ -171,7 +182,7 @@ app.post("/api/chores/:id/complete", (req, res) => {
 
 app.post("/api/chores/:id/uncomplete", (req, res) => {
   try {
-    const now = new Date();
+    const now = getEffectiveNow(req);
     uncompleteChore(db, req.params.id, getCurrentLocalDateString(now));
     res.status(204).send();
   } catch (error) {

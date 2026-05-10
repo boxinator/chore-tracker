@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DashboardPage } from "./pages/DashboardPage";
 import type {
   Child,
@@ -16,11 +16,17 @@ import type {
   UpdateChoreInput
 } from "./types";
 
-async function apiFetch(input: RequestInfo | URL, init?: RequestInit) {
-  return fetch(input, {
-    cache: "no-store",
-    ...init
-  });
+function formatDateInputValue(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatTimeInputValue(date: Date) {
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
 }
 
 export function App() {
@@ -47,11 +53,51 @@ export function App() {
   const [historyEntries, setHistoryEntries] = useState<HistoryEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
+  const [debugTimeEnabled, setDebugTimeEnabled] = useState(false);
+  const [debugDateInput, setDebugDateInput] = useState("");
+  const [debugTimeInput, setDebugTimeInput] = useState("");
   const [rewardModalChildId, setRewardModalChildId] = useState<string | null>(null);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [rewardsLoading, setRewardsLoading] = useState(false);
   const [rewardsError, setRewardsError] = useState<string | null>(null);
   const [redeemResult, setRedeemResult] = useState<RedeemRewardResult | null>(null);
+
+  const debugNowIso = useMemo(() => {
+    if (!debugTimeEnabled || !debugDateInput || !debugTimeInput) {
+      return null;
+    }
+
+    const debugNow = new Date(`${debugDateInput}T${debugTimeInput}`);
+    return Number.isNaN(debugNow.getTime()) ? null : debugNow.toISOString();
+  }, [debugDateInput, debugTimeEnabled, debugTimeInput]);
+
+  const debugPreview = useMemo(() => {
+    if (!debugNowIso) {
+      return "Using real time";
+    }
+
+    return new Date(debugNowIso).toLocaleString(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit"
+    });
+  }, [debugNowIso]);
+
+  const apiFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const headers = new Headers(init?.headers);
+
+    if (debugNowIso) {
+      headers.set("X-Debug-Now", debugNowIso);
+    }
+
+    return fetch(input, {
+      cache: "no-store",
+      ...init,
+      headers
+    });
+  };
 
   const showSuccess = (message: string) => {
     setSuccessMessage(message);
@@ -94,7 +140,7 @@ export function App() {
 
   useEffect(() => {
     void fetchData();
-  }, []);
+  }, [debugNowIso]);
 
   const fetchRewards = async () => {
     const response = await apiFetch("/api/rewards");
@@ -539,8 +585,32 @@ export function App() {
       historyEntries={historyEntries}
       historyLoading={historyLoading}
       historyError={historyError}
+      debugTimeEnabled={debugTimeEnabled}
+      debugDateInput={debugDateInput}
+      debugTimeInput={debugTimeInput}
+      debugPreview={debugPreview}
       onOpenHistory={() => {
         void handleOpenHistory();
+      }}
+      onToggleDebugTime={() => {
+        setDebugTimeEnabled((current) => {
+          const next = !current;
+
+          if (next && (!debugDateInput || !debugTimeInput)) {
+            const now = new Date();
+            setDebugDateInput(formatDateInputValue(now));
+            setDebugTimeInput(formatTimeInputValue(now));
+          }
+
+          return next;
+        });
+      }}
+      onChangeDebugDate={setDebugDateInput}
+      onChangeDebugTime={setDebugTimeInput}
+      onResetDebugTime={() => {
+        setDebugTimeEnabled(false);
+        setDebugDateInput("");
+        setDebugTimeInput("");
       }}
       onCloseHistory={() => {
         if (historyLoading) {

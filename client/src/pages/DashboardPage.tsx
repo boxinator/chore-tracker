@@ -80,7 +80,15 @@ type DashboardPageProps = {
   historyEntries: HistoryEntry[];
   historyLoading: boolean;
   historyError: string | null;
+  debugTimeEnabled: boolean;
+  debugDateInput: string;
+  debugTimeInput: string;
+  debugPreview: string;
   onOpenHistory: () => void;
+  onToggleDebugTime: () => void;
+  onChangeDebugDate: (value: string) => void;
+  onChangeDebugTime: (value: string) => void;
+  onResetDebugTime: () => void;
   onCloseHistory: () => void;
   rewardModalChildId: string | null;
   rewards: Reward[];
@@ -196,7 +204,15 @@ export function DashboardPage({
   historyEntries,
   historyLoading,
   historyError,
+  debugTimeEnabled,
+  debugDateInput,
+  debugTimeInput,
+  debugPreview,
   onOpenHistory,
+  onToggleDebugTime,
+  onChangeDebugDate,
+  onChangeDebugTime,
+  onResetDebugTime,
   onCloseHistory,
   rewardModalChildId,
   rewards,
@@ -275,6 +291,36 @@ export function DashboardPage({
         </div>
 
         <div className="status-meta">
+          <div className="debug-time-panel">
+            <label className="debug-toggle">
+              <input type="checkbox" checked={debugTimeEnabled} onChange={onToggleDebugTime} />
+              <span>Simulated time</span>
+            </label>
+            <div className="debug-time-row">
+              <input
+                className="debug-input"
+                type="date"
+                value={debugDateInput}
+                disabled={!debugTimeEnabled}
+                onChange={(event) => onChangeDebugDate(event.target.value)}
+              />
+              <input
+                className="debug-input"
+                type="time"
+                value={debugTimeInput}
+                disabled={!debugTimeEnabled}
+                onChange={(event) => onChangeDebugTime(event.target.value)}
+              />
+              <button
+                className="secondary-button debug-reset-button"
+                type="button"
+                onClick={onResetDebugTime}
+              >
+                Reset
+              </button>
+            </div>
+            <span>{debugPreview}</span>
+          </div>
           {health ? (
             <>
               <span>{health.app}</span>
