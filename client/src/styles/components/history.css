@@ -1,0 +1,69 @@
+.history-panel {
+  margin-top: 16px;
+}
+
+.history-list {
+  display: grid;
+  gap: 12px;
+}
+
+.history-entry {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-strong);
+}
+
+.history-copy {
+  min-width: 0;
+}
+
+.history-copy strong {
+  display: block;
+  color: var(--color-text-strong);
+}
+
+.history-copy p {
+  margin: 4px 0 0;
+  color: var(--color-text-muted);
+}
+
+.history-delta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.history-delta.is-negative {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.success-toast {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  font-weight: 800;
+}
+
+@media (max-width: 720px) {
+  .history-entry {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

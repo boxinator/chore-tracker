@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CheckCircle2, Send, Trash2, Zap } from "lucide-react";
 import type { AssignChildOption } from "../types";
 
 type ChoreCardProps = {
@@ -36,24 +37,36 @@ export function ChoreCard({
 
   return (
     <article className={`chore-card${done ? " is-done" : ""}${highlighted ? " is-highlighted" : ""}`}>
-      <div className="chore-topline">
-        <button
-          className="check-button"
-          type="button"
-          aria-label={done ? "Undo completed chore" : "Complete chore"}
-          disabled={!canComplete}
-          onClick={() => onToggleComplete?.(id, done)}
-        >
-          {done ? "v" : ""}
-        </button>
+      <span className="points-ribbon">
+        <Zap aria-hidden="true" />
+        {points} pts
+      </span>
+
+      <button
+        className="complete-pill"
+        type="button"
+        aria-label={done ? `Mark ${title} incomplete` : `Mark ${title} complete`}
+        aria-pressed={done}
+        disabled={!canComplete}
+        onClick={() => onToggleComplete?.(id, done)}
+      >
+        <CheckCircle2 aria-hidden="true" />
+        <span>Done</span>
+      </button>
+
+      <button
+        className="chore-detail-button"
+        type="button"
+        aria-label={`Show details for ${title}`}
+        onClick={() => onOpenDetails?.(id)}
+      >
         <div className="chore-copy">
           <h3>{title}</h3>
           <p>{meta}</p>
         </div>
-      </div>
+      </button>
 
       <div className="chore-footer">
-        <span className="points-pill">{points} pts</span>
         <div className="card-actions">
           {canAssign && (
             <button
@@ -63,6 +76,7 @@ export function ChoreCard({
               disabled={assignmentPending}
               onClick={() => setAssignMenuOpen((current) => !current)}
             >
+              <Send aria-hidden="true" />
               {assignmentPending ? "Assigning..." : "Assign"}
             </button>
           )}
@@ -73,12 +87,9 @@ export function ChoreCard({
               aria-label={`Delete ${title}`}
               onClick={() => onDelete(id)}
             >
-              Del
+              <Trash2 aria-hidden="true" />
             </button>
           )}
-          <button className="text-button" type="button" onClick={() => onOpenDetails?.(id)}>
-            Details
-          </button>
         </div>
       </div>
 

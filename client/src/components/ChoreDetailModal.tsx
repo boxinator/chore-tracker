@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Trash2, X, Zap } from "lucide-react";
 import type { DashboardChild, UpdateChoreInput, VisibleChore } from "../types";
 
 type ChoreDetailModalProps = {
@@ -74,12 +75,15 @@ export function ChoreDetailModal({
             <h2 id="chore-detail-title">{chore.title}</h2>
           </div>
           <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
-            x
+            <X aria-hidden="true" />
           </button>
         </header>
 
         <div className="detail-summary">
-          <span className="points-pill">{chore.pointValue} pts</span>
+          <span className="points-pill">
+            <Zap aria-hidden="true" />
+            {chore.pointValue} pts
+          </span>
           <span className={`detail-state${chore.isCompletedToday ? " is-done" : ""}`}>
             {chore.isCompletedToday ? "Completed today" : "Ready for today"}
           </span>
@@ -156,6 +160,7 @@ export function ChoreDetailModal({
               disabled={submitting}
               onClick={() => void handleDelete()}
             >
+              <Trash2 aria-hidden="true" />
               Delete
             </button>
 

@@ -1,0 +1,218 @@
+.chore-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 14px;
+  min-height: 176px;
+  padding: 58px 14px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-strong);
+  border: 1px solid var(--color-border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.chore-card.is-highlighted {
+  border-color: color-mix(in srgb, var(--color-success) 50%, transparent);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--color-success) 16%, transparent),
+    0 0 24px color-mix(in srgb, var(--color-success) 12%, transparent);
+  animation: celebrate-card 1.2s ease;
+}
+
+.chore-card.is-done {
+  opacity: 0.72;
+}
+
+.chore-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.chore-footer {
+  min-width: 0;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.chore-footer .card-actions {
+  flex: 1 1 auto;
+  justify-content: flex-end;
+}
+
+.points-ribbon,
+.complete-pill {
+  position: absolute;
+  top: 14px;
+  min-height: 34px;
+  z-index: 1;
+}
+
+.points-ribbon {
+  left: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.points-ribbon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.complete-pill {
+  right: 14px;
+  max-width: calc(100% - 118px);
+  padding: 0 11px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 18%, transparent);
+  color: var(--color-accent-strong);
+  font-weight: 800;
+}
+
+.complete-pill[aria-pressed="true"] {
+  background: var(--color-success-bg);
+  border-color: color-mix(in srgb, var(--color-success) 34%, transparent);
+  color: var(--color-success);
+}
+
+.complete-pill:disabled {
+  opacity: 0.45;
+}
+
+.complete-pill span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chore-detail-button {
+  width: 100%;
+  min-width: 0;
+  min-height: 72px;
+  display: block;
+  padding: 8px 0 4px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.chore-detail-button:hover h3,
+.chore-detail-button:focus-visible h3 {
+  color: var(--color-accent-strong);
+}
+
+.chore-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.chore-copy h3 {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: 1rem;
+  line-height: 1.22;
+}
+
+.chore-copy p {
+  margin: 6px 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.points-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.points-pill svg {
+  width: 15px;
+  height: 15px;
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: 8px;
+}
+
+.card-actions .danger-button {
+  width: 46px;
+  min-width: 46px;
+  padding: 0;
+}
+
+.assign-chooser {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.assign-chip {
+  flex: 1 1 auto;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  color: var(--color-accent-strong);
+  font-weight: 800;
+}
+
+@media (max-width: 480px) {
+  .chore-footer {
+    align-items: stretch;
+  }
+
+  .chore-footer .card-actions {
+    flex: 1 1 auto;
+    justify-content: stretch;
+  }
+
+  .chore-footer .card-actions > button {
+    flex: 0 0 auto;
+  }
+
+  .assign-chooser {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .complete-pill {
+    max-width: calc(100% - 112px);
+  }
+}
+
+@keyframes celebrate-card {
+  0% {
+    transform: scale(0.985);
+  }
+
+  40% {
+    transform: scale(1.01);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}

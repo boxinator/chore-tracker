@@ -1,3 +1,4 @@
+import { Gift } from "lucide-react";
 import { ChoreCard } from "./ChoreCard";
 import type { AssignChildOption } from "../types";
 
@@ -54,6 +55,7 @@ export function BoardLane({
 
         {showRewards && (
           <button className="reward-button" type="button" onClick={onOpenRewards}>
+            <Gift aria-hidden="true" />
             Rewards
           </button>
         )}

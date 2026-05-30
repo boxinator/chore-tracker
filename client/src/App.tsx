@@ -16,6 +16,8 @@ import type {
   UpdateChoreInput
 } from "./types";
 
+type ThemeName = "default" | "space";
+
 function formatDateInputValue(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -30,6 +32,10 @@ function formatTimeInputValue(date: Date) {
 }
 
 export function App() {
+  const [theme, setTheme] = useState<ThemeName>(() => {
+    const storedTheme = window.localStorage.getItem("chore-theme");
+    return storedTheme === "default" || storedTheme === "space" ? storedTheme : "space";
+  });
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -96,6 +102,14 @@ export function App() {
       cache: "no-store",
       ...init,
       headers
+    });
+  };
+
+  const handleToggleTheme = () => {
+    setTheme((current) => {
+      const next = current === "space" ? "default" : "space";
+      window.localStorage.setItem("chore-theme", next);
+      return next;
     });
   };
 
@@ -515,6 +529,7 @@ export function App() {
   };
 
   return (
+    <div className="app-root" data-theme={theme}>
     <DashboardPage
       health={health}
       dashboardData={dashboardData}
@@ -625,6 +640,8 @@ export function App() {
       rewardsLoading={rewardsLoading}
       rewardsError={rewardsError}
       redeemResult={redeemResult}
+      theme={theme}
+      onToggleTheme={handleToggleTheme}
       onOpenRewards={handleOpenRewards}
       onCloseRewards={() => {
         if (rewardsLoading) {
@@ -637,5 +654,6 @@ export function App() {
       }}
       onRedeemReward={handleRedeemReward}
     />
+    </div>
   );
 }

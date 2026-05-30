@@ -1,0 +1,18 @@
+[data-theme="default"] {
+  --color-bg:
+    radial-gradient(circle at top left, rgba(255, 216, 122, 0.45), transparent 26%),
+    linear-gradient(180deg, #f6f8fc 0%, #edf2fb 100%);
+  --color-bg-elevated: #f6f8fc;
+  --color-text: #172033;
+  --color-text-strong: #0d1424;
+  --color-text-muted: #5b6474;
+  --color-surface: rgba(255, 255, 255, 0.82);
+  --color-surface-strong: #ffffff;
+  --color-surface-soft: rgba(255, 255, 255, 0.72);
+  --color-border: rgba(23, 32, 51, 0.12);
+  --color-border-strong: rgba(23, 32, 51, 0.2);
+  --color-accent: #2857c5;
+  --color-accent-strong: #123892;
+  --shadow-panel: 0 18px 42px rgba(41, 55, 91, 0.12);
+  --shadow-button: 0 14px 28px rgba(41, 55, 91, 0.14);
+}

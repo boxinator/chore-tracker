@@ -66,6 +66,18 @@ Build the image:
 docker build -t chore-tracker .
 ```
 
+Build and tag it for a local registry:
+
+```bash
+docker build -t <local-registry-host>:5050/chore-tracker:latest .
+```
+
+Push it to the local registry:
+
+```bash
+docker push <local-registry-host>:5050/chore-tracker:latest
+```
+
 Run it:
 
 ```bash
@@ -121,10 +133,17 @@ docker tag chore-tracker:test yourname/chore-tracker:latest
 docker push yourname/chore-tracker:latest
 ```
 
+For this local registry, the equivalent commands are:
+
+```bash
+docker build -t <local-registry-host>:5050/chore-tracker:latest .
+docker push <local-registry-host>:5050/chore-tracker:latest
+```
+
 Then on Synology:
 
 - open Container Manager
-- pull `yourname/chore-tracker:latest`
+- pull `yourname/chore-tracker:latest` or `<local-registry-host>:5050/chore-tracker:latest`
 - create the container from that image
 
 ### Option 2: Export And Import A Tar

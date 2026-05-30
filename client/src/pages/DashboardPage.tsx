@@ -1,3 +1,5 @@
+import { CalendarDays, History, Plus, Settings, Sparkles, Wrench, X } from "lucide-react";
+import { useState } from "react";
 import type {
   AssignChildOption,
   Child,
@@ -18,6 +20,7 @@ import { ChoreDetailModal } from "../components/ChoreDetailModal";
 import { HistoryModal } from "../components/HistoryModal";
 import { ManageModal } from "../components/ManageModal";
 import { RewardModal } from "../components/RewardModal";
+import { SpaceBackground } from "../components/SpaceBackground";
 
 type LaneItem = {
   id: string;
@@ -95,6 +98,8 @@ type DashboardPageProps = {
   rewardsLoading: boolean;
   rewardsError: string | null;
   redeemResult: RedeemRewardResult | null;
+  theme: "default" | "space";
+  onToggleTheme: () => void;
   onOpenRewards: (childId: string) => void;
   onCloseRewards: () => void;
   onRedeemReward: (rewardId: string) => Promise<void>;
@@ -164,6 +169,108 @@ function formatBoardDate(data: DashboardResponse | null) {
   });
 }
 
+type DebugDockProps = {
+  health: HealthResponse | null;
+  debugTimeEnabled: boolean;
+  debugDateInput: string;
+  debugTimeInput: string;
+  debugPreview: string;
+  onToggleDebugTime: () => void;
+  onChangeDebugDate: (value: string) => void;
+  onChangeDebugTime: (value: string) => void;
+  onResetDebugTime: () => void;
+};
+
+function DebugDock({
+  health,
+  debugTimeEnabled,
+  debugDateInput,
+  debugTimeInput,
+  debugPreview,
+  onToggleDebugTime,
+  onChangeDebugDate,
+  onChangeDebugTime,
+  onResetDebugTime
+}: DebugDockProps) {
+  const [minimized, setMinimized] = useState(true);
+
+  if (minimized) {
+    return (
+      <aside className="debug-dock is-minimized" aria-label="Debug tools">
+        <button
+          className="debug-float-button"
+          type="button"
+          aria-label="Open debug tools"
+          onClick={() => setMinimized(false)}
+        >
+          <Wrench aria-hidden="true" />
+        </button>
+      </aside>
+    );
+  }
+
+  return (
+    <aside className="debug-dock" aria-label="Debug tools">
+      <div className="debug-panel">
+        <header className="debug-panel-header">
+          <div className="debug-panel-title">
+            <strong>Debug tools</strong>
+            <span>{debugPreview}</span>
+          </div>
+          <button
+            className="modal-close"
+            type="button"
+            aria-label="Minimize debug tools"
+            onClick={() => setMinimized(true)}
+          >
+            <X aria-hidden="true" />
+          </button>
+        </header>
+
+        <label className="debug-toggle">
+          <input type="checkbox" checked={debugTimeEnabled} onChange={onToggleDebugTime} />
+          <span>Simulated time</span>
+        </label>
+        <div className="debug-time-row">
+          <input
+            className="debug-input"
+            type="date"
+            value={debugDateInput}
+            disabled={!debugTimeEnabled}
+            onChange={(event) => onChangeDebugDate(event.target.value)}
+          />
+          <input
+            className="debug-input"
+            type="time"
+            value={debugTimeInput}
+            disabled={!debugTimeEnabled}
+            onChange={(event) => onChangeDebugTime(event.target.value)}
+          />
+          <button
+            className="secondary-button debug-reset-button"
+            type="button"
+            onClick={onResetDebugTime}
+          >
+            Reset
+          </button>
+        </div>
+
+        <div className="debug-health">
+          {health ? (
+            <>
+              <span>{health.app}</span>
+              <span>{health.databasePath}</span>
+              <span>{new Date(health.timestamp).toLocaleString()}</span>
+            </>
+          ) : (
+            <span>Waiting for local API</span>
+          )}
+        </div>
+      </div>
+    </aside>
+  );
+}
+
 export function DashboardPage({
   health,
   dashboardData,
@@ -219,6 +326,8 @@ export function DashboardPage({
   rewardsLoading,
   rewardsError,
   redeemResult,
+  theme,
+  onToggleTheme,
   onOpenRewards,
   onCloseRewards,
   onRedeemReward
@@ -243,6 +352,7 @@ export function DashboardPage({
 
   return (
     <div className="app-shell">
+      <SpaceBackground />
       <header className="topbar">
         <div className="topbar-copy">
           <div className="title-block">
@@ -255,13 +365,35 @@ export function DashboardPage({
         </div>
 
         <div className="topbar-tools">
-          <button className="text-button toolbar-button" type="button" onClick={onOpenManage}>
-            Manage
+          <button
+            className="text-button toolbar-button"
+            type="button"
+            aria-label="Manage"
+            onClick={onOpenManage}
+          >
+            <Settings aria-hidden="true" />
+            <span className="button-label-compact">Manage</span>
           </button>
-          <button className="text-button toolbar-button" type="button" onClick={onOpenHistory}>
-            History
+          <button
+            className="text-button toolbar-button"
+            type="button"
+            aria-label="History"
+            onClick={onOpenHistory}
+          >
+            <History aria-hidden="true" />
+            <span className="button-label-compact">History</span>
+          </button>
+          <button
+            className="text-button toolbar-button"
+            type="button"
+            aria-label="Toggle theme"
+            onClick={onToggleTheme}
+          >
+            <Sparkles aria-hidden="true" />
+            <span className="button-label-compact">{theme === "space" ? "Space" : "Default"}</span>
           </button>
           <div className="board-date" aria-label="Current board date">
+            <CalendarDays aria-hidden="true" />
             {formatBoardDate(dashboardData)}
           </div>
           <button
@@ -270,68 +402,16 @@ export function DashboardPage({
             aria-label="Add chore"
             onClick={onOpenAddModal}
           >
-            +
+            <Plus aria-hidden="true" />
           </button>
         </div>
       </header>
 
-      <section className={`status-panel${error ? " is-error" : ""}`} aria-live="polite">
-        <div className="status-copy">
-          <span className="status-label">System</span>
-          {loading && <strong>Loading dashboard...</strong>}
-          {!loading && error && <strong>Unavailable: {error}</strong>}
-          {!loading && !error && dashboardData && (
-            <strong>
-              {dashboardData.children.length} kids, {dashboardData.unassignedChores.length} unassigned
-            </strong>
-          )}
-          {!loading && !error && successMessage && (
-            <span className="success-toast">{successMessage}</span>
-          )}
-        </div>
-
-        <div className="status-meta">
-          <div className="debug-time-panel">
-            <label className="debug-toggle">
-              <input type="checkbox" checked={debugTimeEnabled} onChange={onToggleDebugTime} />
-              <span>Simulated time</span>
-            </label>
-            <div className="debug-time-row">
-              <input
-                className="debug-input"
-                type="date"
-                value={debugDateInput}
-                disabled={!debugTimeEnabled}
-                onChange={(event) => onChangeDebugDate(event.target.value)}
-              />
-              <input
-                className="debug-input"
-                type="time"
-                value={debugTimeInput}
-                disabled={!debugTimeEnabled}
-                onChange={(event) => onChangeDebugTime(event.target.value)}
-              />
-              <button
-                className="secondary-button debug-reset-button"
-                type="button"
-                onClick={onResetDebugTime}
-              >
-                Reset
-              </button>
-            </div>
-            <span>{debugPreview}</span>
-          </div>
-          {health ? (
-            <>
-              <span>{health.app}</span>
-              <span>{health.databasePath}</span>
-              <span>{new Date(health.timestamp).toLocaleString()}</span>
-            </>
-          ) : (
-            <span>Waiting for local API</span>
-          )}
-        </div>
-      </section>
+      <div className="status-inline" aria-live="polite">
+        {!loading && error && <strong>Unavailable: {error}</strong>}
+        {!loading && !error && successMessage && <span className="success-toast">{successMessage}</span>}
+        {debugTimeEnabled && <span className="status-meta">{debugPreview}</span>}
+      </div>
 
       <main className="board" aria-label="Chore board">
         {loading && (
@@ -441,6 +521,18 @@ export function DashboardPage({
           onSubmit={onSubmitChoreUpdate}
         />
       )}
+
+      <DebugDock
+        health={health}
+        debugTimeEnabled={debugTimeEnabled}
+        debugDateInput={debugDateInput}
+        debugTimeInput={debugTimeInput}
+        debugPreview={debugPreview}
+        onToggleDebugTime={onToggleDebugTime}
+        onChangeDebugDate={onChangeDebugDate}
+        onChangeDebugTime={onChangeDebugTime}
+        onResetDebugTime={onResetDebugTime}
+      />
     </div>
   );
 }

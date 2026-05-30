@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { X } from "lucide-react";
 import type { CreateChoreInput, DashboardChild } from "../types";
 
 type AddChoreModalProps = {
@@ -66,7 +67,7 @@ export function AddChoreModal({
             <h2 id="add-chore-title">Add chore</h2>
           </div>
           <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
-            x
+            <X aria-hidden="true" />
           </button>
         </header>
 

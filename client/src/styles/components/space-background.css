@@ -1,0 +1,54 @@
+.space-background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: #00030a;
+}
+
+[data-theme="default"] .space-background {
+  display: none;
+}
+
+.space-background--epic {
+  background:
+    radial-gradient(circle at 100% 100%, rgba(76, 201, 240, 0.08), transparent 0 50vh),
+    linear-gradient(180deg, rgba(0, 3, 10, 0.02), rgba(0, 3, 10, 0.22)),
+    var(--earth-image) calc(100% + 50vh) calc(100% + 50vh) / auto 100vh no-repeat,
+    #00030a;
+  animation: epic-drift 90s ease-in-out infinite alternate;
+}
+
+.space-background--epic::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    radial-gradient(circle at 100% 100%, transparent 0 48vh, rgba(0, 3, 10, 0.08) 64vh, rgba(0, 3, 10, 0.48) 104vh),
+    linear-gradient(180deg, rgba(0, 3, 10, 0.42), transparent 24%, rgba(0, 3, 10, 0.52));
+}
+
+.space-background--epic::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: rgba(0, 3, 10, 0.04);
+  backdrop-filter: saturate(1.04) contrast(1.03);
+}
+
+@keyframes epic-drift {
+  to {
+    background-position:
+      center,
+      center,
+      calc(100% + 49vh) calc(100% + 49vh),
+      center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .space-background--epic {
+    animation: none;
+  }
+}

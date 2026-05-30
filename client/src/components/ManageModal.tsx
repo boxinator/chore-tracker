@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { X } from "lucide-react";
 import type { Child, ChildInput, Reward, RewardInput } from "../types";
 
 type ManageModalProps = {
@@ -65,7 +66,7 @@ export function ManageModal({
             <h2 id="manage-modal-title">Household setup</h2>
           </div>
           <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
-            x
+            <X aria-hidden="true" />
           </button>
         </header>
 
@@ -208,7 +209,7 @@ export function ManageModal({
                         <>
                           <div className="manage-copy">
                             <strong>{reward.name}</strong>
-                            <p>{reward.cost} pts · {reward.description || "No description yet"}</p>
+                            <p>{reward.cost} pts - {reward.description || "No description yet"}</p>
                           </div>
                           <div className="inline-actions">
                             <button
@@ -308,7 +309,7 @@ export function ManageModal({
                         <article key={reward.id} className="manage-item is-muted">
                           <div className="manage-copy">
                             <strong>{reward.name}</strong>
-                            <p>{reward.cost} pts · Inactive</p>
+                            <p>{reward.cost} pts - Inactive</p>
                           </div>
                         </article>
                       ))}

@@ -1,0 +1,42 @@
+:root {
+  font-family: Inter, "Segoe UI", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --font-body: Inter, "Segoe UI", sans-serif;
+  --color-bg: #edf2fb;
+  --color-bg-elevated: #f6f8fc;
+  --color-text: #172033;
+  --color-text-strong: #0d1424;
+  --color-text-muted: #5b6474;
+  --color-surface: rgba(255, 255, 255, 0.78);
+  --color-surface-strong: #ffffff;
+  --color-surface-soft: rgba(255, 255, 255, 0.72);
+  --color-border: rgba(23, 32, 51, 0.12);
+  --color-border-strong: rgba(23, 32, 51, 0.2);
+  --color-accent: #2857c5;
+  --color-accent-strong: #123892;
+  --color-success: #0a7b57;
+  --color-success-bg: rgba(16, 185, 129, 0.12);
+  --color-danger: #b42318;
+  --color-danger-bg: rgba(239, 68, 68, 0.12);
+  --lane-unassigned: #f59e0b;
+  --lane-1: #10b981;
+  --lane-2: #8b5cf6;
+  --lane-3: #ef4444;
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-pill: 999px;
+  --shadow-panel: 0 18px 42px rgba(41, 55, 91, 0.12);
+  --shadow-button: 0 14px 28px rgba(41, 55, 91, 0.14);
+  --button-height: 42px;
+  --control-height: 44px;
+  --transition-fast: 120ms ease;
+}

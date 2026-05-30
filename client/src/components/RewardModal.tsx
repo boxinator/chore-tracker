@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { ArrowLeft, CheckCircle2, X, Zap } from "lucide-react";
 import type { DashboardChild, RedeemRewardResult, Reward } from "../types";
 
 type RewardModalProps = {
@@ -41,7 +42,7 @@ export function RewardModal({
             <h2 id="reward-modal-title">{child.name}</h2>
           </div>
           <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
-            x
+            <X aria-hidden="true" />
           </button>
         </header>
 
@@ -63,7 +64,10 @@ export function RewardModal({
                     <strong>{reward.name}</strong>
                     <p>{reward.description}</p>
                   </div>
-                  <span className="points-pill">{reward.cost} pts</span>
+                  <span className="points-pill">
+                    <Zap aria-hidden="true" />
+                    {reward.cost} pts
+                  </span>
                 </button>
               );
             })}
@@ -79,6 +83,7 @@ export function RewardModal({
                   type="button"
                   onClick={() => setSelectedRewardId(null)}
                 >
+                  <ArrowLeft aria-hidden="true" />
                   Back
                 </button>
                 <div className="reward-detail-copy">
@@ -114,7 +119,9 @@ export function RewardModal({
             {redeemResult && (
               <div className="reward-success-panel">
                 <p className="reward-success-label">Redeemed</p>
-                <h3>{selectedReward.name}</h3>
+                <h3>
+                  <CheckCircle2 aria-hidden="true" /> {selectedReward.name}
+                </h3>
                 <div className="reward-equation">
                   <span>{redeemResult.previousTotal}</span>
                   <span>-</span>

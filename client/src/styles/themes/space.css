@@ -1,0 +1,24 @@
+[data-theme="space"] {
+  --color-bg: #060914;
+  --color-bg-elevated: #0b1224;
+  --color-text: #eef6ff;
+  --color-text-strong: #ffffff;
+  --color-text-muted: #9db2cf;
+  --color-surface: rgba(9, 18, 36, 0.74);
+  --color-surface-strong: rgba(13, 26, 50, 0.92);
+  --color-surface-soft: rgba(16, 32, 62, 0.72);
+  --color-border: rgba(134, 210, 255, 0.18);
+  --color-border-strong: rgba(134, 210, 255, 0.34);
+  --color-accent: #4cc9f0;
+  --color-accent-strong: #9be7ff;
+  --color-success: #66f2b6;
+  --color-success-bg: rgba(102, 242, 182, 0.12);
+  --color-danger: #ff8f9b;
+  --color-danger-bg: rgba(255, 98, 116, 0.14);
+  --lane-unassigned: #ffd166;
+  --lane-1: #4ade80;
+  --lane-2: #a78bfa;
+  --lane-3: #fb7185;
+  --shadow-panel: 0 18px 44px rgba(0, 0, 0, 0.34), 0 0 38px rgba(76, 201, 240, 0.08);
+  --shadow-button: 0 12px 28px rgba(0, 0, 0, 0.32), 0 0 22px rgba(76, 201, 240, 0.16);
+}

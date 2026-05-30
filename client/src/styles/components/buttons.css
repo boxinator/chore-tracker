@@ -1,0 +1,202 @@
+.icon-button,
+.reward-button,
+.text-button,
+.complete-pill,
+.primary-button,
+.secondary-button,
+.icon-text-button,
+.modal-close,
+.toolbar-button,
+.debug-float-button,
+.segment-button,
+.weekday-button,
+.assign-chip {
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  line-height: 1;
+  white-space: nowrap;
+  vertical-align: middle;
+  transition:
+    transform var(--transition-fast),
+    opacity var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.icon-button:hover,
+.reward-button:hover,
+.text-button:hover,
+.complete-pill:hover,
+.primary-button:hover,
+.secondary-button:hover,
+.icon-text-button:hover,
+.modal-close:hover,
+.toolbar-button:hover,
+.debug-float-button:hover {
+  transform: translateY(-1px);
+}
+
+.icon-button,
+.modal-close,
+.debug-float-button {
+  width: 48px;
+  min-width: 48px;
+  aspect-ratio: 1;
+  padding: 0;
+  border-radius: var(--radius-sm);
+}
+
+.icon-button {
+  background: var(--color-accent);
+  color: #06101f;
+  box-shadow: var(--shadow-button);
+}
+
+.icon-button svg,
+.toolbar-button svg,
+.reward-button svg,
+.complete-pill svg,
+.icon-text-button svg,
+.modal-close svg,
+.secondary-button svg,
+.primary-button svg,
+.debug-float-button svg,
+.board-date svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.reward-button,
+.text-button {
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+}
+
+.toolbar-button {
+  min-height: var(--control-height);
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border);
+  color: var(--color-accent-strong);
+  font-weight: 800;
+}
+
+.primary-button,
+.secondary-button,
+.icon-text-button,
+.modal-close {
+  min-height: var(--button-height);
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  font-weight: 800;
+}
+
+.primary-button,
+.secondary-button,
+.icon-text-button,
+.reward-button,
+.text-button,
+.toolbar-button,
+.segment-button,
+.assign-chip {
+  max-width: 100%;
+}
+
+.primary-button span,
+.secondary-button span,
+.icon-text-button span,
+.reward-button span,
+.text-button span,
+.toolbar-button span,
+.assign-chip span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reward-button {
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 24%, transparent);
+  color: var(--color-accent-strong);
+  font-weight: 800;
+}
+
+.text-button {
+  background: transparent;
+  color: var(--color-accent-strong);
+  font-weight: 800;
+}
+
+.icon-text-button,
+.secondary-button,
+.modal-close {
+  background: rgba(125, 145, 180, 0.14);
+  color: var(--color-accent-strong);
+}
+
+.icon-text-button.is-active {
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  color: var(--color-accent-strong);
+}
+
+.danger-button {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.primary-button {
+  background: var(--color-accent);
+  color: #06101f;
+}
+
+.primary-button:disabled,
+.secondary-button:disabled,
+.icon-text-button:disabled,
+.assign-chip:disabled {
+  opacity: 0.6;
+}
+
+.button-label-compact {
+  display: inline;
+}
+
+@media (max-width: 1024px) {
+  .toolbar-button {
+    width: var(--control-height);
+    min-width: var(--control-height);
+    padding: 0;
+  }
+
+  .toolbar-button .button-label-compact {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .primary-button,
+  .secondary-button,
+  .icon-text-button {
+    min-height: 46px;
+  }
+}
+
+@media (max-width: 480px) {
+  .primary-button,
+  .secondary-button,
+  .icon-text-button,
+  .reward-button,
+  .text-button,
+  .assign-chip {
+    width: 100%;
+  }
+
+  .text-button:not(.toolbar-button) {
+    justify-content: flex-start;
+  }
+}

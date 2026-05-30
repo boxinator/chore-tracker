@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import type { HistoryEntry } from "../types";
 
 type HistoryModalProps = {
@@ -40,7 +41,7 @@ export function HistoryModal({ entries, loading, error, onClose }: HistoryModalP
             <h2 id="history-modal-title">Points history</h2>
           </div>
           <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
-            x
+            <X aria-hidden="true" />
           </button>
         </header>
 

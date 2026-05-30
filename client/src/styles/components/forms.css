@@ -1,0 +1,130 @@
+.modal-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.field,
+.field-row {
+  display: grid;
+  gap: 8px;
+}
+
+.field span {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.field-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field input,
+.field textarea,
+.field select,
+.inline-form input,
+.debug-input {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  background: var(--color-surface-strong);
+  color: var(--color-text);
+  outline: none;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus,
+.inline-form input:focus,
+.debug-input:focus {
+  border-color: var(--color-border-strong);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 14%, transparent);
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.segmented-control {
+  display: inline-flex;
+  gap: 6px;
+  padding: 6px;
+  margin-top: 18px;
+  border-radius: var(--radius-sm);
+  background: rgba(125, 145, 180, 0.1);
+  max-width: 100%;
+}
+
+.segment-button {
+  flex: 1 1 auto;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-weight: 800;
+}
+
+.segment-button.is-active {
+  background: var(--color-surface-strong);
+  color: var(--color-accent-strong);
+  box-shadow: var(--shadow-button);
+}
+
+.weekday-picker {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.weekday-button {
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-strong);
+  color: var(--color-accent-strong);
+  font-weight: 800;
+}
+
+.weekday-button.is-selected {
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent) 38%, transparent);
+}
+
+.inline-form {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+}
+
+.inline-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.form-error {
+  margin: 0;
+  color: var(--color-danger);
+  font-weight: 800;
+}
+
+@media (max-width: 720px) {
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+
+  .segmented-control {
+    display: flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .inline-actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+}
