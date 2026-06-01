@@ -93,6 +93,41 @@
   border-color: color-mix(in srgb, var(--color-accent) 38%, transparent);
 }
 
+.assignment-editor {
+  gap: 12px;
+}
+
+.assignment-grid,
+.unassigned-schedule {
+  display: grid;
+  gap: 12px;
+}
+
+.assignment-row,
+.unassigned-schedule {
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-surface-strong) 76%, transparent);
+}
+
+.assignment-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.assignment-row-header strong {
+  color: var(--color-text-strong);
+}
+
+.assignment-all-button {
+  min-height: 34px;
+  padding: 0 12px;
+}
+
 .inline-form {
   display: grid;
   gap: 10px;

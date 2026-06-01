@@ -13,6 +13,13 @@
   --color-border-strong: rgba(23, 32, 51, 0.2);
   --color-accent: #2857c5;
   --color-accent-strong: #123892;
+  --header-bg-strong: rgba(255, 255, 255, 0.92);
+  --header-bg-soft: rgba(255, 248, 224, 0.76);
+  --header-scene:
+    radial-gradient(circle at 78% 24%, rgba(255, 216, 122, 0.64), transparent 0 12%),
+    linear-gradient(135deg, rgba(40, 87, 197, 0.16), transparent 48%),
+    repeating-linear-gradient(135deg, rgba(40, 87, 197, 0.08) 0 10px, transparent 10px 22px);
+  --header-scene-opacity: 0.52;
   --shadow-panel: 0 18px 42px rgba(41, 55, 91, 0.12);
   --shadow-button: 0 14px 28px rgba(41, 55, 91, 0.14);
 }

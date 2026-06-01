@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import type { HistoryEntry } from "../types";
+import { useModalDismiss } from "./modalDismiss";
 
 type HistoryModalProps = {
   entries: HistoryEntry[];
@@ -26,8 +27,10 @@ function formatDelta(pointDelta: number) {
 }
 
 export function HistoryModal({ entries, loading, error, onClose }: HistoryModalProps) {
+  const { backdropProps, closeButtonProps } = useModalDismiss(onClose);
+
   return (
-    <div className="modal-backdrop" role="presentation" onClick={onClose}>
+    <div className="modal-backdrop" {...backdropProps}>
       <section
         className="modal"
         role="dialog"
@@ -40,7 +43,7 @@ export function HistoryModal({ entries, loading, error, onClose }: HistoryModalP
             <p className="modal-eyebrow">Recent Activity</p>
             <h2 id="history-modal-title">Points history</h2>
           </div>
-          <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
+          <button className="modal-close" type="button" aria-label="Close" {...closeButtonProps}>
             <X aria-hidden="true" />
           </button>
         </header>

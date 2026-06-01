@@ -43,16 +43,19 @@ describe("parseCreateChoreInput", () => {
       title: "  Sweep kitchen  ",
       description: "  Quick clean  ",
       pointValue: "5",
-      assigneeChildId: null,
-      scheduleDays: [4, 1, 4]
+      assignments: [
+        { childId: "child-2", days: [4, 1, 4] },
+        { childId: "child-2", days: [2] }
+      ],
+      unassignedScheduleDays: [6, 6]
     });
 
     expect(parsed).toEqual({
       title: "Sweep kitchen",
       description: "Quick clean",
       pointValue: 5,
-      assigneeChildId: null,
-      scheduleDays: [1, 4]
+      assignments: [{ childId: "child-2", days: [1, 2, 4] }],
+      unassignedScheduleDays: [6]
     });
   });
 
@@ -71,8 +74,8 @@ describe("createChore", () => {
       title: "Sweep kitchen",
       description: "Quick clean",
       pointValue: 5,
-      assigneeChildId: "child-1",
-      scheduleDays: [4]
+      assignments: [{ childId: "child-1", days: [4] }],
+      unassignedScheduleDays: []
     });
 
     createChore(fixtureDb, input);
@@ -84,7 +87,9 @@ describe("createChore", () => {
       title: "Sweep kitchen",
       pointValue: 5,
       assigneeChildId: "child-1",
-      scheduledDays: [4]
+      scheduledDays: [4],
+      assignments: [{ childId: "child-1", days: [4] }],
+      unassignedScheduleDays: []
     });
   });
 });
@@ -114,8 +119,8 @@ describe("updateChore", () => {
       title: " Sweep kitchen ",
       description: " Quick reset ",
       pointValue: "7",
-      assigneeChildId: "child-2",
-      scheduleDays: [6, 1, 6]
+      assignments: [{ childId: "child-2", days: [6, 1, 6] }],
+      unassignedScheduleDays: []
     });
 
     updateChore(fixtureDb, "chore-1", input);
@@ -127,7 +132,9 @@ describe("updateChore", () => {
       description: "Quick reset",
       pointValue: 7,
       assigneeChildId: "child-2",
-      scheduledDays: [1, 6]
+      scheduledDays: [1, 6],
+      assignments: [{ childId: "child-2", days: [1, 6] }],
+      unassignedScheduleDays: []
     });
 
     const offDayDashboard = getDashboardData(fixtureDb, "2026-04-28", 2);
@@ -210,6 +217,13 @@ describe("assignChore", () => {
       `
     ).run();
 
+    fixtureDb.prepare(
+      `
+        INSERT INTO chore_assignments (id, chore_id, child_id, day_of_week)
+        VALUES ('assignment-older-4', 'chore-older', 'child-2', 4)
+      `
+    ).run();
+
     assignChore(fixtureDb, "chore-new", "child-2");
 
     const dashboard = getDashboardData(fixtureDb, "2026-04-23", 4);
@@ -241,7 +255,7 @@ describe("completeChore and uncompleteChore", () => {
       `
     ).run({ now });
 
-    expect(() => completeChore(fixtureDb, "chore-1", "2026-04-23", 4)).toThrow(
+    expect(() => completeChore(fixtureDb, "chore-1", "child-1", "2026-04-23", 4)).toThrow(
       ChoreValidationError
     );
   });
@@ -266,13 +280,20 @@ describe("completeChore and uncompleteChore", () => {
       `
     ).run({ now });
 
-    completeChore(fixtureDb, "chore-1", "2026-04-23", 4);
+    fixtureDb.prepare(
+      `
+        INSERT INTO chore_assignments (id, chore_id, child_id, day_of_week)
+        VALUES ('assignment-1', 'chore-1', 'child-1', 4)
+      `
+    ).run();
+
+    completeChore(fixtureDb, "chore-1", "child-1", "2026-04-23", 4);
 
     let dashboard = getDashboardData(fixtureDb, "2026-04-23", 4);
     expect(dashboard.children[0]?.totalPoints).toBe(5);
     expect(dashboard.children[0]?.chores[0]?.isCompletedToday).toBe(true);
 
-    uncompleteChore(fixtureDb, "chore-1", "2026-04-23");
+    uncompleteChore(fixtureDb, "chore-1", "child-1", "2026-04-23");
 
     dashboard = getDashboardData(fixtureDb, "2026-04-23", 4);
     expect(dashboard.children[0]?.totalPoints).toBe(0);

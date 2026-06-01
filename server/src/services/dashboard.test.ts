@@ -52,8 +52,8 @@ describe("getChildPointTotals", () => {
     const totals = getChildPointTotals(fixtureDb);
 
     expect(totals).toEqual([
-      { childId: "child-1", name: "Sample Child 1", totalPoints: 3 },
-      { childId: "child-2", name: "Sample Child 2", totalPoints: 0 }
+      { childId: "child-1", name: "Sample Child 1", avatarKey: null, totalPoints: 3 },
+      { childId: "child-2", name: "Sample Child 2", avatarKey: null, totalPoints: 0 }
     ]);
   });
 });
@@ -75,11 +75,25 @@ describe("getVisibleChoresForDate", () => {
           created_at,
           updated_at
         ) VALUES
-          ('always', 'Always On', 'Visible daily', 3, 'child-1', 1, @now, @now),
+          ('always', 'Always On', 'Visible daily', 3, NULL, 1, @now, @now),
           ('thu-only', 'Thursday Job', 'Visible on Thursdays', 4, NULL, 1, @now, @now),
           ('mon-only', 'Monday Job', 'Visible on Mondays', 5, NULL, 1, @now, @now)
       `
     ).run({ now });
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chore_assignments (id, chore_id, child_id, day_of_week)
+        VALUES
+          ('always-child-1-0', 'always', 'child-1', 0),
+          ('always-child-1-1', 'always', 'child-1', 1),
+          ('always-child-1-2', 'always', 'child-1', 2),
+          ('always-child-1-3', 'always', 'child-1', 3),
+          ('always-child-1-4', 'always', 'child-1', 4),
+          ('always-child-1-5', 'always', 'child-1', 5),
+          ('always-child-1-6', 'always', 'child-1', 6)
+      `
+    ).run();
 
     fixtureDb.prepare(
       `
@@ -114,9 +128,16 @@ describe("getVisibleChoresForDate", () => {
           created_at,
           updated_at
         ) VALUES
-          ('dishwasher', 'Empty dishwasher', 'Kitchen reset', 6, 'child-2', 1, @now, @now)
+          ('dishwasher', 'Empty dishwasher', 'Kitchen reset', 6, NULL, 1, @now, @now)
       `
     ).run({ now });
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chore_assignments (id, chore_id, child_id, day_of_week)
+        VALUES ('dishwasher-child-2-4', 'dishwasher', 'child-2', 4)
+      `
+    ).run();
 
     fixtureDb.prepare(
       `
@@ -145,7 +166,9 @@ describe("getVisibleChoresForDate", () => {
         pointValue: 6,
         assigneeChildId: "child-2",
         isCompletedToday: true,
-        scheduledDays: []
+        scheduledDays: [4],
+        assignments: [{ childId: "child-2", days: [4] }],
+        unassignedScheduleDays: []
       }
     ]);
   });
@@ -168,11 +191,27 @@ describe("getDashboardData", () => {
           created_at,
           updated_at
         ) VALUES
-          ('assigned-1', 'Feed cat', 'Kitchen', 4, 'child-1', 1, @now, @now),
-          ('assigned-2', 'Laundry', 'Bedroom', 7, 'child-2', 1, @now, @now),
+          ('assigned-1', 'Feed cat', 'Kitchen', 4, NULL, 1, @now, @now),
+          ('assigned-2', 'Laundry', 'Bedroom', 7, NULL, 1, @now, @now),
           ('unassigned-1', 'Recycling', 'Outside', 8, NULL, 1, @now, @now)
       `
     ).run({ now });
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chore_assignments (id, chore_id, child_id, day_of_week)
+        VALUES
+          ('assigned-1-child-1-4', 'assigned-1', 'child-1', 4),
+          ('assigned-2-child-2-4', 'assigned-2', 'child-2', 4)
+      `
+    ).run();
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chore_schedule_days (id, chore_id, day_of_week)
+        VALUES ('unassigned-1-4', 'unassigned-1', 4)
+      `
+    ).run();
 
     fixtureDb.prepare(
       `
@@ -200,6 +239,7 @@ describe("getDashboardData", () => {
       {
         id: "child-1",
         name: "Sample Child 1",
+        avatarKey: null,
         totalPoints: 10,
         chores: [
           {
@@ -209,13 +249,16 @@ describe("getDashboardData", () => {
             pointValue: 4,
             assigneeChildId: "child-1",
             isCompletedToday: false,
-            scheduledDays: []
+            scheduledDays: [4],
+            assignments: [{ childId: "child-1", days: [4] }],
+            unassignedScheduleDays: []
           }
         ]
       },
       {
         id: "child-2",
         name: "Sample Child 2",
+        avatarKey: null,
         totalPoints: 0,
         chores: [
           {
@@ -225,10 +268,47 @@ describe("getDashboardData", () => {
             pointValue: 7,
             assigneeChildId: "child-2",
             isCompletedToday: false,
-            scheduledDays: []
+            scheduledDays: [4],
+            assignments: [{ childId: "child-2", days: [4] }],
+            unassignedScheduleDays: []
           }
         ]
       }
     ]);
+  });
+
+  it("shows the same chore under multiple children on the same weekday", () => {
+    const fixtureDb = createBaseFixture();
+    const now = "2026-04-23T08:00:00.000Z";
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chores (
+          id,
+          title,
+          description,
+          point_value,
+          assignee_child_id,
+          is_active,
+          created_at,
+          updated_at
+        ) VALUES
+          ('workbooks', 'Workbook pages', 'Math and reading', 5, NULL, 1, @now, @now)
+      `
+    ).run({ now });
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chore_assignments (id, chore_id, child_id, day_of_week)
+        VALUES
+          ('workbooks-child-1-4', 'workbooks', 'child-1', 4),
+          ('workbooks-child-2-4', 'workbooks', 'child-2', 4)
+      `
+    ).run();
+
+    const dashboard = getDashboardData(fixtureDb, "2026-04-23", 4);
+
+    expect(dashboard.children[0]?.chores.map((chore) => chore.id)).toEqual(["workbooks"]);
+    expect(dashboard.children[1]?.chores.map((chore) => chore.id)).toEqual(["workbooks"]);
   });
 });

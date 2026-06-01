@@ -1,7 +1,6 @@
-import { CalendarDays, History, Plus, Settings, Sparkles, Wrench, X } from "lucide-react";
-import { useState } from "react";
+import { CalendarDays, ChevronLeft, ChevronRight, History, Settings, Wrench, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type {
-  AssignChildOption,
   Child,
   ChildInput,
   CreateChoreInput,
@@ -19,6 +18,8 @@ import { BoardLane } from "../components/BoardLane";
 import { ChoreDetailModal } from "../components/ChoreDetailModal";
 import { HistoryModal } from "../components/HistoryModal";
 import { ManageModal } from "../components/ManageModal";
+import { AvatarPickerModal } from "../components/AvatarPickerModal";
+import { QuestBackground } from "../components/QuestBackground";
 import { RewardModal } from "../components/RewardModal";
 import { SpaceBackground } from "../components/SpaceBackground";
 
@@ -31,11 +32,14 @@ type LaneItem = {
   done?: boolean;
   assigneeChildId: string | null;
   scheduledDays: number[];
+  assignments: VisibleChore["assignments"];
+  unassignedScheduleDays: number[];
 };
 
 type Lane = {
   id: string;
   name: string;
+  avatarKey?: string | null;
   accent: string;
   subtitle: string;
   items: LaneItem[];
@@ -55,6 +59,7 @@ type DashboardPageProps = {
   onCloseAddModal: () => void;
   onSubmitChore: (input: CreateChoreInput) => Promise<void>;
   detailModalChoreId: string | null;
+  detailAssignmentChildId: string | null;
   detailSubmitting: boolean;
   detailError: string | null;
   highlightedChoreId: string | null;
@@ -65,9 +70,17 @@ type DashboardPageProps = {
   manageLoading: boolean;
   manageSaving: boolean;
   manageError: string | null;
+  theme: "default" | "space" | "quest";
+  onToggleTheme: () => void;
   onOpenDetails: (id: string) => void;
   onOpenManage: () => void;
   onCloseManage: () => void;
+  avatarPickerChild: Child | null;
+  avatarPickerSaving: boolean;
+  avatarPickerError: string | null;
+  onOpenAvatarPicker: (child: Child) => void;
+  onCloseAvatarPicker: () => void;
+  onSelectAvatar: (avatarKey: string) => Promise<void>;
   onCreateChild: (input: ChildInput) => Promise<void>;
   onUpdateChild: (childId: string, input: ChildInput) => Promise<void>;
   onCreateReward: (input: RewardInput) => Promise<void>;
@@ -76,9 +89,8 @@ type DashboardPageProps = {
   onCloseDetails: () => void;
   onSubmitChoreUpdate: (id: string, input: UpdateChoreInput) => Promise<void>;
   onDeleteChore: (id: string) => Promise<void>;
-  onAssignChore: (id: string, childId: string) => Promise<void>;
   assignmentPendingChoreId: string | null;
-  onToggleComplete: (id: string, done: boolean) => Promise<void>;
+  onToggleComplete: (id: string, done: boolean, childId: string | null) => Promise<void>;
   historyModalOpen: boolean;
   historyEntries: HistoryEntry[];
   historyLoading: boolean;
@@ -98,8 +110,6 @@ type DashboardPageProps = {
   rewardsLoading: boolean;
   rewardsError: string | null;
   redeemResult: RedeemRewardResult | null;
-  theme: "default" | "space";
-  onToggleTheme: () => void;
   onOpenRewards: (childId: string) => void;
   onCloseRewards: () => void;
   onRedeemReward: (rewardId: string) => Promise<void>;
@@ -107,6 +117,11 @@ type DashboardPageProps = {
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const accentPalette = ["var(--lane-1)", "var(--lane-2)", "var(--lane-3)"];
+const themeLabels = {
+  default: "Default",
+  space: "Space",
+  quest: "Quest"
+};
 
 function formatSchedule(days: number[]) {
   if (days.length === 0) {
@@ -125,7 +140,9 @@ function toLaneItem(chore: VisibleChore): LaneItem {
     meta: chore.isCompletedToday ? "Completed today" : formatSchedule(chore.scheduledDays),
     done: chore.isCompletedToday,
     assigneeChildId: chore.assigneeChildId,
-    scheduledDays: chore.scheduledDays
+    scheduledDays: chore.scheduledDays,
+    assignments: chore.assignments,
+    unassignedScheduleDays: chore.unassignedScheduleDays
   };
 }
 
@@ -146,6 +163,7 @@ function buildLanes(data: DashboardResponse | null): Lane[] {
     ...data.children.map((child, index) => ({
       id: child.id,
       name: child.name,
+      avatarKey: child.avatarKey,
       accent: accentPalette[index % accentPalette.length],
       subtitle: `${child.totalPoints} pts`,
       items: child.chores.map(toLaneItem),
@@ -215,6 +233,7 @@ function DebugDock({
         <header className="debug-panel-header">
           <div className="debug-panel-title">
             <strong>Debug tools</strong>
+            <span>Phase 14</span>
             <span>{debugPreview}</span>
           </div>
           <button
@@ -283,6 +302,7 @@ export function DashboardPage({
   onCloseAddModal,
   onSubmitChore,
   detailModalChoreId,
+  detailAssignmentChildId,
   detailSubmitting,
   detailError,
   highlightedChoreId,
@@ -293,9 +313,17 @@ export function DashboardPage({
   manageLoading,
   manageSaving,
   manageError,
+  theme,
+  onToggleTheme,
   onOpenDetails,
   onOpenManage,
   onCloseManage,
+  avatarPickerChild,
+  avatarPickerSaving,
+  avatarPickerError,
+  onOpenAvatarPicker,
+  onCloseAvatarPicker,
+  onSelectAvatar,
   onCreateChild,
   onUpdateChild,
   onCreateReward,
@@ -304,7 +332,6 @@ export function DashboardPage({
   onCloseDetails,
   onSubmitChoreUpdate,
   onDeleteChore,
-  onAssignChore,
   assignmentPendingChoreId,
   onToggleComplete,
   historyModalOpen,
@@ -326,15 +353,13 @@ export function DashboardPage({
   rewardsLoading,
   rewardsError,
   redeemResult,
-  theme,
-  onToggleTheme,
   onOpenRewards,
   onCloseRewards,
   onRedeemReward
 }: DashboardPageProps) {
+  const boardRef = useRef<HTMLElement | null>(null);
+  const [boardScrollState, setBoardScrollState] = useState({ canScrollLeft: false, canScrollRight: false });
   const lanes = buildLanes(dashboardData);
-  const assignOptions: AssignChildOption[] =
-    dashboardData?.children.map((child) => ({ id: child.id, name: child.name })) ?? [];
   const rewardChild = dashboardData?.children.find((child) => child.id === rewardModalChildId) ?? null;
   const allChores = lanes.flatMap((lane) => lane.items);
   const detailLaneItem = allChores.find((item) => item.id === detailModalChoreId) ?? null;
@@ -346,22 +371,51 @@ export function DashboardPage({
         pointValue: detailLaneItem.points,
         assigneeChildId: detailLaneItem.assigneeChildId,
         isCompletedToday: detailLaneItem.done ?? false,
-        scheduledDays: detailLaneItem.scheduledDays
+        scheduledDays: detailLaneItem.scheduledDays,
+        assignments: detailLaneItem.assignments,
+        unassignedScheduleDays: detailLaneItem.unassignedScheduleDays
       }
     : null;
+  const scrollBoard = (direction: -1 | 1) => {
+    const board = boardRef.current;
+    if (!board) {
+      return;
+    }
+
+    board.scrollBy({
+      left: direction * Math.max(280, Math.round(board.clientWidth * 0.72)),
+      behavior: "smooth"
+    });
+  };
+  const updateBoardScrollState = () => {
+    const board = boardRef.current;
+    if (!board) {
+      setBoardScrollState({ canScrollLeft: false, canScrollRight: false });
+      return;
+    }
+
+    const maxScrollLeft = board.scrollWidth - board.clientWidth;
+    setBoardScrollState({
+      canScrollLeft: board.scrollLeft > 1,
+      canScrollRight: board.scrollLeft < maxScrollLeft - 1
+    });
+  };
+
+  useEffect(() => {
+    updateBoardScrollState();
+    window.addEventListener("resize", updateBoardScrollState);
+    return () => window.removeEventListener("resize", updateBoardScrollState);
+  }, [lanes.length, loading, error]);
 
   return (
     <div className="app-shell">
       <SpaceBackground />
+      <QuestBackground />
       <header className="topbar">
         <div className="topbar-copy">
           <div className="title-block">
-            <p className="eyebrow">Phase 14</p>
-            <h1>Chore Tracker</h1>
+            <h1>Quest Board</h1>
           </div>
-          <p className="subtitle">
-            A kiosk board for daily chores, point totals, and fast reward access.
-          </p>
         </div>
 
         <div className="topbar-tools">
@@ -374,36 +428,10 @@ export function DashboardPage({
             <Settings aria-hidden="true" />
             <span className="button-label-compact">Manage</span>
           </button>
-          <button
-            className="text-button toolbar-button"
-            type="button"
-            aria-label="History"
-            onClick={onOpenHistory}
-          >
-            <History aria-hidden="true" />
-            <span className="button-label-compact">History</span>
-          </button>
-          <button
-            className="text-button toolbar-button"
-            type="button"
-            aria-label="Toggle theme"
-            onClick={onToggleTheme}
-          >
-            <Sparkles aria-hidden="true" />
-            <span className="button-label-compact">{theme === "space" ? "Space" : "Default"}</span>
-          </button>
           <div className="board-date" aria-label="Current board date">
             <CalendarDays aria-hidden="true" />
             {formatBoardDate(dashboardData)}
           </div>
-          <button
-            className="icon-button"
-            type="button"
-            aria-label="Add chore"
-            onClick={onOpenAddModal}
-          >
-            <Plus aria-hidden="true" />
-          </button>
         </div>
       </header>
 
@@ -413,55 +441,88 @@ export function DashboardPage({
         {debugTimeEnabled && <span className="status-meta">{debugPreview}</span>}
       </div>
 
-      <main className="board" aria-label="Chore board">
-        {loading && (
-          <>
-            <section className="lane lane-skeleton" aria-hidden="true">
-              <div className="skeleton skeleton-title" />
-              <div className="skeleton skeleton-subtitle" />
-              <div className="skeleton-card" />
-              <div className="skeleton-card" />
-            </section>
-            <section className="lane lane-skeleton" aria-hidden="true">
-              <div className="skeleton skeleton-title" />
-              <div className="skeleton skeleton-subtitle" />
-              <div className="skeleton-card" />
-              <div className="skeleton-card" />
-            </section>
-          </>
+      <div className="board-shell">
+        {boardScrollState.canScrollLeft && (
+          <button
+            className="scroll-button board-scroll-button board-scroll-button-left"
+            type="button"
+            aria-label="Scroll lanes left"
+            onClick={() => scrollBoard(-1)}
+          >
+            <ChevronLeft aria-hidden="true" />
+          </button>
         )}
+        <main className="board" aria-label="Chore board" ref={boardRef} onScroll={updateBoardScrollState}>
+          {loading && (
+            <>
+              <section className="lane lane-skeleton" aria-hidden="true">
+                <div className="skeleton skeleton-title" />
+                <div className="skeleton skeleton-subtitle" />
+                <div className="skeleton-card" />
+                <div className="skeleton-card" />
+              </section>
+              <section className="lane lane-skeleton" aria-hidden="true">
+                <div className="skeleton skeleton-title" />
+                <div className="skeleton skeleton-subtitle" />
+                <div className="skeleton-card" />
+                <div className="skeleton-card" />
+              </section>
+            </>
+          )}
 
-        {!loading && !error && lanes.length === 0 && (
-          <section className="lane lane-empty">
-            <p className="empty-copy">No dashboard data found yet.</p>
-          </section>
+          {!loading && !error && lanes.length === 0 && (
+            <section className="lane lane-empty">
+              <p className="empty-copy">No dashboard data found yet.</p>
+            </section>
+          )}
+
+          {!loading &&
+            !error &&
+            lanes.map((lane) => (
+              <BoardLane
+                key={lane.id}
+                id={lane.id}
+                name={lane.name}
+                avatarKey={lane.avatarKey}
+                accent={lane.accent}
+                subtitle={lane.subtitle}
+                items={lane.items}
+                emptyMessage={lane.emptyMessage}
+                showRewards={lane.showRewards}
+                onOpenRewards={lane.showRewards ? () => onOpenRewards(lane.id) : undefined}
+                onOpenAddChore={lane.id === "unassigned" ? onOpenAddModal : undefined}
+                onOpenAvatarPicker={
+                  lane.showRewards
+                    ? () =>
+                        onOpenAvatarPicker({
+                          id: lane.id,
+                          name: lane.name,
+                          avatarKey: lane.avatarKey ?? null,
+                          sortOrder: 0
+                        })
+                    : undefined
+                }
+                onDelete={onDeleteChore}
+                onToggleComplete={onToggleComplete}
+                assignmentPendingChoreId={
+                  lane.id === "unassigned" ? assignmentPendingChoreId : undefined
+                }
+                highlightedChoreId={highlightedChoreId}
+                onOpenDetails={onOpenDetails}
+              />
+            ))}
+        </main>
+        {boardScrollState.canScrollRight && (
+          <button
+            className="scroll-button board-scroll-button board-scroll-button-right"
+            type="button"
+            aria-label="Scroll lanes right"
+            onClick={() => scrollBoard(1)}
+          >
+            <ChevronRight aria-hidden="true" />
+          </button>
         )}
-
-        {!loading &&
-          !error &&
-          lanes.map((lane) => (
-            <BoardLane
-              key={lane.id}
-              id={lane.id}
-              name={lane.name}
-              accent={lane.accent}
-              subtitle={lane.subtitle}
-              items={lane.items}
-              emptyMessage={lane.emptyMessage}
-              showRewards={lane.showRewards}
-              onOpenRewards={lane.showRewards ? () => onOpenRewards(lane.id) : undefined}
-              onDelete={onDeleteChore}
-              onToggleComplete={onToggleComplete}
-              assignOptions={lane.id === "unassigned" ? assignOptions : undefined}
-              onAssign={lane.id === "unassigned" ? onAssignChore : undefined}
-              assignmentPendingChoreId={
-                lane.id === "unassigned" ? assignmentPendingChoreId : undefined
-              }
-              highlightedChoreId={highlightedChoreId}
-              onOpenDetails={onOpenDetails}
-            />
-          ))}
-      </main>
+      </div>
 
       {addModalOpen && dashboardData && (
         <AddChoreModal
@@ -502,11 +563,27 @@ export function DashboardPage({
           error={manageError}
           saving={manageSaving}
           onClose={onCloseManage}
+          onOpenAvatarPicker={onOpenAvatarPicker}
+          themeLabel={themeLabels[theme]}
+          onToggleTheme={onToggleTheme}
           onCreateChild={onCreateChild}
           onUpdateChild={onUpdateChild}
           onCreateReward={onCreateReward}
           onUpdateReward={onUpdateReward}
           onDeactivateReward={onDeactivateReward}
+        />
+      )}
+
+      {avatarPickerChild && (
+        <AvatarPickerModal
+          childName={avatarPickerChild.name}
+          selectedAvatarKey={avatarPickerChild.avatarKey}
+          saving={avatarPickerSaving}
+          error={avatarPickerError}
+          onClose={onCloseAvatarPicker}
+          onSelect={(avatarKey) => {
+            void onSelectAvatar(avatarKey);
+          }}
         />
       )}
 
@@ -516,23 +593,35 @@ export function DashboardPage({
           children={dashboardData.children}
           submitting={detailSubmitting}
           error={detailError}
+          initialAssignmentChildId={detailAssignmentChildId}
+          currentDayOfWeek={dashboardData.dayOfWeek}
           onClose={onCloseDetails}
           onDelete={onDeleteChore}
           onSubmit={onSubmitChoreUpdate}
         />
       )}
 
-      <DebugDock
-        health={health}
-        debugTimeEnabled={debugTimeEnabled}
-        debugDateInput={debugDateInput}
-        debugTimeInput={debugTimeInput}
-        debugPreview={debugPreview}
-        onToggleDebugTime={onToggleDebugTime}
-        onChangeDebugDate={onChangeDebugDate}
-        onChangeDebugTime={onChangeDebugTime}
-        onResetDebugTime={onResetDebugTime}
-      />
+      <div className="floating-tools" aria-label="Quick tools">
+        <button
+          className="floating-tool-button"
+          type="button"
+          aria-label="History"
+          onClick={onOpenHistory}
+        >
+          <History aria-hidden="true" />
+        </button>
+        <DebugDock
+          health={health}
+          debugTimeEnabled={debugTimeEnabled}
+          debugDateInput={debugDateInput}
+          debugTimeInput={debugTimeInput}
+          debugPreview={debugPreview}
+          onToggleDebugTime={onToggleDebugTime}
+          onChangeDebugDate={onChangeDebugDate}
+          onChangeDebugTime={onChangeDebugTime}
+          onResetDebugTime={onResetDebugTime}
+        />
+      </div>
     </div>
   );
 }

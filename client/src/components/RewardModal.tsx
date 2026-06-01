@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle2, X, Zap } from "lucide-react";
 import type { DashboardChild, RedeemRewardResult, Reward } from "../types";
+import { useModalDismiss } from "./modalDismiss";
 
 type RewardModalProps = {
   child: DashboardChild;
@@ -22,13 +23,14 @@ export function RewardModal({
   onRedeem
 }: RewardModalProps) {
   const [selectedRewardId, setSelectedRewardId] = useState<string | null>(null);
+  const { backdropProps, closeButtonProps } = useModalDismiss(onClose);
   const selectedReward = useMemo(
     () => rewards.find((reward) => reward.id === selectedRewardId) ?? null,
     [rewards, selectedRewardId]
   );
 
   return (
-    <div className="modal-backdrop" role="presentation" onClick={onClose}>
+    <div className="modal-backdrop" {...backdropProps}>
       <section
         className="modal"
         role="dialog"
@@ -41,7 +43,7 @@ export function RewardModal({
             <p className="modal-eyebrow">Rewards</p>
             <h2 id="reward-modal-title">{child.name}</h2>
           </div>
-          <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
+          <button className="modal-close" type="button" aria-label="Close" {...closeButtonProps}>
             <X aria-hidden="true" />
           </button>
         </header>
@@ -78,17 +80,15 @@ export function RewardModal({
           <div className="reward-detail">
             {!redeemResult && (
               <>
-                <button
-                  className="secondary-button"
-                  type="button"
-                  onClick={() => setSelectedRewardId(null)}
-                >
-                  <ArrowLeft aria-hidden="true" />
-                  Back
-                </button>
                 <div className="reward-detail-copy">
-                  <h3>{selectedReward.name}</h3>
-                  <p>{selectedReward.description}</p>
+                  <div>
+                    <h3>{selectedReward.name}</h3>
+                    <p>{selectedReward.description}</p>
+                  </div>
+                  <span className="points-pill reward-detail-cost">
+                    <Zap aria-hidden="true" />
+                    {selectedReward.cost} pts
+                  </span>
                 </div>
                 <div className="reward-equation">
                   <span>{child.totalPoints}</span>
@@ -100,18 +100,29 @@ export function RewardModal({
 
                 {error && <p className="form-error">{error}</p>}
 
-                <div className="modal-actions">
-                  <button className="secondary-button" type="button" onClick={onClose}>
-                    Cancel
-                  </button>
+                <div className="modal-actions reward-detail-actions">
                   <button
-                    className="primary-button"
+                    className="secondary-button"
                     type="button"
                     disabled={submitting}
-                    onClick={() => void onRedeem(selectedReward.id)}
+                    onClick={() => setSelectedRewardId(null)}
                   >
-                    {submitting ? "Redeeming..." : "Confirm"}
+                    <ArrowLeft aria-hidden="true" />
+                    Back
                   </button>
+                  <div className="reward-confirm-actions">
+                    <button className="secondary-button" type="button" disabled={submitting} onClick={onClose}>
+                      Cancel
+                    </button>
+                    <button
+                      className="primary-button"
+                      type="button"
+                      disabled={submitting}
+                      onClick={() => void onRedeem(selectedReward.id)}
+                    >
+                      {submitting ? "Redeeming..." : "Confirm"}
+                    </button>
+                  </div>
                 </div>
               </>
             )}

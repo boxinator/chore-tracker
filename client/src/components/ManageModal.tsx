@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
-import { X } from "lucide-react";
+import { Palette, X } from "lucide-react";
+import { Avatar } from "./Avatar";
 import type { Child, ChildInput, Reward, RewardInput } from "../types";
+import { useModalDismiss } from "./modalDismiss";
 
 type ManageModalProps = {
   children: Child[];
@@ -8,7 +10,10 @@ type ManageModalProps = {
   loading: boolean;
   error: string | null;
   saving: boolean;
+  themeLabel: string;
   onClose: () => void;
+  onOpenAvatarPicker: (child: Child) => void;
+  onToggleTheme: () => void;
   onCreateChild: (input: ChildInput) => Promise<void>;
   onUpdateChild: (childId: string, input: ChildInput) => Promise<void>;
   onCreateReward: (input: RewardInput) => Promise<void>;
@@ -19,8 +24,8 @@ type ManageModalProps = {
 type TabKey = "children" | "rewards";
 
 const tabs: Array<{ key: TabKey; label: string }> = [
-  { key: "children", label: "Kids" },
-  { key: "rewards", label: "Rewards" }
+  { key: "rewards", label: "Rewards" },
+  { key: "children", label: "People" }
 ];
 
 export function ManageModal({
@@ -29,14 +34,18 @@ export function ManageModal({
   loading,
   error,
   saving,
+  themeLabel,
   onClose,
+  onOpenAvatarPicker,
+  onToggleTheme,
   onCreateChild,
   onUpdateChild,
   onCreateReward,
   onUpdateReward,
   onDeactivateReward
 }: ManageModalProps) {
-  const [activeTab, setActiveTab] = useState<TabKey>("children");
+  const [activeTab, setActiveTab] = useState<TabKey>("rewards");
+  const { backdropProps, closeButtonProps } = useModalDismiss(onClose);
   const [childDraftName, setChildDraftName] = useState("");
   const [editingChildId, setEditingChildId] = useState<string | null>(null);
   const [editingChildName, setEditingChildName] = useState("");
@@ -52,9 +61,9 @@ export function ManageModal({
   const inactiveRewards = useMemo(() => rewards.filter((reward) => !reward.isActive), [rewards]);
 
   return (
-    <div className="modal-backdrop" role="presentation" onClick={onClose}>
+    <div className="modal-backdrop" {...backdropProps}>
       <section
-        className="modal modal-wide"
+        className="modal modal-wide manage-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="manage-modal-title"
@@ -65,9 +74,20 @@ export function ManageModal({
             <p className="modal-eyebrow">Manage</p>
             <h2 id="manage-modal-title">Household setup</h2>
           </div>
-          <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
-            <X aria-hidden="true" />
-          </button>
+          <div className="manage-header-actions">
+            <button
+              className="secondary-button manage-theme-button"
+              type="button"
+              aria-label={`Change theme, current theme is ${themeLabel}`}
+              onClick={onToggleTheme}
+            >
+              <Palette aria-hidden="true" />
+              <span>{themeLabel}</span>
+            </button>
+            <button className="modal-close" type="button" aria-label="Close" {...closeButtonProps}>
+              <X aria-hidden="true" />
+            </button>
+          </div>
         </header>
 
         <div className="segmented-control" role="tablist" aria-label="Management sections">
@@ -92,8 +112,8 @@ export function ManageModal({
           <div className="manage-grid">
             <section className="manage-section">
               <header className="manage-section-header">
-                <h3>Kids</h3>
-                <p>Names and board columns update right away.</p>
+                <h3>People</h3>
+                <p>Family members appear as board columns.</p>
               </header>
 
               <div className="manage-list">
@@ -103,9 +123,24 @@ export function ManageModal({
                     <article key={child.id} className="manage-item">
                       {!editing && (
                         <>
-                          <div className="manage-copy">
-                            <strong>{child.name}</strong>
-                            <p>Column {child.sortOrder}</p>
+                          <div className="manage-child-main">
+                            <button
+                              className="avatar-button"
+                              type="button"
+                              aria-label={`Change ${child.name} avatar`}
+                              onClick={() => onOpenAvatarPicker(child)}
+                            >
+                              <Avatar
+                                avatarKey={child.avatarKey}
+                                name={child.name}
+                                size="lg"
+                                interactive
+                              />
+                            </button>
+                            <div className="manage-copy">
+                              <strong>{child.name}</strong>
+                              <p>Column {child.sortOrder}</p>
+                            </div>
                           </div>
                           <button
                             className="secondary-button"
@@ -159,8 +194,8 @@ export function ManageModal({
 
             <section className="manage-section">
               <header className="manage-section-header">
-                <h3>Add kid</h3>
-                <p>New kids appear as a fresh column on the board.</p>
+                <h3>Add person</h3>
+                <p>Add kids, parents, or anyone who needs a board column.</p>
               </header>
               <form
                 className="modal-form manage-form"
@@ -182,9 +217,9 @@ export function ManageModal({
                   <button
                     className="primary-button"
                     type="submit"
-                    disabled={saving || childDraftName.trim().length === 0}
-                  >
-                    Add Kid
+                  disabled={saving || childDraftName.trim().length === 0}
+                >
+                    Add Person
                   </button>
                 </div>
               </form>

@@ -8,9 +8,10 @@
 .modal-close,
 .toolbar-button,
 .debug-float-button,
+.floating-tool-button,
+.scroll-button,
 .segment-button,
-.weekday-button,
-.assign-chip {
+.weekday-button {
   border: 0;
   display: inline-flex;
   align-items: center;
@@ -37,13 +38,16 @@
 .icon-text-button:hover,
 .modal-close:hover,
 .toolbar-button:hover,
-.debug-float-button:hover {
+.debug-float-button:hover,
+.floating-tool-button:hover,
+.scroll-button:hover {
   transform: translateY(-1px);
 }
 
 .icon-button,
 .modal-close,
-.debug-float-button {
+.debug-float-button,
+.scroll-button {
   width: 48px;
   min-width: 48px;
   aspect-ratio: 1;
@@ -66,6 +70,8 @@
 .secondary-button svg,
 .primary-button svg,
 .debug-float-button svg,
+.floating-tool-button svg,
+.scroll-button svg,
 .board-date svg {
   width: 18px;
   height: 18px;
@@ -103,8 +109,7 @@
 .reward-button,
 .text-button,
 .toolbar-button,
-.segment-button,
-.assign-chip {
+.segment-button {
   max-width: 100%;
 }
 
@@ -113,8 +118,7 @@
 .icon-text-button span,
 .reward-button span,
 .text-button span,
-.toolbar-button span,
-.assign-chip span {
+.toolbar-button span {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -135,7 +139,8 @@
 
 .icon-text-button,
 .secondary-button,
-.modal-close {
+.modal-close,
+.scroll-button {
   background: rgba(125, 145, 180, 0.14);
   color: var(--color-accent-strong);
 }
@@ -158,7 +163,7 @@
 .primary-button:disabled,
 .secondary-button:disabled,
 .icon-text-button:disabled,
-.assign-chip:disabled {
+.scroll-button:disabled {
   opacity: 0.6;
 }
 
@@ -191,8 +196,7 @@
   .secondary-button,
   .icon-text-button,
   .reward-button,
-  .text-button,
-  .assign-chip {
+  .text-button {
     width: 100%;
   }
 

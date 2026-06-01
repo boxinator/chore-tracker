@@ -1,0 +1,1730 @@
+[
+  {
+    "id": "adventurer-01",
+    "style": "adventurer",
+    "genderOption": "girl",
+    "seed": "adventurer-Sunny-01",
+    "src": "/avatars/adventurer-01.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Sunny-01"
+  },
+  {
+    "id": "adventurer-02",
+    "style": "adventurer",
+    "genderOption": "boy",
+    "seed": "adventurer-Milo-02",
+    "src": "/avatars/adventurer-02.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Milo-02"
+  },
+  {
+    "id": "adventurer-03",
+    "style": "adventurer",
+    "genderOption": "girl",
+    "seed": "adventurer-Luna-03",
+    "src": "/avatars/adventurer-03.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Luna-03"
+  },
+  {
+    "id": "adventurer-04",
+    "style": "adventurer",
+    "genderOption": "boy",
+    "seed": "adventurer-Nova-04",
+    "src": "/avatars/adventurer-04.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Nova-04"
+  },
+  {
+    "id": "adventurer-05",
+    "style": "adventurer",
+    "genderOption": "girl",
+    "seed": "adventurer-Kai-05",
+    "src": "/avatars/adventurer-05.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Kai-05"
+  },
+  {
+    "id": "adventurer-06",
+    "style": "adventurer",
+    "genderOption": "boy",
+    "seed": "adventurer-Zoe-06",
+    "src": "/avatars/adventurer-06.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Zoe-06"
+  },
+  {
+    "id": "adventurer-07",
+    "style": "adventurer",
+    "genderOption": "girl",
+    "seed": "adventurer-Remy-07",
+    "src": "/avatars/adventurer-07.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Remy-07"
+  },
+  {
+    "id": "adventurer-08",
+    "style": "adventurer",
+    "genderOption": "boy",
+    "seed": "adventurer-Ivy-08",
+    "src": "/avatars/adventurer-08.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Ivy-08"
+  },
+  {
+    "id": "adventurer-09",
+    "style": "adventurer",
+    "genderOption": "girl",
+    "seed": "adventurer-Theo-09",
+    "src": "/avatars/adventurer-09.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Theo-09"
+  },
+  {
+    "id": "adventurer-10",
+    "style": "adventurer",
+    "genderOption": "boy",
+    "seed": "adventurer-Maya-10",
+    "src": "/avatars/adventurer-10.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Maya-10"
+  },
+  {
+    "id": "adventurer-11",
+    "style": "adventurer",
+    "genderOption": "girl",
+    "seed": "adventurer-Finn-11",
+    "src": "/avatars/adventurer-11.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Finn-11"
+  },
+  {
+    "id": "adventurer-12",
+    "style": "adventurer",
+    "genderOption": "boy",
+    "seed": "adventurer-Nia-12",
+    "src": "/avatars/adventurer-12.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Nia-12"
+  },
+  {
+    "id": "adventurer-13",
+    "style": "adventurer",
+    "genderOption": "girl",
+    "seed": "adventurer-Sample Child 2-13",
+    "src": "/avatars/adventurer-13.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Sample Child 2-13"
+  },
+  {
+    "id": "adventurer-14",
+    "style": "adventurer",
+    "genderOption": "boy",
+    "seed": "adventurer-Ruby-14",
+    "src": "/avatars/adventurer-14.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Ruby-14"
+  },
+  {
+    "id": "adventurer-15",
+    "style": "adventurer",
+    "genderOption": "girl",
+    "seed": "adventurer-Ezra-15",
+    "src": "/avatars/adventurer-15.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Ezra-15"
+  },
+  {
+    "id": "adventurer-16",
+    "style": "adventurer",
+    "genderOption": "boy",
+    "seed": "adventurer-Ada-16",
+    "src": "/avatars/adventurer-16.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Ada-16"
+  },
+  {
+    "id": "adventurer-17",
+    "style": "adventurer",
+    "genderOption": "girl",
+    "seed": "adventurer-Ollie-17",
+    "src": "/avatars/adventurer-17.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Ollie-17"
+  },
+  {
+    "id": "adventurer-18",
+    "style": "adventurer",
+    "genderOption": "boy",
+    "seed": "adventurer-Poppy-18",
+    "src": "/avatars/adventurer-18.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Poppy-18"
+  },
+  {
+    "id": "adventurer-19",
+    "style": "adventurer",
+    "genderOption": "girl",
+    "seed": "adventurer-Arlo-19",
+    "src": "/avatars/adventurer-19.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Arlo-19"
+  },
+  {
+    "id": "adventurer-20",
+    "style": "adventurer",
+    "genderOption": "boy",
+    "seed": "adventurer-Cora-20",
+    "src": "/avatars/adventurer-20.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Cora-20"
+  },
+  {
+    "id": "adventurer-21",
+    "style": "adventurer",
+    "genderOption": "girl",
+    "seed": "adventurer-Juno-21",
+    "src": "/avatars/adventurer-21.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Juno-21"
+  },
+  {
+    "id": "adventurer-22",
+    "style": "adventurer",
+    "genderOption": "boy",
+    "seed": "adventurer-Max-22",
+    "src": "/avatars/adventurer-22.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Max-22"
+  },
+  {
+    "id": "adventurer-23",
+    "style": "adventurer",
+    "genderOption": "girl",
+    "seed": "adventurer-Ella-23",
+    "src": "/avatars/adventurer-23.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Ella-23"
+  },
+  {
+    "id": "adventurer-24",
+    "style": "adventurer",
+    "genderOption": "boy",
+    "seed": "adventurer-Riley-24",
+    "src": "/avatars/adventurer-24.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer/svg?seed=adventurer-Riley-24"
+  },
+  {
+    "id": "adventurer-neutral-01",
+    "style": "adventurer-neutral",
+    "genderOption": "girl",
+    "seed": "adventurer-neutral-Sunny-01",
+    "src": "/avatars/adventurer-neutral-01.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Sunny-01"
+  },
+  {
+    "id": "adventurer-neutral-02",
+    "style": "adventurer-neutral",
+    "genderOption": "boy",
+    "seed": "adventurer-neutral-Milo-02",
+    "src": "/avatars/adventurer-neutral-02.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Milo-02"
+  },
+  {
+    "id": "adventurer-neutral-03",
+    "style": "adventurer-neutral",
+    "genderOption": "girl",
+    "seed": "adventurer-neutral-Luna-03",
+    "src": "/avatars/adventurer-neutral-03.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Luna-03"
+  },
+  {
+    "id": "adventurer-neutral-04",
+    "style": "adventurer-neutral",
+    "genderOption": "boy",
+    "seed": "adventurer-neutral-Nova-04",
+    "src": "/avatars/adventurer-neutral-04.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Nova-04"
+  },
+  {
+    "id": "adventurer-neutral-05",
+    "style": "adventurer-neutral",
+    "genderOption": "girl",
+    "seed": "adventurer-neutral-Kai-05",
+    "src": "/avatars/adventurer-neutral-05.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Kai-05"
+  },
+  {
+    "id": "adventurer-neutral-06",
+    "style": "adventurer-neutral",
+    "genderOption": "boy",
+    "seed": "adventurer-neutral-Zoe-06",
+    "src": "/avatars/adventurer-neutral-06.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Zoe-06"
+  },
+  {
+    "id": "adventurer-neutral-07",
+    "style": "adventurer-neutral",
+    "genderOption": "girl",
+    "seed": "adventurer-neutral-Remy-07",
+    "src": "/avatars/adventurer-neutral-07.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Remy-07"
+  },
+  {
+    "id": "adventurer-neutral-08",
+    "style": "adventurer-neutral",
+    "genderOption": "boy",
+    "seed": "adventurer-neutral-Ivy-08",
+    "src": "/avatars/adventurer-neutral-08.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Ivy-08"
+  },
+  {
+    "id": "adventurer-neutral-09",
+    "style": "adventurer-neutral",
+    "genderOption": "girl",
+    "seed": "adventurer-neutral-Theo-09",
+    "src": "/avatars/adventurer-neutral-09.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Theo-09"
+  },
+  {
+    "id": "adventurer-neutral-10",
+    "style": "adventurer-neutral",
+    "genderOption": "boy",
+    "seed": "adventurer-neutral-Maya-10",
+    "src": "/avatars/adventurer-neutral-10.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Maya-10"
+  },
+  {
+    "id": "adventurer-neutral-11",
+    "style": "adventurer-neutral",
+    "genderOption": "girl",
+    "seed": "adventurer-neutral-Finn-11",
+    "src": "/avatars/adventurer-neutral-11.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Finn-11"
+  },
+  {
+    "id": "adventurer-neutral-12",
+    "style": "adventurer-neutral",
+    "genderOption": "boy",
+    "seed": "adventurer-neutral-Nia-12",
+    "src": "/avatars/adventurer-neutral-12.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Nia-12"
+  },
+  {
+    "id": "adventurer-neutral-13",
+    "style": "adventurer-neutral",
+    "genderOption": "girl",
+    "seed": "adventurer-neutral-Sample Child 2-13",
+    "src": "/avatars/adventurer-neutral-13.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Sample Child 2-13"
+  },
+  {
+    "id": "adventurer-neutral-14",
+    "style": "adventurer-neutral",
+    "genderOption": "boy",
+    "seed": "adventurer-neutral-Ruby-14",
+    "src": "/avatars/adventurer-neutral-14.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Ruby-14"
+  },
+  {
+    "id": "adventurer-neutral-15",
+    "style": "adventurer-neutral",
+    "genderOption": "girl",
+    "seed": "adventurer-neutral-Ezra-15",
+    "src": "/avatars/adventurer-neutral-15.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Ezra-15"
+  },
+  {
+    "id": "adventurer-neutral-16",
+    "style": "adventurer-neutral",
+    "genderOption": "boy",
+    "seed": "adventurer-neutral-Ada-16",
+    "src": "/avatars/adventurer-neutral-16.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Ada-16"
+  },
+  {
+    "id": "adventurer-neutral-17",
+    "style": "adventurer-neutral",
+    "genderOption": "girl",
+    "seed": "adventurer-neutral-Ollie-17",
+    "src": "/avatars/adventurer-neutral-17.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Ollie-17"
+  },
+  {
+    "id": "adventurer-neutral-18",
+    "style": "adventurer-neutral",
+    "genderOption": "boy",
+    "seed": "adventurer-neutral-Poppy-18",
+    "src": "/avatars/adventurer-neutral-18.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Poppy-18"
+  },
+  {
+    "id": "adventurer-neutral-19",
+    "style": "adventurer-neutral",
+    "genderOption": "girl",
+    "seed": "adventurer-neutral-Arlo-19",
+    "src": "/avatars/adventurer-neutral-19.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Arlo-19"
+  },
+  {
+    "id": "adventurer-neutral-20",
+    "style": "adventurer-neutral",
+    "genderOption": "boy",
+    "seed": "adventurer-neutral-Cora-20",
+    "src": "/avatars/adventurer-neutral-20.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Cora-20"
+  },
+  {
+    "id": "adventurer-neutral-21",
+    "style": "adventurer-neutral",
+    "genderOption": "girl",
+    "seed": "adventurer-neutral-Juno-21",
+    "src": "/avatars/adventurer-neutral-21.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Juno-21"
+  },
+  {
+    "id": "adventurer-neutral-22",
+    "style": "adventurer-neutral",
+    "genderOption": "boy",
+    "seed": "adventurer-neutral-Max-22",
+    "src": "/avatars/adventurer-neutral-22.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Max-22"
+  },
+  {
+    "id": "adventurer-neutral-23",
+    "style": "adventurer-neutral",
+    "genderOption": "girl",
+    "seed": "adventurer-neutral-Ella-23",
+    "src": "/avatars/adventurer-neutral-23.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Ella-23"
+  },
+  {
+    "id": "adventurer-neutral-24",
+    "style": "adventurer-neutral",
+    "genderOption": "boy",
+    "seed": "adventurer-neutral-Riley-24",
+    "src": "/avatars/adventurer-neutral-24.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=adventurer-neutral-Riley-24"
+  },
+  {
+    "id": "avataaars-01",
+    "style": "avataaars",
+    "genderOption": "girl",
+    "seed": "avataaars-Sunny-01",
+    "src": "/avatars/avataaars-01.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Sunny-01"
+  },
+  {
+    "id": "avataaars-02",
+    "style": "avataaars",
+    "genderOption": "boy",
+    "seed": "avataaars-Milo-02",
+    "src": "/avatars/avataaars-02.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Milo-02"
+  },
+  {
+    "id": "avataaars-03",
+    "style": "avataaars",
+    "genderOption": "girl",
+    "seed": "avataaars-Luna-03",
+    "src": "/avatars/avataaars-03.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Luna-03"
+  },
+  {
+    "id": "avataaars-04",
+    "style": "avataaars",
+    "genderOption": "boy",
+    "seed": "avataaars-Nova-04",
+    "src": "/avatars/avataaars-04.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Nova-04"
+  },
+  {
+    "id": "avataaars-05",
+    "style": "avataaars",
+    "genderOption": "girl",
+    "seed": "avataaars-Kai-05",
+    "src": "/avatars/avataaars-05.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Kai-05"
+  },
+  {
+    "id": "avataaars-06",
+    "style": "avataaars",
+    "genderOption": "boy",
+    "seed": "avataaars-Zoe-06",
+    "src": "/avatars/avataaars-06.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Zoe-06"
+  },
+  {
+    "id": "avataaars-07",
+    "style": "avataaars",
+    "genderOption": "girl",
+    "seed": "avataaars-Remy-07",
+    "src": "/avatars/avataaars-07.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Remy-07"
+  },
+  {
+    "id": "avataaars-08",
+    "style": "avataaars",
+    "genderOption": "boy",
+    "seed": "avataaars-Ivy-08",
+    "src": "/avatars/avataaars-08.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Ivy-08"
+  },
+  {
+    "id": "avataaars-09",
+    "style": "avataaars",
+    "genderOption": "girl",
+    "seed": "avataaars-Theo-09",
+    "src": "/avatars/avataaars-09.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Theo-09"
+  },
+  {
+    "id": "avataaars-10",
+    "style": "avataaars",
+    "genderOption": "boy",
+    "seed": "avataaars-Maya-10",
+    "src": "/avatars/avataaars-10.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Maya-10"
+  },
+  {
+    "id": "avataaars-11",
+    "style": "avataaars",
+    "genderOption": "girl",
+    "seed": "avataaars-Finn-11",
+    "src": "/avatars/avataaars-11.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Finn-11"
+  },
+  {
+    "id": "avataaars-12",
+    "style": "avataaars",
+    "genderOption": "boy",
+    "seed": "avataaars-Nia-12",
+    "src": "/avatars/avataaars-12.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Nia-12"
+  },
+  {
+    "id": "avataaars-13",
+    "style": "avataaars",
+    "genderOption": "girl",
+    "seed": "avataaars-Sample Child 2-13",
+    "src": "/avatars/avataaars-13.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Sample Child 2-13"
+  },
+  {
+    "id": "avataaars-14",
+    "style": "avataaars",
+    "genderOption": "boy",
+    "seed": "avataaars-Ruby-14",
+    "src": "/avatars/avataaars-14.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Ruby-14"
+  },
+  {
+    "id": "avataaars-15",
+    "style": "avataaars",
+    "genderOption": "girl",
+    "seed": "avataaars-Ezra-15",
+    "src": "/avatars/avataaars-15.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Ezra-15"
+  },
+  {
+    "id": "avataaars-16",
+    "style": "avataaars",
+    "genderOption": "boy",
+    "seed": "avataaars-Ada-16",
+    "src": "/avatars/avataaars-16.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Ada-16"
+  },
+  {
+    "id": "avataaars-17",
+    "style": "avataaars",
+    "genderOption": "girl",
+    "seed": "avataaars-Ollie-17",
+    "src": "/avatars/avataaars-17.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Ollie-17"
+  },
+  {
+    "id": "avataaars-18",
+    "style": "avataaars",
+    "genderOption": "boy",
+    "seed": "avataaars-Poppy-18",
+    "src": "/avatars/avataaars-18.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Poppy-18"
+  },
+  {
+    "id": "avataaars-19",
+    "style": "avataaars",
+    "genderOption": "girl",
+    "seed": "avataaars-Arlo-19",
+    "src": "/avatars/avataaars-19.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Arlo-19"
+  },
+  {
+    "id": "avataaars-20",
+    "style": "avataaars",
+    "genderOption": "boy",
+    "seed": "avataaars-Cora-20",
+    "src": "/avatars/avataaars-20.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Cora-20"
+  },
+  {
+    "id": "avataaars-21",
+    "style": "avataaars",
+    "genderOption": "girl",
+    "seed": "avataaars-Juno-21",
+    "src": "/avatars/avataaars-21.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Juno-21"
+  },
+  {
+    "id": "avataaars-22",
+    "style": "avataaars",
+    "genderOption": "boy",
+    "seed": "avataaars-Max-22",
+    "src": "/avatars/avataaars-22.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Max-22"
+  },
+  {
+    "id": "avataaars-23",
+    "style": "avataaars",
+    "genderOption": "girl",
+    "seed": "avataaars-Ella-23",
+    "src": "/avatars/avataaars-23.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Ella-23"
+  },
+  {
+    "id": "avataaars-24",
+    "style": "avataaars",
+    "genderOption": "boy",
+    "seed": "avataaars-Riley-24",
+    "src": "/avatars/avataaars-24.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/avataaars/svg?seed=avataaars-Riley-24"
+  },
+  {
+    "id": "big-ears-01",
+    "style": "big-ears",
+    "genderOption": "girl",
+    "seed": "big-ears-Sunny-01",
+    "src": "/avatars/big-ears-01.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Sunny-01"
+  },
+  {
+    "id": "big-ears-02",
+    "style": "big-ears",
+    "genderOption": "boy",
+    "seed": "big-ears-Milo-02",
+    "src": "/avatars/big-ears-02.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Milo-02"
+  },
+  {
+    "id": "big-ears-03",
+    "style": "big-ears",
+    "genderOption": "girl",
+    "seed": "big-ears-Luna-03",
+    "src": "/avatars/big-ears-03.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Luna-03"
+  },
+  {
+    "id": "big-ears-04",
+    "style": "big-ears",
+    "genderOption": "boy",
+    "seed": "big-ears-Nova-04",
+    "src": "/avatars/big-ears-04.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Nova-04"
+  },
+  {
+    "id": "big-ears-05",
+    "style": "big-ears",
+    "genderOption": "girl",
+    "seed": "big-ears-Kai-05",
+    "src": "/avatars/big-ears-05.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Kai-05"
+  },
+  {
+    "id": "big-ears-06",
+    "style": "big-ears",
+    "genderOption": "boy",
+    "seed": "big-ears-Zoe-06",
+    "src": "/avatars/big-ears-06.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Zoe-06"
+  },
+  {
+    "id": "big-ears-07",
+    "style": "big-ears",
+    "genderOption": "girl",
+    "seed": "big-ears-Remy-07",
+    "src": "/avatars/big-ears-07.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Remy-07"
+  },
+  {
+    "id": "big-ears-08",
+    "style": "big-ears",
+    "genderOption": "boy",
+    "seed": "big-ears-Ivy-08",
+    "src": "/avatars/big-ears-08.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Ivy-08"
+  },
+  {
+    "id": "big-ears-09",
+    "style": "big-ears",
+    "genderOption": "girl",
+    "seed": "big-ears-Theo-09",
+    "src": "/avatars/big-ears-09.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Theo-09"
+  },
+  {
+    "id": "big-ears-10",
+    "style": "big-ears",
+    "genderOption": "boy",
+    "seed": "big-ears-Maya-10",
+    "src": "/avatars/big-ears-10.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Maya-10"
+  },
+  {
+    "id": "big-ears-11",
+    "style": "big-ears",
+    "genderOption": "girl",
+    "seed": "big-ears-Finn-11",
+    "src": "/avatars/big-ears-11.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Finn-11"
+  },
+  {
+    "id": "big-ears-12",
+    "style": "big-ears",
+    "genderOption": "boy",
+    "seed": "big-ears-Nia-12",
+    "src": "/avatars/big-ears-12.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Nia-12"
+  },
+  {
+    "id": "big-ears-13",
+    "style": "big-ears",
+    "genderOption": "girl",
+    "seed": "big-ears-Sample Child 2-13",
+    "src": "/avatars/big-ears-13.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Sample Child 2-13"
+  },
+  {
+    "id": "big-ears-14",
+    "style": "big-ears",
+    "genderOption": "boy",
+    "seed": "big-ears-Ruby-14",
+    "src": "/avatars/big-ears-14.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Ruby-14"
+  },
+  {
+    "id": "big-ears-15",
+    "style": "big-ears",
+    "genderOption": "girl",
+    "seed": "big-ears-Ezra-15",
+    "src": "/avatars/big-ears-15.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Ezra-15"
+  },
+  {
+    "id": "big-ears-16",
+    "style": "big-ears",
+    "genderOption": "boy",
+    "seed": "big-ears-Ada-16",
+    "src": "/avatars/big-ears-16.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Ada-16"
+  },
+  {
+    "id": "big-ears-17",
+    "style": "big-ears",
+    "genderOption": "girl",
+    "seed": "big-ears-Ollie-17",
+    "src": "/avatars/big-ears-17.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Ollie-17"
+  },
+  {
+    "id": "big-ears-18",
+    "style": "big-ears",
+    "genderOption": "boy",
+    "seed": "big-ears-Poppy-18",
+    "src": "/avatars/big-ears-18.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Poppy-18"
+  },
+  {
+    "id": "big-ears-19",
+    "style": "big-ears",
+    "genderOption": "girl",
+    "seed": "big-ears-Arlo-19",
+    "src": "/avatars/big-ears-19.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Arlo-19"
+  },
+  {
+    "id": "big-ears-20",
+    "style": "big-ears",
+    "genderOption": "boy",
+    "seed": "big-ears-Cora-20",
+    "src": "/avatars/big-ears-20.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Cora-20"
+  },
+  {
+    "id": "big-ears-21",
+    "style": "big-ears",
+    "genderOption": "girl",
+    "seed": "big-ears-Juno-21",
+    "src": "/avatars/big-ears-21.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Juno-21"
+  },
+  {
+    "id": "big-ears-22",
+    "style": "big-ears",
+    "genderOption": "boy",
+    "seed": "big-ears-Max-22",
+    "src": "/avatars/big-ears-22.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Max-22"
+  },
+  {
+    "id": "big-ears-23",
+    "style": "big-ears",
+    "genderOption": "girl",
+    "seed": "big-ears-Ella-23",
+    "src": "/avatars/big-ears-23.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Ella-23"
+  },
+  {
+    "id": "big-ears-24",
+    "style": "big-ears",
+    "genderOption": "boy",
+    "seed": "big-ears-Riley-24",
+    "src": "/avatars/big-ears-24.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-ears/svg?seed=big-ears-Riley-24"
+  },
+  {
+    "id": "bottts-01",
+    "style": "bottts",
+    "genderOption": "girl",
+    "seed": "bottts-Sunny-01",
+    "src": "/avatars/bottts-01.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Sunny-01"
+  },
+  {
+    "id": "bottts-02",
+    "style": "bottts",
+    "genderOption": "boy",
+    "seed": "bottts-Milo-02",
+    "src": "/avatars/bottts-02.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Milo-02"
+  },
+  {
+    "id": "bottts-03",
+    "style": "bottts",
+    "genderOption": "girl",
+    "seed": "bottts-Luna-03",
+    "src": "/avatars/bottts-03.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Luna-03"
+  },
+  {
+    "id": "bottts-04",
+    "style": "bottts",
+    "genderOption": "boy",
+    "seed": "bottts-Nova-04",
+    "src": "/avatars/bottts-04.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Nova-04"
+  },
+  {
+    "id": "bottts-05",
+    "style": "bottts",
+    "genderOption": "girl",
+    "seed": "bottts-Kai-05",
+    "src": "/avatars/bottts-05.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Kai-05"
+  },
+  {
+    "id": "bottts-06",
+    "style": "bottts",
+    "genderOption": "boy",
+    "seed": "bottts-Zoe-06",
+    "src": "/avatars/bottts-06.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Zoe-06"
+  },
+  {
+    "id": "bottts-07",
+    "style": "bottts",
+    "genderOption": "girl",
+    "seed": "bottts-Remy-07",
+    "src": "/avatars/bottts-07.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Remy-07"
+  },
+  {
+    "id": "bottts-08",
+    "style": "bottts",
+    "genderOption": "boy",
+    "seed": "bottts-Ivy-08",
+    "src": "/avatars/bottts-08.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Ivy-08"
+  },
+  {
+    "id": "bottts-09",
+    "style": "bottts",
+    "genderOption": "girl",
+    "seed": "bottts-Theo-09",
+    "src": "/avatars/bottts-09.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Theo-09"
+  },
+  {
+    "id": "bottts-10",
+    "style": "bottts",
+    "genderOption": "boy",
+    "seed": "bottts-Maya-10",
+    "src": "/avatars/bottts-10.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Maya-10"
+  },
+  {
+    "id": "bottts-11",
+    "style": "bottts",
+    "genderOption": "girl",
+    "seed": "bottts-Finn-11",
+    "src": "/avatars/bottts-11.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Finn-11"
+  },
+  {
+    "id": "bottts-12",
+    "style": "bottts",
+    "genderOption": "boy",
+    "seed": "bottts-Nia-12",
+    "src": "/avatars/bottts-12.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Nia-12"
+  },
+  {
+    "id": "bottts-13",
+    "style": "bottts",
+    "genderOption": "girl",
+    "seed": "bottts-Sample Child 2-13",
+    "src": "/avatars/bottts-13.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Sample Child 2-13"
+  },
+  {
+    "id": "bottts-14",
+    "style": "bottts",
+    "genderOption": "boy",
+    "seed": "bottts-Ruby-14",
+    "src": "/avatars/bottts-14.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Ruby-14"
+  },
+  {
+    "id": "bottts-15",
+    "style": "bottts",
+    "genderOption": "girl",
+    "seed": "bottts-Ezra-15",
+    "src": "/avatars/bottts-15.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Ezra-15"
+  },
+  {
+    "id": "bottts-16",
+    "style": "bottts",
+    "genderOption": "boy",
+    "seed": "bottts-Ada-16",
+    "src": "/avatars/bottts-16.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Ada-16"
+  },
+  {
+    "id": "bottts-17",
+    "style": "bottts",
+    "genderOption": "girl",
+    "seed": "bottts-Ollie-17",
+    "src": "/avatars/bottts-17.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Ollie-17"
+  },
+  {
+    "id": "bottts-18",
+    "style": "bottts",
+    "genderOption": "boy",
+    "seed": "bottts-Poppy-18",
+    "src": "/avatars/bottts-18.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Poppy-18"
+  },
+  {
+    "id": "bottts-19",
+    "style": "bottts",
+    "genderOption": "girl",
+    "seed": "bottts-Arlo-19",
+    "src": "/avatars/bottts-19.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Arlo-19"
+  },
+  {
+    "id": "bottts-20",
+    "style": "bottts",
+    "genderOption": "boy",
+    "seed": "bottts-Cora-20",
+    "src": "/avatars/bottts-20.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Cora-20"
+  },
+  {
+    "id": "bottts-21",
+    "style": "bottts",
+    "genderOption": "girl",
+    "seed": "bottts-Juno-21",
+    "src": "/avatars/bottts-21.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Juno-21"
+  },
+  {
+    "id": "bottts-22",
+    "style": "bottts",
+    "genderOption": "boy",
+    "seed": "bottts-Max-22",
+    "src": "/avatars/bottts-22.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Max-22"
+  },
+  {
+    "id": "bottts-23",
+    "style": "bottts",
+    "genderOption": "girl",
+    "seed": "bottts-Ella-23",
+    "src": "/avatars/bottts-23.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Ella-23"
+  },
+  {
+    "id": "bottts-24",
+    "style": "bottts",
+    "genderOption": "boy",
+    "seed": "bottts-Riley-24",
+    "src": "/avatars/bottts-24.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/bottts/svg?seed=bottts-Riley-24"
+  },
+  {
+    "id": "big-smile-01",
+    "style": "big-smile",
+    "genderOption": "girl",
+    "seed": "big-smile-Sunny-01",
+    "src": "/avatars/big-smile-01.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Sunny-01"
+  },
+  {
+    "id": "big-smile-02",
+    "style": "big-smile",
+    "genderOption": "boy",
+    "seed": "big-smile-Milo-02",
+    "src": "/avatars/big-smile-02.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Milo-02"
+  },
+  {
+    "id": "big-smile-03",
+    "style": "big-smile",
+    "genderOption": "girl",
+    "seed": "big-smile-Luna-03",
+    "src": "/avatars/big-smile-03.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Luna-03"
+  },
+  {
+    "id": "big-smile-04",
+    "style": "big-smile",
+    "genderOption": "boy",
+    "seed": "big-smile-Nova-04",
+    "src": "/avatars/big-smile-04.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Nova-04"
+  },
+  {
+    "id": "big-smile-05",
+    "style": "big-smile",
+    "genderOption": "girl",
+    "seed": "big-smile-Kai-05",
+    "src": "/avatars/big-smile-05.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Kai-05"
+  },
+  {
+    "id": "big-smile-06",
+    "style": "big-smile",
+    "genderOption": "boy",
+    "seed": "big-smile-Zoe-06",
+    "src": "/avatars/big-smile-06.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Zoe-06"
+  },
+  {
+    "id": "big-smile-07",
+    "style": "big-smile",
+    "genderOption": "girl",
+    "seed": "big-smile-Remy-07",
+    "src": "/avatars/big-smile-07.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Remy-07"
+  },
+  {
+    "id": "big-smile-08",
+    "style": "big-smile",
+    "genderOption": "boy",
+    "seed": "big-smile-Ivy-08",
+    "src": "/avatars/big-smile-08.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Ivy-08"
+  },
+  {
+    "id": "big-smile-09",
+    "style": "big-smile",
+    "genderOption": "girl",
+    "seed": "big-smile-Theo-09",
+    "src": "/avatars/big-smile-09.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Theo-09"
+  },
+  {
+    "id": "big-smile-10",
+    "style": "big-smile",
+    "genderOption": "boy",
+    "seed": "big-smile-Maya-10",
+    "src": "/avatars/big-smile-10.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Maya-10"
+  },
+  {
+    "id": "big-smile-11",
+    "style": "big-smile",
+    "genderOption": "girl",
+    "seed": "big-smile-Finn-11",
+    "src": "/avatars/big-smile-11.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Finn-11"
+  },
+  {
+    "id": "big-smile-12",
+    "style": "big-smile",
+    "genderOption": "boy",
+    "seed": "big-smile-Nia-12",
+    "src": "/avatars/big-smile-12.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Nia-12"
+  },
+  {
+    "id": "big-smile-13",
+    "style": "big-smile",
+    "genderOption": "girl",
+    "seed": "big-smile-Sample Child 2-13",
+    "src": "/avatars/big-smile-13.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Sample Child 2-13"
+  },
+  {
+    "id": "big-smile-14",
+    "style": "big-smile",
+    "genderOption": "boy",
+    "seed": "big-smile-Ruby-14",
+    "src": "/avatars/big-smile-14.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Ruby-14"
+  },
+  {
+    "id": "big-smile-15",
+    "style": "big-smile",
+    "genderOption": "girl",
+    "seed": "big-smile-Ezra-15",
+    "src": "/avatars/big-smile-15.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Ezra-15"
+  },
+  {
+    "id": "big-smile-16",
+    "style": "big-smile",
+    "genderOption": "boy",
+    "seed": "big-smile-Ada-16",
+    "src": "/avatars/big-smile-16.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Ada-16"
+  },
+  {
+    "id": "big-smile-17",
+    "style": "big-smile",
+    "genderOption": "girl",
+    "seed": "big-smile-Ollie-17",
+    "src": "/avatars/big-smile-17.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Ollie-17"
+  },
+  {
+    "id": "big-smile-18",
+    "style": "big-smile",
+    "genderOption": "boy",
+    "seed": "big-smile-Poppy-18",
+    "src": "/avatars/big-smile-18.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Poppy-18"
+  },
+  {
+    "id": "big-smile-19",
+    "style": "big-smile",
+    "genderOption": "girl",
+    "seed": "big-smile-Arlo-19",
+    "src": "/avatars/big-smile-19.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Arlo-19"
+  },
+  {
+    "id": "big-smile-20",
+    "style": "big-smile",
+    "genderOption": "boy",
+    "seed": "big-smile-Cora-20",
+    "src": "/avatars/big-smile-20.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Cora-20"
+  },
+  {
+    "id": "big-smile-21",
+    "style": "big-smile",
+    "genderOption": "girl",
+    "seed": "big-smile-Juno-21",
+    "src": "/avatars/big-smile-21.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Juno-21"
+  },
+  {
+    "id": "big-smile-22",
+    "style": "big-smile",
+    "genderOption": "boy",
+    "seed": "big-smile-Max-22",
+    "src": "/avatars/big-smile-22.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Max-22"
+  },
+  {
+    "id": "big-smile-23",
+    "style": "big-smile",
+    "genderOption": "girl",
+    "seed": "big-smile-Ella-23",
+    "src": "/avatars/big-smile-23.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Ella-23"
+  },
+  {
+    "id": "big-smile-24",
+    "style": "big-smile",
+    "genderOption": "boy",
+    "seed": "big-smile-Riley-24",
+    "src": "/avatars/big-smile-24.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/big-smile/svg?seed=big-smile-Riley-24"
+  },
+  {
+    "id": "fun-emoji-01",
+    "style": "fun-emoji",
+    "genderOption": "girl",
+    "seed": "fun-emoji-Sunny-01",
+    "src": "/avatars/fun-emoji-01.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Sunny-01"
+  },
+  {
+    "id": "fun-emoji-02",
+    "style": "fun-emoji",
+    "genderOption": "boy",
+    "seed": "fun-emoji-Milo-02",
+    "src": "/avatars/fun-emoji-02.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Milo-02"
+  },
+  {
+    "id": "fun-emoji-03",
+    "style": "fun-emoji",
+    "genderOption": "girl",
+    "seed": "fun-emoji-Luna-03",
+    "src": "/avatars/fun-emoji-03.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Luna-03"
+  },
+  {
+    "id": "fun-emoji-04",
+    "style": "fun-emoji",
+    "genderOption": "boy",
+    "seed": "fun-emoji-Nova-04",
+    "src": "/avatars/fun-emoji-04.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Nova-04"
+  },
+  {
+    "id": "fun-emoji-05",
+    "style": "fun-emoji",
+    "genderOption": "girl",
+    "seed": "fun-emoji-Kai-05",
+    "src": "/avatars/fun-emoji-05.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Kai-05"
+  },
+  {
+    "id": "fun-emoji-06",
+    "style": "fun-emoji",
+    "genderOption": "boy",
+    "seed": "fun-emoji-Zoe-06",
+    "src": "/avatars/fun-emoji-06.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Zoe-06"
+  },
+  {
+    "id": "fun-emoji-07",
+    "style": "fun-emoji",
+    "genderOption": "girl",
+    "seed": "fun-emoji-Remy-07",
+    "src": "/avatars/fun-emoji-07.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Remy-07"
+  },
+  {
+    "id": "fun-emoji-08",
+    "style": "fun-emoji",
+    "genderOption": "boy",
+    "seed": "fun-emoji-Ivy-08",
+    "src": "/avatars/fun-emoji-08.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Ivy-08"
+  },
+  {
+    "id": "fun-emoji-09",
+    "style": "fun-emoji",
+    "genderOption": "girl",
+    "seed": "fun-emoji-Theo-09",
+    "src": "/avatars/fun-emoji-09.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Theo-09"
+  },
+  {
+    "id": "fun-emoji-10",
+    "style": "fun-emoji",
+    "genderOption": "boy",
+    "seed": "fun-emoji-Maya-10",
+    "src": "/avatars/fun-emoji-10.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Maya-10"
+  },
+  {
+    "id": "fun-emoji-11",
+    "style": "fun-emoji",
+    "genderOption": "girl",
+    "seed": "fun-emoji-Finn-11",
+    "src": "/avatars/fun-emoji-11.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Finn-11"
+  },
+  {
+    "id": "fun-emoji-12",
+    "style": "fun-emoji",
+    "genderOption": "boy",
+    "seed": "fun-emoji-Nia-12",
+    "src": "/avatars/fun-emoji-12.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Nia-12"
+  },
+  {
+    "id": "fun-emoji-13",
+    "style": "fun-emoji",
+    "genderOption": "girl",
+    "seed": "fun-emoji-Sample Child 2-13",
+    "src": "/avatars/fun-emoji-13.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Sample Child 2-13"
+  },
+  {
+    "id": "fun-emoji-14",
+    "style": "fun-emoji",
+    "genderOption": "boy",
+    "seed": "fun-emoji-Ruby-14",
+    "src": "/avatars/fun-emoji-14.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Ruby-14"
+  },
+  {
+    "id": "fun-emoji-15",
+    "style": "fun-emoji",
+    "genderOption": "girl",
+    "seed": "fun-emoji-Ezra-15",
+    "src": "/avatars/fun-emoji-15.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Ezra-15"
+  },
+  {
+    "id": "fun-emoji-16",
+    "style": "fun-emoji",
+    "genderOption": "boy",
+    "seed": "fun-emoji-Ada-16",
+    "src": "/avatars/fun-emoji-16.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Ada-16"
+  },
+  {
+    "id": "fun-emoji-17",
+    "style": "fun-emoji",
+    "genderOption": "girl",
+    "seed": "fun-emoji-Ollie-17",
+    "src": "/avatars/fun-emoji-17.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Ollie-17"
+  },
+  {
+    "id": "fun-emoji-18",
+    "style": "fun-emoji",
+    "genderOption": "boy",
+    "seed": "fun-emoji-Poppy-18",
+    "src": "/avatars/fun-emoji-18.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Poppy-18"
+  },
+  {
+    "id": "fun-emoji-19",
+    "style": "fun-emoji",
+    "genderOption": "girl",
+    "seed": "fun-emoji-Arlo-19",
+    "src": "/avatars/fun-emoji-19.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Arlo-19"
+  },
+  {
+    "id": "fun-emoji-20",
+    "style": "fun-emoji",
+    "genderOption": "boy",
+    "seed": "fun-emoji-Cora-20",
+    "src": "/avatars/fun-emoji-20.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Cora-20"
+  },
+  {
+    "id": "fun-emoji-21",
+    "style": "fun-emoji",
+    "genderOption": "girl",
+    "seed": "fun-emoji-Juno-21",
+    "src": "/avatars/fun-emoji-21.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Juno-21"
+  },
+  {
+    "id": "fun-emoji-22",
+    "style": "fun-emoji",
+    "genderOption": "boy",
+    "seed": "fun-emoji-Max-22",
+    "src": "/avatars/fun-emoji-22.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Max-22"
+  },
+  {
+    "id": "fun-emoji-23",
+    "style": "fun-emoji",
+    "genderOption": "girl",
+    "seed": "fun-emoji-Ella-23",
+    "src": "/avatars/fun-emoji-23.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Ella-23"
+  },
+  {
+    "id": "fun-emoji-24",
+    "style": "fun-emoji",
+    "genderOption": "boy",
+    "seed": "fun-emoji-Riley-24",
+    "src": "/avatars/fun-emoji-24.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=fun-emoji-Riley-24"
+  },
+  {
+    "id": "miniavs-01",
+    "style": "miniavs",
+    "genderOption": "girl",
+    "seed": "miniavs-Sunny-01",
+    "src": "/avatars/miniavs-01.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Sunny-01"
+  },
+  {
+    "id": "miniavs-02",
+    "style": "miniavs",
+    "genderOption": "boy",
+    "seed": "miniavs-Milo-02",
+    "src": "/avatars/miniavs-02.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Milo-02"
+  },
+  {
+    "id": "miniavs-03",
+    "style": "miniavs",
+    "genderOption": "girl",
+    "seed": "miniavs-Luna-03",
+    "src": "/avatars/miniavs-03.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Luna-03"
+  },
+  {
+    "id": "miniavs-04",
+    "style": "miniavs",
+    "genderOption": "boy",
+    "seed": "miniavs-Nova-04",
+    "src": "/avatars/miniavs-04.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Nova-04"
+  },
+  {
+    "id": "miniavs-05",
+    "style": "miniavs",
+    "genderOption": "girl",
+    "seed": "miniavs-Kai-05",
+    "src": "/avatars/miniavs-05.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Kai-05"
+  },
+  {
+    "id": "miniavs-06",
+    "style": "miniavs",
+    "genderOption": "boy",
+    "seed": "miniavs-Zoe-06",
+    "src": "/avatars/miniavs-06.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Zoe-06"
+  },
+  {
+    "id": "miniavs-07",
+    "style": "miniavs",
+    "genderOption": "girl",
+    "seed": "miniavs-Remy-07",
+    "src": "/avatars/miniavs-07.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Remy-07"
+  },
+  {
+    "id": "miniavs-08",
+    "style": "miniavs",
+    "genderOption": "boy",
+    "seed": "miniavs-Ivy-08",
+    "src": "/avatars/miniavs-08.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Ivy-08"
+  },
+  {
+    "id": "miniavs-09",
+    "style": "miniavs",
+    "genderOption": "girl",
+    "seed": "miniavs-Theo-09",
+    "src": "/avatars/miniavs-09.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Theo-09"
+  },
+  {
+    "id": "miniavs-10",
+    "style": "miniavs",
+    "genderOption": "boy",
+    "seed": "miniavs-Maya-10",
+    "src": "/avatars/miniavs-10.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Maya-10"
+  },
+  {
+    "id": "miniavs-11",
+    "style": "miniavs",
+    "genderOption": "girl",
+    "seed": "miniavs-Finn-11",
+    "src": "/avatars/miniavs-11.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Finn-11"
+  },
+  {
+    "id": "miniavs-12",
+    "style": "miniavs",
+    "genderOption": "boy",
+    "seed": "miniavs-Nia-12",
+    "src": "/avatars/miniavs-12.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Nia-12"
+  },
+  {
+    "id": "miniavs-13",
+    "style": "miniavs",
+    "genderOption": "girl",
+    "seed": "miniavs-Sample Child 2-13",
+    "src": "/avatars/miniavs-13.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Sample Child 2-13"
+  },
+  {
+    "id": "miniavs-14",
+    "style": "miniavs",
+    "genderOption": "boy",
+    "seed": "miniavs-Ruby-14",
+    "src": "/avatars/miniavs-14.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Ruby-14"
+  },
+  {
+    "id": "miniavs-15",
+    "style": "miniavs",
+    "genderOption": "girl",
+    "seed": "miniavs-Ezra-15",
+    "src": "/avatars/miniavs-15.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Ezra-15"
+  },
+  {
+    "id": "miniavs-16",
+    "style": "miniavs",
+    "genderOption": "boy",
+    "seed": "miniavs-Ada-16",
+    "src": "/avatars/miniavs-16.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Ada-16"
+  },
+  {
+    "id": "miniavs-17",
+    "style": "miniavs",
+    "genderOption": "girl",
+    "seed": "miniavs-Ollie-17",
+    "src": "/avatars/miniavs-17.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Ollie-17"
+  },
+  {
+    "id": "miniavs-18",
+    "style": "miniavs",
+    "genderOption": "boy",
+    "seed": "miniavs-Poppy-18",
+    "src": "/avatars/miniavs-18.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Poppy-18"
+  },
+  {
+    "id": "miniavs-19",
+    "style": "miniavs",
+    "genderOption": "girl",
+    "seed": "miniavs-Arlo-19",
+    "src": "/avatars/miniavs-19.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Arlo-19"
+  },
+  {
+    "id": "miniavs-20",
+    "style": "miniavs",
+    "genderOption": "boy",
+    "seed": "miniavs-Cora-20",
+    "src": "/avatars/miniavs-20.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Cora-20"
+  },
+  {
+    "id": "miniavs-21",
+    "style": "miniavs",
+    "genderOption": "girl",
+    "seed": "miniavs-Juno-21",
+    "src": "/avatars/miniavs-21.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Juno-21"
+  },
+  {
+    "id": "miniavs-22",
+    "style": "miniavs",
+    "genderOption": "boy",
+    "seed": "miniavs-Max-22",
+    "src": "/avatars/miniavs-22.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Max-22"
+  },
+  {
+    "id": "miniavs-23",
+    "style": "miniavs",
+    "genderOption": "girl",
+    "seed": "miniavs-Ella-23",
+    "src": "/avatars/miniavs-23.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Ella-23"
+  },
+  {
+    "id": "miniavs-24",
+    "style": "miniavs",
+    "genderOption": "boy",
+    "seed": "miniavs-Riley-24",
+    "src": "/avatars/miniavs-24.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/miniavs/svg?seed=miniavs-Riley-24"
+  },
+  {
+    "id": "toon-head-01",
+    "style": "toon-head",
+    "genderOption": "girl",
+    "seed": "toon-head-Sunny-01",
+    "src": "/avatars/toon-head-01.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Sunny-01"
+  },
+  {
+    "id": "toon-head-02",
+    "style": "toon-head",
+    "genderOption": "boy",
+    "seed": "toon-head-Milo-02",
+    "src": "/avatars/toon-head-02.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Milo-02"
+  },
+  {
+    "id": "toon-head-03",
+    "style": "toon-head",
+    "genderOption": "girl",
+    "seed": "toon-head-Luna-03",
+    "src": "/avatars/toon-head-03.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Luna-03"
+  },
+  {
+    "id": "toon-head-04",
+    "style": "toon-head",
+    "genderOption": "boy",
+    "seed": "toon-head-Nova-04",
+    "src": "/avatars/toon-head-04.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Nova-04"
+  },
+  {
+    "id": "toon-head-05",
+    "style": "toon-head",
+    "genderOption": "girl",
+    "seed": "toon-head-Kai-05",
+    "src": "/avatars/toon-head-05.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Kai-05"
+  },
+  {
+    "id": "toon-head-06",
+    "style": "toon-head",
+    "genderOption": "boy",
+    "seed": "toon-head-Zoe-06",
+    "src": "/avatars/toon-head-06.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Zoe-06"
+  },
+  {
+    "id": "toon-head-07",
+    "style": "toon-head",
+    "genderOption": "girl",
+    "seed": "toon-head-Remy-07",
+    "src": "/avatars/toon-head-07.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Remy-07"
+  },
+  {
+    "id": "toon-head-08",
+    "style": "toon-head",
+    "genderOption": "boy",
+    "seed": "toon-head-Ivy-08",
+    "src": "/avatars/toon-head-08.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Ivy-08"
+  },
+  {
+    "id": "toon-head-09",
+    "style": "toon-head",
+    "genderOption": "girl",
+    "seed": "toon-head-Theo-09",
+    "src": "/avatars/toon-head-09.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Theo-09"
+  },
+  {
+    "id": "toon-head-10",
+    "style": "toon-head",
+    "genderOption": "boy",
+    "seed": "toon-head-Maya-10",
+    "src": "/avatars/toon-head-10.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Maya-10"
+  },
+  {
+    "id": "toon-head-11",
+    "style": "toon-head",
+    "genderOption": "girl",
+    "seed": "toon-head-Finn-11",
+    "src": "/avatars/toon-head-11.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Finn-11"
+  },
+  {
+    "id": "toon-head-12",
+    "style": "toon-head",
+    "genderOption": "boy",
+    "seed": "toon-head-Nia-12",
+    "src": "/avatars/toon-head-12.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Nia-12"
+  },
+  {
+    "id": "toon-head-13",
+    "style": "toon-head",
+    "genderOption": "girl",
+    "seed": "toon-head-Sample Child 2-13",
+    "src": "/avatars/toon-head-13.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Sample Child 2-13"
+  },
+  {
+    "id": "toon-head-14",
+    "style": "toon-head",
+    "genderOption": "boy",
+    "seed": "toon-head-Ruby-14",
+    "src": "/avatars/toon-head-14.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Ruby-14"
+  },
+  {
+    "id": "toon-head-15",
+    "style": "toon-head",
+    "genderOption": "girl",
+    "seed": "toon-head-Ezra-15",
+    "src": "/avatars/toon-head-15.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Ezra-15"
+  },
+  {
+    "id": "toon-head-16",
+    "style": "toon-head",
+    "genderOption": "boy",
+    "seed": "toon-head-Ada-16",
+    "src": "/avatars/toon-head-16.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Ada-16"
+  },
+  {
+    "id": "toon-head-17",
+    "style": "toon-head",
+    "genderOption": "girl",
+    "seed": "toon-head-Ollie-17",
+    "src": "/avatars/toon-head-17.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Ollie-17"
+  },
+  {
+    "id": "toon-head-18",
+    "style": "toon-head",
+    "genderOption": "boy",
+    "seed": "toon-head-Poppy-18",
+    "src": "/avatars/toon-head-18.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Poppy-18"
+  },
+  {
+    "id": "toon-head-19",
+    "style": "toon-head",
+    "genderOption": "girl",
+    "seed": "toon-head-Arlo-19",
+    "src": "/avatars/toon-head-19.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Arlo-19"
+  },
+  {
+    "id": "toon-head-20",
+    "style": "toon-head",
+    "genderOption": "boy",
+    "seed": "toon-head-Cora-20",
+    "src": "/avatars/toon-head-20.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Cora-20"
+  },
+  {
+    "id": "toon-head-21",
+    "style": "toon-head",
+    "genderOption": "girl",
+    "seed": "toon-head-Juno-21",
+    "src": "/avatars/toon-head-21.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Juno-21"
+  },
+  {
+    "id": "toon-head-22",
+    "style": "toon-head",
+    "genderOption": "boy",
+    "seed": "toon-head-Max-22",
+    "src": "/avatars/toon-head-22.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Max-22"
+  },
+  {
+    "id": "toon-head-23",
+    "style": "toon-head",
+    "genderOption": "girl",
+    "seed": "toon-head-Ella-23",
+    "src": "/avatars/toon-head-23.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Ella-23"
+  },
+  {
+    "id": "toon-head-24",
+    "style": "toon-head",
+    "genderOption": "boy",
+    "seed": "toon-head-Riley-24",
+    "src": "/avatars/toon-head-24.svg",
+    "sourceUrl": "https://api.dicebear.com/9.x/toon-head/svg?seed=toon-head-Riley-24"
+  }
+]

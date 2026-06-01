@@ -1,0 +1,91 @@
+[data-theme="quest"] {
+  --color-bg:
+    linear-gradient(180deg, rgba(119, 196, 242, 0.9), rgba(161, 218, 112, 0.84)),
+    #91d85d;
+  --color-bg-elevated: #f8f4d8;
+  --color-text: #25331f;
+  --color-text-strong: #152214;
+  --color-text-muted: #5e6b44;
+  --color-surface: rgba(255, 252, 220, 0.86);
+  --color-surface-strong: rgba(255, 255, 236, 0.96);
+  --color-surface-soft: rgba(255, 244, 181, 0.76);
+  --color-border: rgba(66, 88, 39, 0.22);
+  --color-border-strong: rgba(66, 88, 39, 0.36);
+  --color-accent: #f6b83f;
+  --color-accent-strong: #5f3f08;
+  --color-success: #147a50;
+  --color-success-bg: rgba(67, 174, 101, 0.16);
+  --color-danger: #b52f26;
+  --color-danger-bg: rgba(218, 75, 54, 0.14);
+  --lane-unassigned: #e9a42f;
+  --lane-1: #29a865;
+  --lane-2: #2c8ccf;
+  --lane-3: #e05242;
+  --header-bg-strong: rgba(255, 252, 220, 0.92);
+  --header-bg-soft: rgba(251, 227, 134, 0.62);
+  --header-scene:
+    linear-gradient(90deg, rgba(255, 252, 220, 0.42), rgba(255, 252, 220, 0.1)),
+    url("../../assets/chore-quest-overworld.png");
+  --header-scene-opacity: 0.72;
+  --shadow-panel: 0 18px 0 rgba(57, 70, 38, 0.14), 0 20px 38px rgba(40, 65, 28, 0.18);
+  --shadow-button: 0 6px 0 rgba(103, 75, 19, 0.32), 0 12px 20px rgba(103, 75, 19, 0.18);
+}
+
+[data-theme="quest"] .topbar,
+[data-theme="quest"] .status-panel,
+[data-theme="quest"] .lane,
+[data-theme="quest"] .chore-card,
+[data-theme="quest"] .modal,
+[data-theme="quest"] .debug-dock,
+[data-theme="quest"] .floating-tool-button {
+  backdrop-filter: saturate(1.08) blur(10px);
+}
+
+[data-theme="quest"] .topbar h1,
+[data-theme="quest"] .lane-header h2,
+[data-theme="quest"] .chore-copy h3 {
+  font-family: "Trebuchet MS", var(--font-body);
+}
+
+[data-theme="quest"] .topbar h1 {
+  letter-spacing: 0.01em;
+}
+
+[data-theme="quest"] .lane,
+[data-theme="quest"] .chore-card,
+[data-theme="quest"] .modal,
+[data-theme="quest"] .board-date,
+[data-theme="quest"] .toolbar-button,
+[data-theme="quest"] .reward-button,
+[data-theme="quest"] .primary-button,
+[data-theme="quest"] .secondary-button,
+[data-theme="quest"] .icon-button,
+[data-theme="quest"] .icon-text-button,
+[data-theme="quest"] .modal-close,
+[data-theme="quest"] .weekday-button,
+[data-theme="quest"] .points-ribbon,
+[data-theme="quest"] .points-pill,
+[data-theme="quest"] .complete-pill {
+  border-width: 2px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    0 4px 0 rgba(64, 76, 43, 0.18);
+}
+
+[data-theme="quest"] .lane {
+  border-color: var(--color-border-strong);
+}
+
+[data-theme="quest"] .chore-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 245, 0.96), rgba(255, 245, 204, 0.96));
+}
+
+[data-theme="quest"] .chore-card.is-done {
+  filter: grayscale(0.45);
+}
+
+[data-theme="quest"] .icon-button,
+[data-theme="quest"] .primary-button {
+  color: #3a2602;
+}

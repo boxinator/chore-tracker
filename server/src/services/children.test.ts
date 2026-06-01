@@ -59,6 +59,14 @@ describe("children service", () => {
     expect(listChildren(fixtureDb)[1]?.name).toBe("Sample Child 2 Rocket");
   });
 
+  it("updates a child avatar", () => {
+    const fixtureDb = createBaseFixture();
+
+    updateChild(fixtureDb, "child-1", { avatarKey: "adventurer-01" });
+
+    expect(listChildren(fixtureDb)[0]?.avatarKey).toBe("adventurer-01");
+  });
+
   it("rejects invalid child payloads", () => {
     expect(() => parseChildInput({ name: "" })).toThrow(ChildValidationError);
   });

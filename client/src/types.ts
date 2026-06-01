@@ -13,11 +13,19 @@ export type VisibleChore = {
   assigneeChildId: string | null;
   isCompletedToday: boolean;
   scheduledDays: number[];
+  assignments: ChoreAssignment[];
+  unassignedScheduleDays: number[];
+};
+
+export type ChoreAssignment = {
+  childId: string;
+  days: number[];
 };
 
 export type DashboardChild = {
   id: string;
   name: string;
+  avatarKey: string | null;
   totalPoints: number;
   chores: VisibleChore[];
 };
@@ -33,25 +41,22 @@ export type CreateChoreInput = {
   title: string;
   description: string;
   pointValue: number;
-  assigneeChildId: string | null;
-  scheduleDays: number[];
+  assignments: ChoreAssignment[];
+  unassignedScheduleDays: number[];
 };
 
 export type UpdateChoreInput = CreateChoreInput;
 
-export type AssignChildOption = {
-  id: string;
-  name: string;
-};
-
 export type Child = {
   id: string;
   name: string;
+  avatarKey: string | null;
   sortOrder: number;
 };
 
 export type ChildInput = {
-  name: string;
+  name?: string;
+  avatarKey?: string | null;
 };
 
 export type Reward = {

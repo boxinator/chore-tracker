@@ -1,17 +1,14 @@
-import { useState } from "react";
 import { CheckCircle2, Send, Trash2, Zap } from "lucide-react";
-import type { AssignChildOption } from "../types";
 
 type ChoreCardProps = {
   id: string;
   title: string;
   points: number;
   meta: string;
+  assigneeChildId?: string | null;
   done?: boolean;
   onDelete?: (id: string) => void;
-  onToggleComplete?: (id: string, done: boolean) => void;
-  assignOptions?: AssignChildOption[];
-  onAssign?: (id: string, childId: string) => void;
+  onToggleComplete?: (id: string, done: boolean, childId: string | null) => void;
   onOpenDetails?: (id: string) => void;
   assignmentPending?: boolean;
   highlighted?: boolean;
@@ -22,18 +19,16 @@ export function ChoreCard({
   title,
   points,
   meta,
+  assigneeChildId = null,
   done = false,
   onDelete,
   onToggleComplete,
-  assignOptions,
-  onAssign,
   onOpenDetails,
   assignmentPending = false,
   highlighted = false
 }: ChoreCardProps) {
-  const [assignMenuOpen, setAssignMenuOpen] = useState(false);
-  const canComplete = done || Boolean(onToggleComplete);
-  const canAssign = !done && assignOptions && assignOptions.length > 0 && onAssign;
+  const canComplete = done || Boolean(onToggleComplete && assigneeChildId);
+  const canAssign = !done && !assigneeChildId && Boolean(onOpenDetails);
 
   return (
     <article className={`chore-card${done ? " is-done" : ""}${highlighted ? " is-highlighted" : ""}`}>
@@ -48,7 +43,7 @@ export function ChoreCard({
         aria-label={done ? `Mark ${title} incomplete` : `Mark ${title} complete`}
         aria-pressed={done}
         disabled={!canComplete}
-        onClick={() => onToggleComplete?.(id, done)}
+        onClick={() => onToggleComplete?.(id, done, assigneeChildId)}
       >
         <CheckCircle2 aria-hidden="true" />
         <span>Done</span>
@@ -70,14 +65,13 @@ export function ChoreCard({
         <div className="card-actions">
           {canAssign && (
             <button
-              className={`icon-text-button${assignMenuOpen ? " is-active" : ""}`}
+              className="icon-text-button"
               type="button"
-              aria-expanded={assignMenuOpen}
               disabled={assignmentPending}
-              onClick={() => setAssignMenuOpen((current) => !current)}
+              onClick={() => onOpenDetails?.(id)}
             >
               <Send aria-hidden="true" />
-              {assignmentPending ? "Assigning..." : "Assign"}
+              Assign
             </button>
           )}
           {onDelete && (
@@ -93,24 +87,6 @@ export function ChoreCard({
         </div>
       </div>
 
-      {canAssign && assignMenuOpen && (
-        <div className="assign-chooser" aria-label={`Choose assignee for ${title}`}>
-          {assignOptions.map((option) => (
-            <button
-              key={option.id}
-              className="assign-chip"
-              type="button"
-              disabled={assignmentPending}
-              onClick={() => {
-                setAssignMenuOpen(false);
-                onAssign(id, option.id);
-              }}
-            >
-              {option.name}
-            </button>
-          ))}
-        </div>
-      )}
     </article>
   );
 }

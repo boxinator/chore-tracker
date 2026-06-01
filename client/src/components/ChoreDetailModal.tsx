@@ -1,44 +1,69 @@
 import { useMemo, useState } from "react";
 import { Trash2, X, Zap } from "lucide-react";
-import type { DashboardChild, UpdateChoreInput, VisibleChore } from "../types";
+import type { ChoreAssignment, DashboardChild, UpdateChoreInput, VisibleChore } from "../types";
+import { useModalDismiss } from "./modalDismiss";
+import { ChoreAssignmentEditor } from "./ChoreAssignmentEditor";
 
 type ChoreDetailModalProps = {
   chore: VisibleChore;
   children: DashboardChild[];
   submitting: boolean;
   error: string | null;
+  initialAssignmentChildId?: string | null;
+  currentDayOfWeek: number;
   onClose: () => void;
   onDelete: (choreId: string) => Promise<void>;
   onSubmit: (choreId: string, input: UpdateChoreInput) => Promise<void>;
 };
 
-const weekdayLabels = ["S", "M", "T", "W", "T", "F", "S"];
+const allDays = [0, 1, 2, 3, 4, 5, 6];
 
 export function ChoreDetailModal({
   chore,
   children,
   submitting,
   error,
+  initialAssignmentChildId,
+  currentDayOfWeek,
   onClose,
   onDelete,
   onSubmit
 }: ChoreDetailModalProps) {
   const [title, setTitle] = useState(chore.title);
+  const { backdropProps, closeButtonProps } = useModalDismiss(onClose);
   const [description, setDescription] = useState(chore.description);
   const [pointValue, setPointValue] = useState(String(chore.pointValue));
-  const [assigneeChildId, setAssigneeChildId] = useState(chore.assigneeChildId ?? "");
-  const [scheduleDays, setScheduleDays] = useState<number[]>(chore.scheduledDays);
+  const [assignments, setAssignments] = useState<ChoreAssignment[]>(() => {
+    if (!initialAssignmentChildId) {
+      return chore.assignments;
+    }
+
+    const existing = chore.assignments.find(
+      (assignment) => assignment.childId === initialAssignmentChildId
+    );
+
+    if (existing) {
+      return chore.assignments.map((assignment) =>
+        assignment.childId === initialAssignmentChildId &&
+        !assignment.days.includes(currentDayOfWeek)
+          ? { ...assignment, days: [...assignment.days, currentDayOfWeek].sort((a, b) => a - b) }
+          : assignment
+      );
+    }
+
+    return [
+      ...chore.assignments,
+      { childId: initialAssignmentChildId, days: [currentDayOfWeek] }
+    ].sort((left, right) => left.childId.localeCompare(right.childId));
+  });
+  const [unassignedScheduleDays, setUnassignedScheduleDays] = useState<number[]>(
+    chore.unassignedScheduleDays.length > 0 ? chore.unassignedScheduleDays : allDays
+  );
 
   const canSubmit = useMemo(() => title.trim().length > 0 && Number(pointValue) > 0, [
     pointValue,
     title
   ]);
-
-  const toggleDay = (day: number) => {
-    setScheduleDays((current) =>
-      current.includes(day) ? current.filter((value) => value !== day) : [...current, day].sort()
-    );
-  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -51,8 +76,8 @@ export function ChoreDetailModal({
       title,
       description,
       pointValue: Number(pointValue),
-      assigneeChildId: assigneeChildId || null,
-      scheduleDays
+      assignments,
+      unassignedScheduleDays: assignments.length === 0 ? unassignedScheduleDays : []
     });
   };
 
@@ -61,7 +86,7 @@ export function ChoreDetailModal({
   };
 
   return (
-    <div className="modal-backdrop" role="presentation" onClick={onClose}>
+    <div className="modal-backdrop" {...backdropProps}>
       <section
         className="modal"
         role="dialog"
@@ -74,7 +99,7 @@ export function ChoreDetailModal({
             <p className="modal-eyebrow">Chore Details</p>
             <h2 id="chore-detail-title">{chore.title}</h2>
           </div>
-          <button className="modal-close" type="button" aria-label="Close" onClick={onClose}>
+          <button className="modal-close" type="button" aria-label="Close" {...closeButtonProps}>
             <X aria-hidden="true" />
           </button>
         </header>
@@ -104,52 +129,23 @@ export function ChoreDetailModal({
             />
           </label>
 
-          <div className="field-row">
-            <label className="field">
-              <span>Points</span>
-              <input
-                type="number"
-                min="1"
-                value={pointValue}
-                onChange={(event) => setPointValue(event.target.value)}
-              />
-            </label>
+          <label className="field">
+            <span>Points</span>
+            <input
+              type="number"
+              min="1"
+              value={pointValue}
+              onChange={(event) => setPointValue(event.target.value)}
+            />
+          </label>
 
-            <label className="field">
-              <span>Assignee</span>
-              <select
-                value={assigneeChildId}
-                onChange={(event) => setAssigneeChildId(event.target.value)}
-              >
-                <option value="">Unassigned</option>
-                {children.map((child) => (
-                  <option key={child.id} value={child.id}>
-                    {child.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <div className="field">
-            <span>Schedule</span>
-            <div className="weekday-picker">
-              {weekdayLabels.map((label, day) => {
-                const selected = scheduleDays.includes(day);
-                return (
-                  <button
-                    key={`${label}-${day}`}
-                    className={`weekday-button${selected ? " is-selected" : ""}`}
-                    type="button"
-                    onClick={() => toggleDay(day)}
-                    aria-pressed={selected}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <ChoreAssignmentEditor
+            children={children}
+            assignments={assignments}
+            unassignedScheduleDays={unassignedScheduleDays}
+            onChangeAssignments={setAssignments}
+            onChangeUnassignedScheduleDays={setUnassignedScheduleDays}
+          />
 
           {error && <p className="form-error">{error}</p>}
 

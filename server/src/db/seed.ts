@@ -3,6 +3,7 @@ import type { DatabaseConnection } from "./connection.js";
 type ChildSeed = {
   id: string;
   name: string;
+  avatarKey: string;
   sortOrder: number;
 };
 
@@ -23,9 +24,9 @@ type RewardSeed = {
 };
 
 const childSeedData: ChildSeed[] = [
-  { id: "child-sample-1", name: "Sample Child 1", sortOrder: 1 },
-  { id: "child-sample-2", name: "Sample Child 2", sortOrder: 2 },
-  { id: "child-sample-3", name: "Sample Child 3", sortOrder: 3 }
+  { id: "child-sample-1", name: "Sample Child 1", avatarKey: "adventurer-01", sortOrder: 1 },
+  { id: "child-sample-2", name: "Sample Child 2", avatarKey: "bottts-01", sortOrder: 2 },
+  { id: "child-sample-3", name: "Sample Child 3", avatarKey: "toon-head-01", sortOrder: 3 }
 ];
 
 const choreSeedData: ChoreSeed[] = [
@@ -84,14 +85,17 @@ const rewardSeedData: RewardSeed[] = [
   }
 ];
 
+const allDays = [0, 1, 2, 3, 4, 5, 6];
+
 export function seedDatabase(db: DatabaseConnection) {
   const now = new Date().toISOString();
 
   const insertChild = db.prepare(`
-    INSERT INTO children (id, name, sort_order, created_at, updated_at)
-    VALUES (@id, @name, @sortOrder, @createdAt, @updatedAt)
+    INSERT INTO children (id, name, avatar_key, sort_order, created_at, updated_at)
+    VALUES (@id, @name, @avatarKey, @sortOrder, @createdAt, @updatedAt)
     ON CONFLICT(id) DO UPDATE SET
       name = excluded.name,
+      avatar_key = COALESCE(children.avatar_key, excluded.avatar_key),
       sort_order = excluded.sort_order,
       updated_at = excluded.updated_at
   `);
@@ -111,7 +115,7 @@ export function seedDatabase(db: DatabaseConnection) {
       @title,
       @description,
       @pointValue,
-      @assigneeChildId,
+      NULL,
       1,
       @createdAt,
       @updatedAt
@@ -120,7 +124,7 @@ export function seedDatabase(db: DatabaseConnection) {
       title = excluded.title,
       description = excluded.description,
       point_value = excluded.point_value,
-      assignee_child_id = excluded.assignee_child_id,
+      assignee_child_id = NULL,
       is_active = excluded.is_active,
       updated_at = excluded.updated_at
   `);
@@ -133,6 +137,16 @@ export function seedDatabase(db: DatabaseConnection) {
   const deleteScheduleDaysForChore = db.prepare(`
     DELETE FROM chore_schedule_days
     WHERE chore_id = ?
+  `);
+
+  const deleteAssignmentsForChore = db.prepare(`
+    DELETE FROM chore_assignments
+    WHERE chore_id = ?
+  `);
+
+  const insertAssignment = db.prepare(`
+    INSERT INTO chore_assignments (id, chore_id, child_id, day_of_week)
+    VALUES (@id, @choreId, @childId, @dayOfWeek)
   `);
 
   const insertReward = db.prepare(`
@@ -196,8 +210,23 @@ export function seedDatabase(db: DatabaseConnection) {
       });
 
       deleteScheduleDaysForChore.run(chore.id);
+      deleteAssignmentsForChore.run(chore.id);
 
-      chore.scheduleDays.forEach((dayOfWeek) => {
+      if (chore.assigneeChildId) {
+        const assignedDays = chore.scheduleDays.length > 0 ? chore.scheduleDays : allDays;
+        assignedDays.forEach((dayOfWeek) => {
+          insertAssignment.run({
+            id: `${chore.id}-${chore.assigneeChildId}-day-${dayOfWeek}`,
+            choreId: chore.id,
+            childId: chore.assigneeChildId,
+            dayOfWeek
+          });
+        });
+        continue;
+      }
+
+      const unassignedDays = chore.scheduleDays.length > 0 ? chore.scheduleDays : allDays;
+      unassignedDays.forEach((dayOfWeek) => {
         insertScheduleDay.run({
           id: `${chore.id}-day-${dayOfWeek}`,
           choreId: chore.id,

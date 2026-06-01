@@ -20,6 +20,7 @@ import {
   createChild,
   listChildren,
   parseChildInput,
+  parseChildUpdateInput,
   updateChild
 } from "./services/children.js";
 import {
@@ -94,7 +95,7 @@ app.post("/api/children", (req, res) => {
 
 app.patch("/api/children/:id", (req, res) => {
   try {
-    updateChild(db, req.params.id, parseChildInput(req.body));
+    updateChild(db, req.params.id, parseChildUpdateInput(req.body));
     res.status(204).send();
   } catch (error) {
     if (error instanceof ChildValidationError) {
@@ -168,7 +169,8 @@ app.patch("/api/chores/:id/assign", (req, res) => {
 app.post("/api/chores/:id/complete", (req, res) => {
   try {
     const now = getEffectiveNow(req);
-    completeChore(db, req.params.id, getCurrentLocalDateString(now), now.getDay());
+    const childId = typeof req.body?.childId === "string" ? req.body.childId : "";
+    completeChore(db, req.params.id, childId, getCurrentLocalDateString(now), now.getDay());
     res.status(204).send();
   } catch (error) {
     if (error instanceof ChoreValidationError) {
@@ -183,7 +185,8 @@ app.post("/api/chores/:id/complete", (req, res) => {
 app.post("/api/chores/:id/uncomplete", (req, res) => {
   try {
     const now = getEffectiveNow(req);
-    uncompleteChore(db, req.params.id, getCurrentLocalDateString(now));
+    const childId = typeof req.body?.childId === "string" ? req.body.childId : "";
+    uncompleteChore(db, req.params.id, childId, getCurrentLocalDateString(now));
     res.status(204).send();
   } catch (error) {
     if (error instanceof ChoreValidationError) {

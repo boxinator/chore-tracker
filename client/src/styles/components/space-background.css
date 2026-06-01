@@ -4,51 +4,47 @@
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
-  background: #00030a;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(89, 219, 255, 0.22), transparent 0 24%),
+    repeating-linear-gradient(
+      0deg,
+      rgba(69, 229, 255, 0.08) 0 8px,
+      rgba(167, 139, 250, 0.08) 8px 16px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 221, 116, 0.05) 0 8px,
+      rgba(25, 37, 115, 0.05) 8px 16px
+    ),
+    #18206a;
 }
 
-[data-theme="default"] .space-background {
+[data-theme="default"] .space-background,
+[data-theme="quest"] .space-background {
   display: none;
 }
 
-.space-background--epic {
-  background:
-    radial-gradient(circle at 100% 100%, rgba(76, 201, 240, 0.08), transparent 0 50vh),
-    linear-gradient(180deg, rgba(0, 3, 10, 0.02), rgba(0, 3, 10, 0.22)),
-    var(--earth-image) calc(100% + 50vh) calc(100% + 50vh) / auto 100vh no-repeat,
-    #00030a;
-  animation: epic-drift 90s ease-in-out infinite alternate;
-}
-
-.space-background--epic::before {
+.space-background--overworld::before {
   position: absolute;
   inset: 0;
   content: "";
   background:
-    radial-gradient(circle at 100% 100%, transparent 0 48vh, rgba(0, 3, 10, 0.08) 64vh, rgba(0, 3, 10, 0.48) 104vh),
-    linear-gradient(180deg, rgba(0, 3, 10, 0.42), transparent 24%, rgba(0, 3, 10, 0.52));
+    linear-gradient(180deg, rgba(12, 18, 74, 0.06), rgba(9, 14, 58, 0.26)),
+    var(--space-overworld-image) center top / max(100vw, 1500px) auto no-repeat;
 }
 
-.space-background--epic::after {
+.space-background--overworld::after {
   position: absolute;
   inset: 0;
   content: "";
-  background: rgba(0, 3, 10, 0.04);
-  backdrop-filter: saturate(1.04) contrast(1.03);
+  background:
+    radial-gradient(circle at 50% 26%, transparent 0 38vw, rgba(247, 209, 255, 0.08) 56vw),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 24%, rgba(13, 18, 58, 0.26));
+  backdrop-filter: saturate(1.08) contrast(1.02);
 }
 
-@keyframes epic-drift {
-  to {
-    background-position:
-      center,
-      center,
-      calc(100% + 49vh) calc(100% + 49vh),
-      center;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .space-background--epic {
-    animation: none;
+@media (min-height: 950px) {
+  .space-background--overworld::before {
+    background-size: auto min(78vh, 980px);
   }
 }

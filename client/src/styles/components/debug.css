@@ -1,8 +1,4 @@
 .debug-dock {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  z-index: 8;
   max-width: min(420px, calc(100vw - 36px));
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -85,7 +81,7 @@
 }
 
 @media (max-width: 720px) {
-  .debug-dock {
+  .floating-tools {
     right: 12px;
     bottom: 12px;
   }

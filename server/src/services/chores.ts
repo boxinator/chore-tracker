@@ -2,16 +2,26 @@ import crypto from "node:crypto";
 import { z } from "zod";
 import type { DatabaseConnection } from "../db/connection.js";
 
+const allDays = [0, 1, 2, 3, 4, 5, 6];
+
 const choreInputSchema = z.object({
   title: z.string().trim().min(1).max(120),
   description: z.string().max(1000).optional().default(""),
   pointValue: z.coerce.number().int().min(1).max(1000),
-  assigneeChildId: z.string().trim().min(1).nullable().optional().default(null),
-  scheduleDays: z
+  assignments: z
+    .array(
+      z.object({
+        childId: z.string().trim().min(1),
+        days: z.array(z.number().int().min(0).max(6)).min(1).max(7)
+      })
+    )
+    .optional()
+    .default([]),
+  unassignedScheduleDays: z
     .array(z.number().int().min(0).max(6))
     .max(7)
     .optional()
-    .default([])
+    .default(allDays)
 });
 
 const createChoreSchema = choreInputSchema;
@@ -36,10 +46,28 @@ function normalizeChoreInput(
     throw new ChoreValidationError(result.error.issues[0]?.message ?? "Invalid chore input");
   }
 
+  const assignmentMap = result.data.assignments.reduce<Map<string, Set<number>>>(
+    (map, assignment) => {
+      const days = map.get(assignment.childId) ?? new Set<number>();
+      for (const day of assignment.days) {
+        days.add(day);
+      }
+      map.set(assignment.childId, days);
+      return map;
+    },
+    new Map()
+  );
+
   return {
     ...result.data,
     description: result.data.description?.trim() ?? "",
-    scheduleDays: [...new Set(result.data.scheduleDays)].sort((a, b) => a - b)
+    assignments: [...assignmentMap.entries()]
+      .map(([childId, days]) => ({
+        childId,
+        days: [...days].sort((a, b) => a - b)
+      }))
+      .sort((left, right) => left.childId.localeCompare(right.childId)),
+    unassignedScheduleDays: [...new Set(result.data.unassignedScheduleDays)].sort((a, b) => a - b)
   };
 }
 
@@ -66,8 +94,10 @@ export function createChore(db: DatabaseConnection, input: CreateChoreInput) {
   const choreId = `chore-${crypto.randomUUID()}`;
 
   const childExistsStatement = db.prepare("SELECT 1 FROM children WHERE id = ? LIMIT 1");
-  if (input.assigneeChildId && !childExistsStatement.get(input.assigneeChildId)) {
-    throw new ChoreValidationError("Selected child does not exist");
+  for (const assignment of input.assignments) {
+    if (!childExistsStatement.get(assignment.childId)) {
+      throw new ChoreValidationError("Selected child does not exist");
+    }
   }
 
   const insertChore = db.prepare(`
@@ -88,19 +118,35 @@ export function createChore(db: DatabaseConnection, input: CreateChoreInput) {
     VALUES (?, ?, ?)
   `);
 
+  const insertAssignment = db.prepare(`
+    INSERT INTO chore_assignments (id, chore_id, child_id, day_of_week)
+    VALUES (?, ?, ?, ?)
+  `);
+
   const transaction = db.transaction(() => {
     insertChore.run(
       choreId,
       input.title,
       input.description,
       input.pointValue,
-      input.assigneeChildId,
+      null,
       now,
       now
     );
 
-    for (const dayOfWeek of input.scheduleDays) {
+    for (const dayOfWeek of input.assignments.length === 0 ? input.unassignedScheduleDays : []) {
       insertScheduleDay.run(`schedule-${crypto.randomUUID()}`, choreId, dayOfWeek);
+    }
+
+    for (const assignment of input.assignments) {
+      for (const dayOfWeek of assignment.days) {
+        insertAssignment.run(
+          `assignment-${crypto.randomUUID()}`,
+          choreId,
+          assignment.childId,
+          dayOfWeek
+        );
+      }
     }
   });
 
@@ -111,8 +157,10 @@ export function createChore(db: DatabaseConnection, input: CreateChoreInput) {
 
 export function updateChore(db: DatabaseConnection, choreId: string, input: UpdateChoreInput) {
   const childExistsStatement = db.prepare("SELECT 1 FROM children WHERE id = ? LIMIT 1");
-  if (input.assigneeChildId && !childExistsStatement.get(input.assigneeChildId)) {
-    throw new ChoreValidationError("Selected child does not exist");
+  for (const assignment of input.assignments) {
+    if (!childExistsStatement.get(assignment.childId)) {
+      throw new ChoreValidationError("Selected child does not exist");
+    }
   }
 
   const choreExists = db
@@ -128,6 +176,10 @@ export function updateChore(db: DatabaseConnection, choreId: string, input: Upda
     INSERT INTO chore_schedule_days (id, chore_id, day_of_week)
     VALUES (?, ?, ?)
   `);
+  const insertAssignment = db.prepare(`
+    INSERT INTO chore_assignments (id, chore_id, child_id, day_of_week)
+    VALUES (?, ?, ?, ?)
+  `);
 
   const transaction = db.transaction(() => {
     db.prepare(
@@ -136,7 +188,7 @@ export function updateChore(db: DatabaseConnection, choreId: string, input: Upda
         SET title = ?,
             description = ?,
             point_value = ?,
-            assignee_child_id = ?,
+            assignee_child_id = NULL,
             updated_at = ?
         WHERE id = ?
       `
@@ -144,15 +196,26 @@ export function updateChore(db: DatabaseConnection, choreId: string, input: Upda
       input.title,
       input.description,
       input.pointValue,
-      input.assigneeChildId,
       now,
       choreId
     );
 
     db.prepare("DELETE FROM chore_schedule_days WHERE chore_id = ?").run(choreId);
+    db.prepare("DELETE FROM chore_assignments WHERE chore_id = ?").run(choreId);
 
-    for (const dayOfWeek of input.scheduleDays) {
+    for (const dayOfWeek of input.assignments.length === 0 ? input.unassignedScheduleDays : []) {
       insertScheduleDay.run(`schedule-${crypto.randomUUID()}`, choreId, dayOfWeek);
+    }
+
+    for (const assignment of input.assignments) {
+      for (const dayOfWeek of assignment.days) {
+        insertAssignment.run(
+          `assignment-${crypto.randomUUID()}`,
+          choreId,
+          assignment.childId,
+          dayOfWeek
+        );
+      }
     }
   });
 
@@ -199,18 +262,34 @@ export function assignChore(db: DatabaseConnection, choreId: string, childId: st
     throw new ChoreValidationError("Chore not found");
   }
 
-  db.prepare(
-    `
-      UPDATE chores
-      SET assignee_child_id = ?, updated_at = ?
-      WHERE id = ?
-    `
-  ).run(childId, new Date().toISOString(), choreId);
+  const now = new Date().toISOString();
+  const transaction = db.transaction(() => {
+    db.prepare("DELETE FROM chore_schedule_days WHERE chore_id = ?").run(choreId);
+    const insertAssignment = db.prepare(`
+      INSERT OR IGNORE INTO chore_assignments (id, chore_id, child_id, day_of_week)
+      VALUES (?, ?, ?, ?)
+    `);
+
+    for (const dayOfWeek of [0, 1, 2, 3, 4, 5, 6]) {
+      insertAssignment.run(`assignment-${crypto.randomUUID()}`, choreId, childId, dayOfWeek);
+    }
+
+    db.prepare(
+      `
+        UPDATE chores
+        SET updated_at = ?
+        WHERE id = ?
+      `
+    ).run(now, choreId);
+  });
+
+  transaction();
 }
 
 export function completeChore(
   db: DatabaseConnection,
   choreId: string,
+  childId: string,
   currentDateLocal: string,
   dayOfWeek: number
 ) {
@@ -221,44 +300,28 @@ export function completeChore(
           ch.id,
           ch.title,
           ch.point_value,
-          ch.assignee_child_id,
           c.name as child_name
         FROM chores ch
-        LEFT JOIN children c ON c.id = ch.assignee_child_id
+        INNER JOIN chore_assignments ca
+          ON ca.chore_id = ch.id
+          AND ca.child_id = ?
+          AND ca.day_of_week = ?
+        INNER JOIN children c ON c.id = ca.child_id
         WHERE ch.id = ? AND ch.is_active = 1
         LIMIT 1
       `
     )
-    .get(choreId) as
+    .get(childId, dayOfWeek, choreId) as
     | {
         id: string;
         title: string;
         point_value: number;
-        assignee_child_id: string | null;
         child_name: string | null;
       }
     | undefined;
 
   if (!chore) {
-    throw new ChoreValidationError("Chore not found");
-  }
-
-  if (!chore.assignee_child_id || !chore.child_name) {
-    throw new ChoreValidationError("Assign this chore before completing it");
-  }
-
-  const scheduleDays = db
-    .prepare(
-      `
-        SELECT day_of_week
-        FROM chore_schedule_days
-        WHERE chore_id = ?
-      `
-    )
-    .all(choreId) as Array<{ day_of_week: number }>;
-
-  if (scheduleDays.length > 0 && !scheduleDays.some((row) => row.day_of_week === dayOfWeek)) {
-    throw new ChoreValidationError("This chore is not active today");
+    throw new ChoreValidationError("This chore is not assigned to this child today");
   }
 
   const existingCompletion = db
@@ -267,12 +330,13 @@ export function completeChore(
         SELECT id
         FROM chore_completions
         WHERE chore_id = ?
+          AND child_id = ?
           AND completion_date_local = ?
           AND status = 'completed'
         LIMIT 1
       `
     )
-    .get(choreId, currentDateLocal);
+    .get(choreId, childId, currentDateLocal);
 
   if (existingCompletion) {
     throw new ChoreValidationError("This chore is already completed today");
@@ -301,7 +365,7 @@ export function completeChore(
       `
     ).run(
       ledgerEntryId,
-      chore.assignee_child_id,
+      childId,
       chore.child_name,
       chore.id,
       chore.title,
@@ -326,7 +390,7 @@ export function completeChore(
     ).run(
       completionId,
       chore.id,
-      chore.assignee_child_id,
+      childId,
       currentDateLocal,
       now,
       ledgerEntryId
@@ -336,7 +400,12 @@ export function completeChore(
   transaction();
 }
 
-export function uncompleteChore(db: DatabaseConnection, choreId: string, currentDateLocal: string) {
+export function uncompleteChore(
+  db: DatabaseConnection,
+  choreId: string,
+  childId: string,
+  currentDateLocal: string
+) {
   const completion = db
     .prepare(
       `
@@ -350,12 +419,13 @@ export function uncompleteChore(db: DatabaseConnection, choreId: string, current
         FROM chore_completions cc
         INNER JOIN ledger_entries le ON le.id = cc.ledger_entry_id
         WHERE cc.chore_id = ?
+          AND cc.child_id = ?
           AND cc.completion_date_local = ?
           AND cc.status = 'completed'
         LIMIT 1
       `
     )
-    .get(choreId, currentDateLocal) as
+    .get(choreId, childId, currentDateLocal) as
     | {
         id: string;
         child_id: string;

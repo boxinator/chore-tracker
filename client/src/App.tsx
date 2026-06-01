@@ -16,7 +16,8 @@ import type {
   UpdateChoreInput
 } from "./types";
 
-type ThemeName = "default" | "space";
+type ThemeName = "default" | "space" | "quest";
+const themeCycle: ThemeName[] = ["space", "quest", "default"];
 
 function formatDateInputValue(date: Date) {
   const year = date.getFullYear();
@@ -34,7 +35,7 @@ function formatTimeInputValue(date: Date) {
 export function App() {
   const [theme, setTheme] = useState<ThemeName>(() => {
     const storedTheme = window.localStorage.getItem("chore-theme");
-    return storedTheme === "default" || storedTheme === "space" ? storedTheme : "space";
+    return themeCycle.includes(storedTheme as ThemeName) ? (storedTheme as ThemeName) : "space";
   });
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(null);
@@ -44,6 +45,7 @@ export function App() {
   const [addSubmitting, setAddSubmitting] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const [detailModalChoreId, setDetailModalChoreId] = useState<string | null>(null);
+  const [detailAssignmentChildId, setDetailAssignmentChildId] = useState<string | null>(null);
   const [detailSubmitting, setDetailSubmitting] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
   const [assignmentPendingChoreId, setAssignmentPendingChoreId] = useState<string | null>(null);
@@ -55,6 +57,9 @@ export function App() {
   const [manageError, setManageError] = useState<string | null>(null);
   const [managedChildren, setManagedChildren] = useState<Child[]>([]);
   const [managedRewards, setManagedRewards] = useState<Reward[]>([]);
+  const [avatarPickerChild, setAvatarPickerChild] = useState<Child | null>(null);
+  const [avatarPickerSaving, setAvatarPickerSaving] = useState(false);
+  const [avatarPickerError, setAvatarPickerError] = useState<string | null>(null);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [historyEntries, setHistoryEntries] = useState<HistoryEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -107,7 +112,7 @@ export function App() {
 
   const handleToggleTheme = () => {
     setTheme((current) => {
-      const next = current === "space" ? "default" : "space";
+      const next = themeCycle[(themeCycle.indexOf(current) + 1) % themeCycle.length];
       window.localStorage.setItem("chore-theme", next);
       return next;
     });
@@ -242,6 +247,7 @@ export function App() {
     }
 
     setDetailModalChoreId(null);
+    setDetailAssignmentChildId(null);
     setDetailError(null);
     await fetchData();
     showSuccess("Chore deleted");
@@ -266,6 +272,7 @@ export function App() {
       }
 
       setDetailModalChoreId(null);
+      setDetailAssignmentChildId(null);
       await fetchData();
       flashChore(id);
       showSuccess("Chore updated");
@@ -276,36 +283,19 @@ export function App() {
     }
   };
 
-  const handleAssignChore = async (id: string, childId: string) => {
-    try {
-      setAssignmentPendingChoreId(id);
-
-      const response = await apiFetch(`/api/chores/${id}/assign`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ childId })
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        setError(payload?.error ?? `Assign chore failed with ${response.status}`);
-        return;
-      }
-
-      await fetchData();
-      flashChore(id);
-      showSuccess("Chore assigned");
-    } finally {
-      setAssignmentPendingChoreId(null);
+  const handleToggleComplete = async (id: string, done: boolean, childId: string | null) => {
+    if (!childId) {
+      setError("Assign this chore before completing it");
+      return;
     }
-  };
 
-  const handleToggleComplete = async (id: string, done: boolean) => {
     const endpoint = done ? "uncomplete" : "complete";
     const response = await apiFetch(`/api/chores/${id}/${endpoint}`, {
-      method: "POST"
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ childId })
     });
 
     if (!response.ok) {
@@ -412,6 +402,36 @@ export function App() {
       throw err;
     } finally {
       setManageSaving(false);
+    }
+  };
+
+  const handleSelectAvatar = async (avatarKey: string) => {
+    if (!avatarPickerChild) {
+      return;
+    }
+
+    try {
+      setAvatarPickerSaving(true);
+      setAvatarPickerError(null);
+
+      const response = await apiFetch(`/api/children/${avatarPickerChild.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarKey })
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? `Update avatar failed with ${response.status}`);
+      }
+
+      await Promise.all([fetchData(), refreshManagementData()]);
+      setAvatarPickerChild(null);
+      showSuccess("Avatar updated");
+    } catch (err) {
+      setAvatarPickerError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setAvatarPickerSaving(false);
     }
   };
 
@@ -552,6 +572,7 @@ export function App() {
       }}
       onSubmitChore={handleSubmitChore}
       detailModalChoreId={detailModalChoreId}
+      detailAssignmentChildId={detailAssignmentChildId}
       detailSubmitting={detailSubmitting}
       detailError={detailError}
       highlightedChoreId={highlightedChoreId}
@@ -565,6 +586,7 @@ export function App() {
       onOpenDetails={(id) => {
         setError(null);
         setDetailError(null);
+        setDetailAssignmentChildId(null);
         setDetailModalChoreId(id);
       }}
       onOpenManage={() => {
@@ -578,6 +600,22 @@ export function App() {
         setManageModalOpen(false);
         setManageError(null);
       }}
+      avatarPickerChild={avatarPickerChild}
+      avatarPickerSaving={avatarPickerSaving}
+      avatarPickerError={avatarPickerError}
+      onOpenAvatarPicker={(child) => {
+        setAvatarPickerChild(child);
+        setAvatarPickerError(null);
+      }}
+      onCloseAvatarPicker={() => {
+        if (avatarPickerSaving) {
+          return;
+        }
+
+        setAvatarPickerChild(null);
+        setAvatarPickerError(null);
+      }}
+      onSelectAvatar={handleSelectAvatar}
       onCreateChild={handleCreateChild}
       onUpdateChild={handleUpdateChild}
       onCreateReward={handleCreateReward}
@@ -589,11 +627,11 @@ export function App() {
         }
 
         setDetailError(null);
+        setDetailAssignmentChildId(null);
         setDetailModalChoreId(null);
       }}
       onSubmitChoreUpdate={handleUpdateChore}
       onDeleteChore={handleDeleteChore}
-      onAssignChore={handleAssignChore}
       assignmentPendingChoreId={assignmentPendingChoreId}
       onToggleComplete={handleToggleComplete}
       historyModalOpen={historyModalOpen}

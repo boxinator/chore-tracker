@@ -1,0 +1,27 @@
+.quest-background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  display: none;
+  background: #9bb641;
+}
+
+[data-theme="quest"] .quest-background {
+  display: block;
+}
+
+.quest-background::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: var(--quest-overworld-image) center top / max(100vw, 1500px) auto no-repeat;
+  image-rendering: auto;
+}
+
+@media (min-height: 950px) {
+  .quest-background::before {
+    background-size: auto min(78vh, 980px);
+  }
+}
