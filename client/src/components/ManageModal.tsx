@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Palette, X } from "lucide-react";
+import { Palette, X, Zap } from "lucide-react";
 import { Avatar } from "./Avatar";
 import type { Child, ChildInput, Reward, RewardInput } from "../types";
 import { useModalDismiss } from "./modalDismiss";
@@ -22,11 +22,26 @@ type ManageModalProps = {
 };
 
 type TabKey = "children" | "rewards";
+type RewardSubtabKey = "active" | "inactive";
 
 const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "rewards", label: "Rewards" },
   { key: "children", label: "People" }
 ];
+
+const rewardSubtabs: Array<{ key: RewardSubtabKey; label: string }> = [
+  { key: "active", label: "Active" },
+  { key: "inactive", label: "Inactive" }
+];
+
+function RewardCostRibbon({ cost }: { cost: number }) {
+  return (
+    <span className="reward-cost-ribbon">
+      <Zap aria-hidden="true" />
+      {cost} pts
+    </span>
+  );
+}
 
 export function ManageModal({
   children,
@@ -45,6 +60,7 @@ export function ManageModal({
   onDeactivateReward
 }: ManageModalProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("rewards");
+  const [activeRewardSubtab, setActiveRewardSubtab] = useState<RewardSubtabKey>("active");
   const { backdropProps, closeButtonProps } = useModalDismiss(onClose);
   const [childDraftName, setChildDraftName] = useState("");
   const [editingChildId, setEditingChildId] = useState<string | null>(null);
@@ -90,19 +106,21 @@ export function ManageModal({
           </div>
         </header>
 
-        <div className="segmented-control" role="tablist" aria-label="Management sections">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              className={`segment-button${activeTab === tab.key ? " is-active" : ""}`}
-              type="button"
-              role="tab"
-              aria-selected={activeTab === tab.key}
-              onClick={() => setActiveTab(tab.key)}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="manage-tabbar">
+          <div className="segmented-control" role="tablist" aria-label="Management sections">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                className={`segment-button${activeTab === tab.key ? " is-active" : ""}`}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === tab.key}
+                onClick={() => setActiveTab(tab.key)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {error && <p className="form-error">{error}</p>}
@@ -231,127 +249,151 @@ export function ManageModal({
           <div className="manage-grid">
             <section className="manage-section">
               <header className="manage-section-header">
-                <h3>Rewards</h3>
+                <div className="manage-section-title-row">
+                  <h3>Rewards</h3>
+                  <div className="manage-filter" role="tablist" aria-label="Reward status">
+                    {rewardSubtabs.map((tab) => (
+                      <button
+                        key={tab.key}
+                        className={`manage-filter-button${activeRewardSubtab === tab.key ? " is-active" : ""}`}
+                        type="button"
+                        role="tab"
+                        aria-selected={activeRewardSubtab === tab.key}
+                        onClick={() => {
+                          setEditingRewardId(null);
+                          setActiveRewardSubtab(tab.key);
+                        }}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <p>Active rewards show in each kid's reward list.</p>
               </header>
 
-              <div className="manage-list">
-                {activeRewards.map((reward) => {
-                  const editing = editingRewardId === reward.id;
-                  return (
-                    <article key={reward.id} className="manage-item manage-item-stack">
-                      {!editing && (
-                        <>
-                          <div className="manage-copy">
-                            <strong>{reward.name}</strong>
-                            <p>{reward.cost} pts - {reward.description || "No description yet"}</p>
-                          </div>
-                          <div className="inline-actions">
-                            <button
-                              className="secondary-button"
-                              type="button"
-                              onClick={() => {
-                                setEditingRewardId(reward.id);
-                                setEditingRewardName(reward.name);
-                                setEditingRewardDescription(reward.description);
-                                setEditingRewardCost(String(reward.cost));
-                              }}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              className="icon-text-button danger-button"
-                              type="button"
-                              disabled={saving}
-                              onClick={() =>
-                                void onDeactivateReward(reward.id).catch(() => undefined)
-                              }
-                            >
-                              Deactivate
-                            </button>
-                          </div>
-                        </>
-                      )}
+              {activeRewardSubtab === "active" && (
+                <div className="manage-list">
+                  {activeRewards.map((reward) => {
+                    const editing = editingRewardId === reward.id;
+                    return (
+                      <article key={reward.id} className="manage-item manage-item-stack">
+                        {!editing && (
+                          <>
+                            <div className="manage-copy">
+                              <strong>{reward.name}</strong>
+                              <p>{reward.description || "No description yet"}</p>
+                            </div>
+                            <RewardCostRibbon cost={reward.cost} />
+                            <div className="inline-actions">
+                              <button
+                                className="secondary-button"
+                                type="button"
+                                onClick={() => {
+                                  setEditingRewardId(reward.id);
+                                  setEditingRewardName(reward.name);
+                                  setEditingRewardDescription(reward.description);
+                                  setEditingRewardCost(String(reward.cost));
+                                }}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                className="icon-text-button danger-button"
+                                type="button"
+                                disabled={saving}
+                                onClick={() =>
+                                  void onDeactivateReward(reward.id).catch(() => undefined)
+                                }
+                              >
+                                Deactivate
+                              </button>
+                            </div>
+                          </>
+                        )}
 
-                      {editing && (
-                        <form
-                          className="modal-form manage-form"
-                          onSubmit={(event) => {
-                            event.preventDefault();
-                            void onUpdateReward(reward.id, {
-                              name: editingRewardName,
-                              description: editingRewardDescription,
-                              cost: Number(editingRewardCost)
-                            })
-                              .then(() => {
-                                setEditingRewardId(null);
-                                setEditingRewardName("");
-                                setEditingRewardDescription("");
-                                setEditingRewardCost("10");
+                        {editing && (
+                          <form
+                            className="modal-form manage-form"
+                            onSubmit={(event) => {
+                              event.preventDefault();
+                              void onUpdateReward(reward.id, {
+                                name: editingRewardName,
+                                description: editingRewardDescription,
+                                cost: Number(editingRewardCost)
                               })
-                              .catch(() => undefined);
-                          }}
-                        >
-                          <label className="field">
-                            <span>Name</span>
-                            <input
-                              value={editingRewardName}
-                              onChange={(event) => setEditingRewardName(event.target.value)}
-                            />
-                          </label>
-                          <label className="field">
-                            <span>Description</span>
-                            <textarea
-                              rows={3}
-                              value={editingRewardDescription}
-                              onChange={(event) =>
-                                setEditingRewardDescription(event.target.value)
-                              }
-                            />
-                          </label>
-                          <label className="field">
-                            <span>Cost</span>
-                            <input
-                              type="number"
-                              min="1"
-                              value={editingRewardCost}
-                              onChange={(event) => setEditingRewardCost(event.target.value)}
-                            />
-                          </label>
-                          <div className="inline-actions">
-                            <button
-                              className="secondary-button"
-                              type="button"
-                              onClick={() => setEditingRewardId(null)}
-                            >
-                              Cancel
-                            </button>
-                            <button className="primary-button" type="submit" disabled={saving}>
-                              Save
-                            </button>
-                          </div>
-                        </form>
-                      )}
-                    </article>
-                  );
-                })}
+                                .then(() => {
+                                  setEditingRewardId(null);
+                                  setEditingRewardName("");
+                                  setEditingRewardDescription("");
+                                  setEditingRewardCost("10");
+                                })
+                                .catch(() => undefined);
+                            }}
+                          >
+                            <label className="field">
+                              <span>Name</span>
+                              <input
+                                value={editingRewardName}
+                                onChange={(event) => setEditingRewardName(event.target.value)}
+                              />
+                            </label>
+                            <label className="field">
+                              <span>Description</span>
+                              <textarea
+                                rows={3}
+                                value={editingRewardDescription}
+                                onChange={(event) =>
+                                  setEditingRewardDescription(event.target.value)
+                                }
+                              />
+                            </label>
+                            <label className="field">
+                              <span>Cost</span>
+                              <input
+                                type="number"
+                                min="1"
+                                value={editingRewardCost}
+                                onChange={(event) => setEditingRewardCost(event.target.value)}
+                              />
+                            </label>
+                            <div className="inline-actions">
+                              <button
+                                className="secondary-button"
+                                type="button"
+                                onClick={() => setEditingRewardId(null)}
+                              >
+                                Cancel
+                              </button>
+                              <button className="primary-button" type="submit" disabled={saving}>
+                                Save
+                              </button>
+                            </div>
+                          </form>
+                        )}
+                      </article>
+                    );
+                  })}
 
-                {inactiveRewards.length > 0 && (
-                  <div className="manage-inactive">
-                    <strong>Inactive rewards</strong>
-                    <div className="manage-list">
-                      {inactiveRewards.map((reward) => (
-                        <article key={reward.id} className="manage-item is-muted">
-                          <div className="manage-copy">
-                            <strong>{reward.name}</strong>
-                            <p>{reward.cost} pts - Inactive</p>
-                          </div>
-                        </article>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+                  {activeRewards.length === 0 && <p className="empty-copy">No active rewards yet.</p>}
+                </div>
+              )}
+
+              {activeRewardSubtab === "inactive" && (
+                <div className="manage-list">
+                  {inactiveRewards.map((reward) => (
+                    <article key={reward.id} className="manage-item is-muted manage-reward-row">
+                      <div className="manage-copy">
+                        <strong>{reward.name}</strong>
+                        <p>{reward.description || "No description yet"}</p>
+                      </div>
+                      <RewardCostRibbon cost={reward.cost} />
+                    </article>
+                  ))}
+
+                  {inactiveRewards.length === 0 && <p className="empty-copy">No inactive rewards yet.</p>}
+                </div>
+              )}
             </section>
 
             <section className="manage-section">

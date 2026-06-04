@@ -183,6 +183,33 @@
   }
 }
 
+@media (min-width: 1000px) and (max-width: 1280px) {
+  .icon-button,
+  .modal-close,
+  .debug-float-button,
+  .scroll-button {
+    width: 42px;
+    min-width: 42px;
+  }
+
+  .primary-button,
+  .secondary-button,
+  .icon-text-button,
+  .modal-close {
+    min-height: 40px;
+    padding: 0 12px;
+  }
+
+  .toolbar-button {
+    min-height: 38px;
+  }
+
+  .reward-button,
+  .text-button {
+    min-height: 38px;
+  }
+}
+
 @media (max-width: 720px) {
   .primary-button,
   .secondary-button,

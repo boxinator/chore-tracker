@@ -66,7 +66,7 @@ export function RewardModal({
                     <strong>{reward.name}</strong>
                     <p>{reward.description}</p>
                   </div>
-                  <span className="points-pill">
+                  <span className="reward-cost-ribbon">
                     <Zap aria-hidden="true" />
                     {reward.cost} pts
                   </span>
@@ -85,7 +85,7 @@ export function RewardModal({
                     <h3>{selectedReward.name}</h3>
                     <p>{selectedReward.description}</p>
                   </div>
-                  <span className="points-pill reward-detail-cost">
+                  <span className="reward-cost-ribbon reward-detail-cost">
                     <Zap aria-hidden="true" />
                     {selectedReward.cost} pts
                   </span>

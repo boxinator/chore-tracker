@@ -196,6 +196,55 @@
   }
 }
 
+@media (min-width: 1000px) and (max-width: 1280px) {
+  .chore-card {
+    min-height: 162px;
+    gap: 10px;
+    padding: 48px 12px 12px;
+  }
+
+  .points-ribbon,
+  .complete-pill {
+    top: 12px;
+    min-height: 30px;
+    font-size: 0.84rem;
+  }
+
+  .points-ribbon {
+    left: 12px;
+    padding: 0 9px;
+  }
+
+  .complete-pill {
+    right: 12px;
+    max-width: calc(100% - 104px);
+    padding: 0 9px;
+  }
+
+  .chore-detail-button {
+    min-height: 54px;
+    padding: 4px 0 2px;
+  }
+
+  .chore-copy h3 {
+    font-size: 0.95rem;
+  }
+
+  .chore-copy p {
+    margin-top: 4px;
+    font-size: 0.82rem;
+  }
+
+  .card-actions {
+    gap: 6px;
+  }
+
+  .card-actions .danger-button {
+    width: 42px;
+    min-width: 42px;
+  }
+}
+
 @keyframes celebrate-card {
   0% {
     transform: scale(0.985);

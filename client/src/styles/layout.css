@@ -1,5 +1,6 @@
 .app-root {
   min-height: 100vh;
+  min-height: 100dvh;
   color: var(--color-text);
   background: var(--color-bg);
   isolation: isolate;
@@ -9,6 +10,7 @@
   position: relative;
   z-index: 1;
   height: 100vh;
+  height: 100dvh;
   padding: 24px;
   display: grid;
   grid-template-rows: auto auto 1fr;
@@ -257,6 +259,59 @@
     display: grid;
     grid-template-columns: var(--control-height) minmax(160px, 1fr);
     align-items: start;
+  }
+}
+
+@media (min-width: 1000px) and (max-width: 1280px) {
+  .app-shell {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .topbar {
+    align-items: center;
+    padding: 10px 12px;
+    gap: 12px;
+  }
+
+  .topbar-copy,
+  .title-block {
+    gap: 4px;
+  }
+
+  .topbar h1 {
+    font-size: 1.65rem;
+  }
+
+  .topbar-tools {
+    gap: 8px;
+  }
+
+  .board-date {
+    min-height: 38px;
+    padding: 0 10px;
+    font-size: 0.9rem;
+  }
+
+  .status-inline {
+    min-height: 24px;
+    font-size: 0.9rem;
+  }
+
+  .board {
+    grid-auto-columns: minmax(260px, 1fr);
+    gap: 12px;
+    padding-bottom: 0;
+  }
+
+  .floating-tools {
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .floating-tool-button {
+    width: 42px;
+    min-width: 42px;
   }
 }
 

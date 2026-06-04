@@ -156,6 +156,51 @@
   border-radius: var(--radius-sm);
 }
 
+@media (min-width: 1000px) and (max-width: 1280px) {
+  .lane {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .lane-header,
+  .lane-title-group {
+    gap: 10px;
+  }
+
+  .lane-header h2 {
+    font-size: 1.05rem;
+  }
+
+  .lane-header p {
+    margin-top: 3px;
+    font-size: 0.86rem;
+  }
+
+  .lane-list {
+    gap: 10px;
+    scroll-padding-block: 10px;
+  }
+
+  .lane-scroll-button {
+    right: 8px;
+    width: 40px;
+    min-width: 40px;
+  }
+
+  .lane-scroll-button-top {
+    top: calc(12px + 46px);
+  }
+
+  .lane-scroll-button-bottom {
+    bottom: calc(12px + 46px);
+  }
+
+  .lane-reward-button,
+  .lane-add-button {
+    min-height: 42px;
+  }
+}
+
 @keyframes shimmer {
   100% {
     transform: translateX(100%);

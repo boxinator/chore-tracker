@@ -22,6 +22,18 @@
   height: 18px;
 }
 
+.manage-tabbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.manage-tabbar .segmented-control {
+  margin-top: 0;
+}
+
 .manage-section {
   display: grid;
   align-content: start;
@@ -35,6 +47,13 @@
 .manage-section-header h3 {
   margin: 0;
   color: var(--color-text-strong);
+}
+
+.manage-section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .manage-section-header p {
@@ -148,6 +167,11 @@
   min-height: 132px;
 }
 
+.manage-item.manage-item-stack > .reward-cost-ribbon {
+  justify-self: start;
+  margin-top: 8px;
+}
+
 .manage-item.manage-item-stack > .inline-actions {
   align-self: end;
   justify-content: flex-start;
@@ -156,6 +180,40 @@
 
 .manage-item.is-muted {
   opacity: 0.66;
+}
+
+.manage-reward-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.manage-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-surface-strong) 72%, transparent);
+}
+
+.manage-filter-button {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.manage-filter-button.is-active {
+  background: var(--color-surface-strong);
+  color: var(--color-accent-strong);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
 }
 
 .manage-copy {
@@ -176,12 +234,6 @@
   margin-top: 0;
 }
 
-.manage-inactive {
-  display: grid;
-  gap: 12px;
-  padding-top: 6px;
-}
-
 @media (max-width: 720px) {
   .manage-modal {
     min-height: min(680px, calc(100vh - 24px));
@@ -192,6 +244,24 @@
     min-height: 0;
   }
 
+  .manage-tabbar,
+  .manage-tabbar .segmented-control {
+    width: 100%;
+  }
+
+  .manage-section-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .manage-filter {
+    width: 100%;
+  }
+
+  .manage-filter-button {
+    flex: 1 1 0;
+  }
+
   .manage-item {
     flex-direction: column;
     align-items: stretch;
@@ -199,6 +269,10 @@
 
   .manage-item .inline-actions {
     justify-content: stretch;
+  }
+
+  .manage-reward-row {
+    grid-template-columns: 1fr;
   }
 }
 
