@@ -51,6 +51,22 @@ export function initializeSchema(db: DatabaseConnection) {
       updated_at TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS tasks (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      assignee_child_id TEXT NOT NULL REFERENCES children(id),
+      status TEXT NOT NULL CHECK (status IN ('open', 'completed')),
+      completion_date_local TEXT,
+      completed_at TEXT,
+      uncompleted_at TEXT,
+      completion_ledger_entry_id TEXT REFERENCES ledger_entries(id),
+      uncompletion_ledger_entry_id TEXT REFERENCES ledger_entries(id),
+      is_active INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS ledger_entries (
       id TEXT PRIMARY KEY,
       event_type TEXT NOT NULL,

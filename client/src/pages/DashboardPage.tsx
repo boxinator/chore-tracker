@@ -4,6 +4,7 @@ import type {
   Child,
   ChildInput,
   CreateChoreInput,
+  CreateTaskInput,
   DashboardResponse,
   HealthResponse,
   HistoryEntry,
@@ -11,7 +12,8 @@ import type {
   Reward,
   RewardInput,
   UpdateChoreInput,
-  VisibleChore
+  VisibleChore,
+  VisibleTask
 } from "../types";
 import { AddChoreModal } from "../components/AddChoreModal";
 import { BoardLane } from "../components/BoardLane";
@@ -25,6 +27,7 @@ import { SpaceBackground } from "../components/SpaceBackground";
 
 type LaneItem = {
   id: string;
+  kind: "chore" | "task";
   title: string;
   description: string;
   points: number;
@@ -58,6 +61,7 @@ type DashboardPageProps = {
   onOpenAddModal: () => void;
   onCloseAddModal: () => void;
   onSubmitChore: (input: CreateChoreInput) => Promise<void>;
+  onSubmitTask: (input: CreateTaskInput) => Promise<void>;
   detailModalChoreId: string | null;
   detailAssignmentChildId: string | null;
   detailSubmitting: boolean;
@@ -88,9 +92,14 @@ type DashboardPageProps = {
   onDeactivateReward: (rewardId: string) => Promise<void>;
   onCloseDetails: () => void;
   onSubmitChoreUpdate: (id: string, input: UpdateChoreInput) => Promise<void>;
-  onDeleteChore: (id: string) => Promise<void>;
+  onDeleteItem: (id: string, kind: "chore" | "task") => Promise<void>;
   assignmentPendingChoreId: string | null;
-  onToggleComplete: (id: string, done: boolean, childId: string | null) => Promise<void>;
+  onToggleComplete: (
+    id: string,
+    done: boolean,
+    childId: string | null,
+    kind: "chore" | "task"
+  ) => Promise<void>;
   historyModalOpen: boolean;
   historyEntries: HistoryEntry[];
   historyLoading: boolean;
@@ -134,6 +143,7 @@ function formatSchedule(days: number[]) {
 function toLaneItem(chore: VisibleChore): LaneItem {
   return {
     id: chore.id,
+    kind: "chore",
     title: chore.title,
     description: chore.description,
     points: chore.pointValue,
@@ -143,6 +153,22 @@ function toLaneItem(chore: VisibleChore): LaneItem {
     scheduledDays: chore.scheduledDays,
     assignments: chore.assignments,
     unassignedScheduleDays: chore.unassignedScheduleDays
+  };
+}
+
+function toTaskLaneItem(task: VisibleTask): LaneItem {
+  return {
+    id: task.id,
+    kind: "task",
+    title: task.title,
+    description: task.description,
+    points: 0,
+    meta: task.isCompletedToday ? "Completed today" : task.description || "Task",
+    done: task.isCompletedToday,
+    assigneeChildId: task.assigneeChildId,
+    scheduledDays: [],
+    assignments: [],
+    unassignedScheduleDays: []
   };
 }
 
@@ -166,7 +192,7 @@ function buildLanes(data: DashboardResponse | null): Lane[] {
       avatarKey: child.avatarKey,
       accent: accentPalette[index % accentPalette.length],
       subtitle: `${child.totalPoints} pts`,
-      items: child.chores.map(toLaneItem),
+      items: [...child.tasks.map(toTaskLaneItem), ...child.chores.map(toLaneItem)],
       emptyMessage: "No visible chores today.",
       showRewards: true
     }))
@@ -301,6 +327,7 @@ export function DashboardPage({
   onOpenAddModal,
   onCloseAddModal,
   onSubmitChore,
+  onSubmitTask,
   detailModalChoreId,
   detailAssignmentChildId,
   detailSubmitting,
@@ -331,7 +358,7 @@ export function DashboardPage({
   onDeactivateReward,
   onCloseDetails,
   onSubmitChoreUpdate,
-  onDeleteChore,
+  onDeleteItem,
   assignmentPendingChoreId,
   onToggleComplete,
   historyModalOpen,
@@ -361,7 +388,7 @@ export function DashboardPage({
   const [boardScrollState, setBoardScrollState] = useState({ canScrollLeft: false, canScrollRight: false });
   const lanes = buildLanes(dashboardData);
   const rewardChild = dashboardData?.children.find((child) => child.id === rewardModalChildId) ?? null;
-  const allChores = lanes.flatMap((lane) => lane.items);
+  const allChores = lanes.flatMap((lane) => lane.items).filter((item) => item.kind === "chore");
   const detailLaneItem = allChores.find((item) => item.id === detailModalChoreId) ?? null;
   const detailChore = detailLaneItem
     ? {
@@ -502,7 +529,7 @@ export function DashboardPage({
                         })
                     : undefined
                 }
-                onDelete={onDeleteChore}
+                onDelete={onDeleteItem}
                 onToggleComplete={onToggleComplete}
                 assignmentPendingChoreId={
                   lane.id === "unassigned" ? assignmentPendingChoreId : undefined
@@ -531,6 +558,7 @@ export function DashboardPage({
           error={addError}
           onClose={onCloseAddModal}
           onSubmit={onSubmitChore}
+          onSubmitTask={onSubmitTask}
         />
       )}
 
@@ -596,7 +624,7 @@ export function DashboardPage({
           initialAssignmentChildId={detailAssignmentChildId}
           currentDayOfWeek={dashboardData.dayOfWeek}
           onClose={onCloseDetails}
-          onDelete={onDeleteChore}
+          onDelete={(id) => onDeleteItem(id, "chore")}
           onSubmit={onSubmitChoreUpdate}
         />
       )}

@@ -22,11 +22,20 @@ export type ChoreAssignment = {
   days: number[];
 };
 
+export type VisibleTask = {
+  id: string;
+  title: string;
+  description: string;
+  assigneeChildId: string;
+  isCompletedToday: boolean;
+};
+
 export type DashboardChild = {
   id: string;
   name: string;
   avatarKey: string | null;
   totalPoints: number;
+  tasks: VisibleTask[];
   chores: VisibleChore[];
 };
 
@@ -46,6 +55,12 @@ export type CreateChoreInput = {
 };
 
 export type UpdateChoreInput = CreateChoreInput;
+
+export type CreateTaskInput = {
+  title: string;
+  description: string;
+  childId: string;
+};
 
 export type Child = {
   id: string;

@@ -36,6 +36,14 @@ import {
   uncompleteChore
 } from "./services/chores.js";
 import { getDashboardData } from "./services/dashboard.js";
+import {
+  TaskValidationError,
+  completeTask,
+  createTask,
+  deleteTask,
+  parseCreateTaskInput,
+  uncompleteTask
+} from "./services/tasks.js";
 
 const db = setupDatabase(config.databasePath);
 const app = express();
@@ -195,6 +203,62 @@ app.post("/api/chores/:id/uncomplete", (req, res) => {
     }
 
     res.status(500).json({ error: "Failed to uncomplete chore" });
+  }
+});
+
+app.post("/api/tasks", (req, res) => {
+  try {
+    res.status(201).json(createTask(db, parseCreateTaskInput(req.body)));
+  } catch (error) {
+    if (error instanceof TaskValidationError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to create task" });
+  }
+});
+
+app.delete("/api/tasks/:id", (req, res) => {
+  try {
+    deleteTask(db, req.params.id);
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof TaskValidationError) {
+      res.status(404).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to delete task" });
+  }
+});
+
+app.post("/api/tasks/:id/complete", (req, res) => {
+  try {
+    const now = getEffectiveNow(req);
+    completeTask(db, req.params.id, getCurrentLocalDateString(now));
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof TaskValidationError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to complete task" });
+  }
+});
+
+app.post("/api/tasks/:id/uncomplete", (req, res) => {
+  try {
+    uncompleteTask(db, req.params.id);
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof TaskValidationError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to uncomplete task" });
   }
 });
 

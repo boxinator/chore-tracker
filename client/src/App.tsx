@@ -5,6 +5,7 @@ import type {
   ChildInput,
   ChildrenResponse,
   CreateChoreInput,
+  CreateTaskInput,
   DashboardResponse,
   HealthResponse,
   HistoryEntry,
@@ -233,24 +234,57 @@ export function App() {
     }
   };
 
-  const handleDeleteChore = async (id: string) => {
-    if (!window.confirm("Delete this chore?")) {
+  const handleSubmitTask = async (input: CreateTaskInput) => {
+    try {
+      setAddSubmitting(true);
+      setAddError(null);
+
+      const response = await apiFetch("/api/tasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(input)
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? `Create task failed with ${response.status}`);
+      }
+
+      setAddModalOpen(false);
+      await fetchData();
+      showSuccess("Task added");
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setAddSubmitting(false);
+    }
+  };
+
+  const handleDeleteItem = async (id: string, kind: "chore" | "task") => {
+    if (!window.confirm(`Delete this ${kind}?`)) {
       return;
     }
 
-    const response = await apiFetch(`/api/chores/${id}`, { method: "DELETE" });
+    const response = await apiFetch(`/api/${kind === "task" ? "tasks" : "chores"}/${id}`, {
+      method: "DELETE"
+    });
 
     if (!response.ok) {
       const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-      setError(payload?.error ?? `Delete chore failed with ${response.status}`);
+      setError(payload?.error ?? `Delete ${kind} failed with ${response.status}`);
       return;
     }
 
-    setDetailModalChoreId(null);
-    setDetailAssignmentChildId(null);
-    setDetailError(null);
+    if (kind === "chore") {
+      setDetailModalChoreId(null);
+      setDetailAssignmentChildId(null);
+      setDetailError(null);
+    }
+
     await fetchData();
-    showSuccess("Chore deleted");
+    showSuccess(kind === "task" ? "Task deleted" : "Chore deleted");
   };
 
   const handleUpdateChore = async (id: string, input: UpdateChoreInput) => {
@@ -283,29 +317,39 @@ export function App() {
     }
   };
 
-  const handleToggleComplete = async (id: string, done: boolean, childId: string | null) => {
-    if (!childId) {
+  const handleToggleComplete = async (
+    id: string,
+    done: boolean,
+    childId: string | null,
+    kind: "chore" | "task"
+  ) => {
+    if (kind === "chore" && !childId) {
       setError("Assign this chore before completing it");
       return;
     }
 
     const endpoint = done ? "uncomplete" : "complete";
-    const response = await apiFetch(`/api/chores/${id}/${endpoint}`, {
+    const response = await apiFetch(`/api/${kind === "task" ? "tasks" : "chores"}/${id}/${endpoint}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ childId })
+      body: JSON.stringify(kind === "chore" ? { childId } : {})
     });
 
     if (!response.ok) {
       const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-      setError(payload?.error ?? `Update chore failed with ${response.status}`);
+      setError(payload?.error ?? `Update ${kind} failed with ${response.status}`);
       return;
     }
 
     await fetchData();
     flashChore(id);
+    if (kind === "task") {
+      showSuccess(done ? "Task marked active again" : "Task completed");
+      return;
+    }
+
     showSuccess(done ? "Chore marked active again" : "Chore completed");
   };
 
@@ -571,6 +615,7 @@ export function App() {
         setAddModalOpen(false);
       }}
       onSubmitChore={handleSubmitChore}
+      onSubmitTask={handleSubmitTask}
       detailModalChoreId={detailModalChoreId}
       detailAssignmentChildId={detailAssignmentChildId}
       detailSubmitting={detailSubmitting}
@@ -631,7 +676,7 @@ export function App() {
         setDetailModalChoreId(null);
       }}
       onSubmitChoreUpdate={handleUpdateChore}
-      onDeleteChore={handleDeleteChore}
+      onDeleteItem={handleDeleteItem}
       assignmentPendingChoreId={assignmentPendingChoreId}
       onToggleComplete={handleToggleComplete}
       historyModalOpen={historyModalOpen}

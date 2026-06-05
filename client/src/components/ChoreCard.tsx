@@ -1,14 +1,20 @@
-import { CheckCircle2, Send, Trash2, Zap } from "lucide-react";
+import { CheckCircle2, ClipboardCheck, Send, Trash2, Zap } from "lucide-react";
 
 type ChoreCardProps = {
   id: string;
+  kind?: "chore" | "task";
   title: string;
   points: number;
   meta: string;
   assigneeChildId?: string | null;
   done?: boolean;
-  onDelete?: (id: string) => void;
-  onToggleComplete?: (id: string, done: boolean, childId: string | null) => void;
+  onDelete?: (id: string, kind: "chore" | "task") => void;
+  onToggleComplete?: (
+    id: string,
+    done: boolean,
+    childId: string | null,
+    kind: "chore" | "task"
+  ) => void;
   onOpenDetails?: (id: string) => void;
   assignmentPending?: boolean;
   highlighted?: boolean;
@@ -16,6 +22,7 @@ type ChoreCardProps = {
 
 export function ChoreCard({
   id,
+  kind = "chore",
   title,
   points,
   meta,
@@ -27,15 +34,23 @@ export function ChoreCard({
   assignmentPending = false,
   highlighted = false
 }: ChoreCardProps) {
-  const canComplete = done || Boolean(onToggleComplete && assigneeChildId);
-  const canAssign = !done && !assigneeChildId && Boolean(onOpenDetails);
+  const isTask = kind === "task";
+  const canComplete = isTask || done || Boolean(onToggleComplete && assigneeChildId);
+  const canAssign = !isTask && !done && !assigneeChildId && Boolean(onOpenDetails);
 
   return (
-    <article className={`chore-card${done ? " is-done" : ""}${highlighted ? " is-highlighted" : ""}`}>
-      <span className="points-ribbon">
-        <Zap aria-hidden="true" />
-        {points} pts
-      </span>
+    <article className={`chore-card${isTask ? " is-task" : ""}${done ? " is-done" : ""}${highlighted ? " is-highlighted" : ""}`}>
+      {isTask ? (
+        <span className="task-ribbon">
+          <ClipboardCheck aria-hidden="true" />
+          Task
+        </span>
+      ) : (
+        <span className="points-ribbon">
+          <Zap aria-hidden="true" />
+          {points} pts
+        </span>
+      )}
 
       <button
         className="complete-pill"
@@ -43,7 +58,7 @@ export function ChoreCard({
         aria-label={done ? `Mark ${title} incomplete` : `Mark ${title} complete`}
         aria-pressed={done}
         disabled={!canComplete}
-        onClick={() => onToggleComplete?.(id, done, assigneeChildId)}
+        onClick={() => onToggleComplete?.(id, done, assigneeChildId, kind)}
       >
         <CheckCircle2 aria-hidden="true" />
         <span>Done</span>
@@ -53,7 +68,11 @@ export function ChoreCard({
         className="chore-detail-button"
         type="button"
         aria-label={`Show details for ${title}`}
-        onClick={() => onOpenDetails?.(id)}
+        onClick={() => {
+          if (!isTask) {
+            onOpenDetails?.(id);
+          }
+        }}
       >
         <div className="chore-copy">
           <h3>{title}</h3>
@@ -79,7 +98,7 @@ export function ChoreCard({
               className="icon-text-button danger-button"
               type="button"
               aria-label={`Delete ${title}`}
-              onClick={() => onDelete(id)}
+              onClick={() => onDelete(id, kind)}
             >
               <Trash2 aria-hidden="true" />
             </button>

@@ -23,6 +23,17 @@
   opacity: 0.72;
 }
 
+.chore-card.is-task {
+  border-color: color-mix(in srgb, var(--color-accent) 34%, var(--color-border));
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-accent) 10%, transparent),
+      transparent 42%
+    ),
+    var(--color-surface-strong);
+}
+
 .chore-footer {
   display: flex;
   align-items: center;
@@ -46,6 +57,7 @@
 }
 
 .points-ribbon,
+.task-ribbon,
 .complete-pill {
   position: absolute;
   top: 14px;
@@ -66,7 +78,21 @@
   white-space: nowrap;
 }
 
-.points-ribbon svg {
+.task-ribbon {
+  left: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  color: var(--color-accent-strong);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.points-ribbon svg,
+.task-ribbon svg {
   width: 15px;
   height: 15px;
 }
@@ -204,6 +230,7 @@
   }
 
   .points-ribbon,
+  .task-ribbon,
   .complete-pill {
     top: 12px;
     min-height: 30px;
@@ -211,6 +238,11 @@
   }
 
   .points-ribbon {
+    left: 12px;
+    padding: 0 9px;
+  }
+
+  .task-ribbon {
     left: 12px;
     padding: 0 9px;
   }

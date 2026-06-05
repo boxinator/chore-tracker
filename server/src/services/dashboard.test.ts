@@ -241,6 +241,7 @@ describe("getDashboardData", () => {
         name: "Sample Child 1",
         avatarKey: null,
         totalPoints: 10,
+        tasks: [],
         chores: [
           {
             id: "assigned-1",
@@ -260,6 +261,7 @@ describe("getDashboardData", () => {
         name: "Sample Child 2",
         avatarKey: null,
         totalPoints: 0,
+        tasks: [],
         chores: [
           {
             id: "assigned-2",
@@ -310,5 +312,77 @@ describe("getDashboardData", () => {
 
     expect(dashboard.children[0]?.chores.map((chore) => chore.id)).toEqual(["workbooks"]);
     expect(dashboard.children[1]?.chores.map((chore) => chore.id)).toEqual(["workbooks"]);
+  });
+
+  it("shows open tasks above chores and hides completed tasks after the completion day", () => {
+    const fixtureDb = createBaseFixture();
+    const now = "2026-04-23T08:00:00.000Z";
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO tasks (
+          id,
+          title,
+          description,
+          assignee_child_id,
+          status,
+          completion_date_local,
+          completed_at,
+          uncompleted_at,
+          completion_ledger_entry_id,
+          uncompletion_ledger_entry_id,
+          is_active,
+          created_at,
+          updated_at
+        ) VALUES
+          ('task-open', 'Put bike away', 'Garage', 'child-1', 'open', NULL, NULL, NULL, NULL, NULL, 1, @now, @now),
+          ('task-done', 'Pack camp shirt', '', 'child-1', 'completed', '2026-04-23', @now, NULL, NULL, NULL, 1, @now, @now),
+          ('task-old', 'Old task', '', 'child-1', 'completed', '2026-04-22', @now, NULL, NULL, NULL, 1, @now, @now)
+      `
+    ).run({ now });
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chores (
+          id,
+          title,
+          description,
+          point_value,
+          assignee_child_id,
+          is_active,
+          created_at,
+          updated_at
+        ) VALUES ('chore-1', 'Feed cat', '', 4, NULL, 1, @now, @now)
+      `
+    ).run({ now });
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chore_assignments (id, chore_id, child_id, day_of_week)
+        VALUES ('chore-1-child-1-4', 'chore-1', 'child-1', 4)
+      `
+    ).run();
+
+    const dashboard = getDashboardData(fixtureDb, "2026-04-23", 4);
+
+    expect(dashboard.children[0]?.tasks).toEqual([
+      {
+        id: "task-open",
+        title: "Put bike away",
+        description: "Garage",
+        assigneeChildId: "child-1",
+        isCompletedToday: false
+      },
+      {
+        id: "task-done",
+        title: "Pack camp shirt",
+        description: "",
+        assigneeChildId: "child-1",
+        isCompletedToday: true
+      }
+    ]);
+
+    const nextDayDashboard = getDashboardData(fixtureDb, "2026-04-24", 5);
+    expect(nextDayDashboard.children[0]?.tasks.map((task) => task.id)).toEqual(["task-open"]);
   });
 });

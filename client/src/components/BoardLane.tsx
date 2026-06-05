@@ -5,6 +5,7 @@ import { ChoreCard } from "./ChoreCard";
 
 type LaneItem = {
   id: string;
+  kind: "chore" | "task";
   title: string;
   points: number;
   meta: string;
@@ -24,8 +25,13 @@ type BoardLaneProps = {
   onOpenRewards?: () => void;
   onOpenAddChore?: () => void;
   onOpenAvatarPicker?: () => void;
-  onDelete?: (id: string) => void;
-  onToggleComplete?: (id: string, done: boolean, childId: string | null) => void;
+  onDelete?: (id: string, kind: "chore" | "task") => void;
+  onToggleComplete?: (
+    id: string,
+    done: boolean,
+    childId: string | null,
+    kind: "chore" | "task"
+  ) => void;
   onOpenDetails?: (id: string) => void;
   assignmentPendingChoreId?: string | null;
   highlightedChoreId?: string | null;
@@ -118,6 +124,7 @@ export function BoardLane({
           <ChoreCard
             key={item.id}
             id={item.id}
+            kind={item.kind}
             title={item.title}
             points={item.points}
             meta={item.meta}
@@ -168,7 +175,7 @@ export function BoardLane({
         <footer className="lane-footer">
           <button className="primary-button lane-add-button" type="button" onClick={onOpenAddChore}>
             <Plus aria-hidden="true" />
-            Add Chore
+            Add
           </button>
         </footer>
       )}

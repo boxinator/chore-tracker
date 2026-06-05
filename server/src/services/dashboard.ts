@@ -24,11 +24,20 @@ export type ChoreAssignment = {
   days: number[];
 };
 
+export type VisibleTask = {
+  id: string;
+  title: string;
+  description: string;
+  assigneeChildId: string;
+  isCompletedToday: boolean;
+};
+
 export type DashboardChild = {
   id: string;
   name: string;
   avatarKey: string | null;
   totalPoints: number;
+  tasks: VisibleTask[];
   chores: VisibleChore[];
 };
 
@@ -64,9 +73,26 @@ type CompletionRow = {
   childId: string;
 };
 
+type TaskRow = {
+  id: string;
+  title: string;
+  description: string;
+  assigneeChildId: string;
+  status: string;
+  completionDateLocal: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 type InternalVisibleChore = VisibleChore & {
   createdAt: string;
   updatedAt: string;
+};
+
+type InternalVisibleTask = VisibleTask & {
+  createdAt: string;
+  updatedAt: string;
+  status: string;
 };
 
 export function getChildPointTotals(db: DatabaseConnection): ChildPointTotal[] {
@@ -242,6 +268,48 @@ export function getVisibleChoresForDate(
   }));
 }
 
+function getVisibleTasksForDate(
+  db: DatabaseConnection,
+  currentDateLocal: string
+): InternalVisibleTask[] {
+  const tasks = db
+    .prepare(
+      `
+        SELECT
+          id,
+          title,
+          description,
+          assignee_child_id as assigneeChildId,
+          status,
+          completion_date_local as completionDateLocal,
+          created_at as createdAt,
+          updated_at as updatedAt
+        FROM tasks
+        WHERE is_active = 1
+          AND (
+            status = 'open'
+            OR (status = 'completed' AND completion_date_local = ?)
+          )
+        ORDER BY
+          CASE status WHEN 'open' THEN 0 ELSE 1 END ASC,
+          datetime(updated_at) DESC,
+          datetime(created_at) ASC
+      `
+    )
+    .all(currentDateLocal) as TaskRow[];
+
+  return tasks.map((task) => ({
+    id: task.id,
+    title: task.title,
+    description: task.description,
+    assigneeChildId: task.assigneeChildId,
+    isCompletedToday: task.status === "completed" && task.completionDateLocal === currentDateLocal,
+    createdAt: task.createdAt,
+    updatedAt: task.updatedAt,
+    status: task.status
+  }));
+}
+
 export function getDashboardData(
   db: DatabaseConnection,
   currentDateLocal: string,
@@ -249,6 +317,7 @@ export function getDashboardData(
 ): DashboardData {
   const totals = getChildPointTotals(db);
   const visibleChores = getVisibleChoreRecordsForDate(db, currentDateLocal, dayOfWeek);
+  const visibleTasks = getVisibleTasksForDate(db, currentDateLocal);
 
   const choresByChildId = visibleChores.reduce<Map<string, VisibleChore[]>>((map, chore) => {
     if (!chore.assigneeChildId) {
@@ -279,6 +348,19 @@ export function getDashboardData(
     );
   }
 
+  const tasksByChildId = visibleTasks.reduce<Map<string, VisibleTask[]>>((map, task) => {
+    const tasks = map.get(task.assigneeChildId) ?? [];
+    tasks.push({
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      assigneeChildId: task.assigneeChildId,
+      isCompletedToday: task.isCompletedToday
+    });
+    map.set(task.assigneeChildId, tasks);
+    return map;
+  }, new Map());
+
   const unassignedChores = visibleChores
     .filter((chore) => chore.assigneeChildId === null)
     .sort((left, right) => left.createdAt.localeCompare(right.createdAt))
@@ -303,6 +385,7 @@ export function getDashboardData(
       name: child.name,
       avatarKey: child.avatarKey,
       totalPoints: child.totalPoints,
+      tasks: tasksByChildId.get(child.childId) ?? [],
       chores: choresByChildId.get(child.childId) ?? []
     }))
   };

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { X } from "lucide-react";
-import type { ChoreAssignment, CreateChoreInput, DashboardChild } from "../types";
+import type { ChoreAssignment, CreateChoreInput, CreateTaskInput, DashboardChild } from "../types";
 import { useModalDismiss } from "./modalDismiss";
 import { ChoreAssignmentEditor } from "./ChoreAssignmentEditor";
 
@@ -10,27 +10,40 @@ type AddChoreModalProps = {
   error: string | null;
   onClose: () => void;
   onSubmit: (input: CreateChoreInput) => Promise<void>;
+  onSubmitTask: (input: CreateTaskInput) => Promise<void>;
 };
 
 const allDays = [0, 1, 2, 3, 4, 5, 6];
+type AddMode = "chore" | "task";
 
 export function AddChoreModal({
   children,
   submitting,
   error,
   onClose,
-  onSubmit
+  onSubmit,
+  onSubmitTask
 }: AddChoreModalProps) {
+  const [mode, setMode] = useState<AddMode>("chore");
   const [title, setTitle] = useState("");
   const { backdropProps, closeButtonProps } = useModalDismiss(onClose);
   const [description, setDescription] = useState("");
   const [pointValue, setPointValue] = useState("5");
+  const [taskChildId, setTaskChildId] = useState(children[0]?.id ?? "");
   const [assignments, setAssignments] = useState<ChoreAssignment[]>([]);
   const [unassignedScheduleDays, setUnassignedScheduleDays] = useState<number[]>(allDays);
 
-  const canSubmit = useMemo(() => title.trim().length > 0 && Number(pointValue) > 0, [
+  const canSubmit = useMemo(() => {
+    if (mode === "task") {
+      return title.trim().length > 0 && taskChildId.length > 0;
+    }
+
+    return title.trim().length > 0 && Number(pointValue) > 0;
+  }, [
+    mode,
     title,
-    pointValue
+    pointValue,
+    taskChildId
   ]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -40,13 +53,22 @@ export function AddChoreModal({
       return;
     }
 
+    if (mode === "task") {
+      await onSubmitTask({
+        title,
+        description,
+        childId: taskChildId
+      });
+      return;
+    }
+
     await onSubmit({
-      title,
-      description,
-      pointValue: Number(pointValue),
-      assignments,
-      unassignedScheduleDays: assignments.length === 0 ? unassignedScheduleDays : []
-    });
+        title,
+        description,
+        pointValue: Number(pointValue),
+        assignments,
+        unassignedScheduleDays: assignments.length === 0 ? unassignedScheduleDays : []
+      });
   };
 
   return (
@@ -60,8 +82,8 @@ export function AddChoreModal({
       >
         <header className="modal-header">
           <div>
-            <p className="modal-eyebrow">New Chore</p>
-            <h2 id="add-chore-title">Add chore</h2>
+            <p className="modal-eyebrow">New Item</p>
+            <h2 id="add-chore-title">Add {mode}</h2>
           </div>
           <button className="modal-close" type="button" aria-label="Close" {...closeButtonProps}>
             <X aria-hidden="true" />
@@ -69,6 +91,27 @@ export function AddChoreModal({
         </header>
 
         <form className="modal-form" onSubmit={handleSubmit}>
+          <div className="segmented-control" role="tablist" aria-label="Item type">
+            <button
+              className={`segment-button${mode === "chore" ? " is-active" : ""}`}
+              type="button"
+              role="tab"
+              aria-selected={mode === "chore"}
+              onClick={() => setMode("chore")}
+            >
+              Chore
+            </button>
+            <button
+              className={`segment-button${mode === "task" ? " is-active" : ""}`}
+              type="button"
+              role="tab"
+              aria-selected={mode === "task"}
+              onClick={() => setMode("task")}
+            >
+              Task
+            </button>
+          </div>
+
           <label className="field">
             <span>Title</span>
             <input value={title} onChange={(event) => setTitle(event.target.value)} />
@@ -83,23 +126,43 @@ export function AddChoreModal({
             />
           </label>
 
-          <label className="field">
-            <span>Points</span>
-            <input
-              type="number"
-              min="1"
-              value={pointValue}
-              onChange={(event) => setPointValue(event.target.value)}
-            />
-          </label>
+          {mode === "chore" && (
+            <>
+              <label className="field">
+                <span>Points</span>
+                <input
+                  type="number"
+                  min="1"
+                  value={pointValue}
+                  onChange={(event) => setPointValue(event.target.value)}
+                />
+              </label>
 
-          <ChoreAssignmentEditor
-            children={children}
-            assignments={assignments}
-            unassignedScheduleDays={unassignedScheduleDays}
-            onChangeAssignments={setAssignments}
-            onChangeUnassignedScheduleDays={setUnassignedScheduleDays}
-          />
+              <ChoreAssignmentEditor
+                children={children}
+                assignments={assignments}
+                unassignedScheduleDays={unassignedScheduleDays}
+                onChangeAssignments={setAssignments}
+                onChangeUnassignedScheduleDays={setUnassignedScheduleDays}
+              />
+            </>
+          )}
+
+          {mode === "task" && (
+            <label className="field">
+              <span>Assigned to</span>
+              <select
+                value={taskChildId}
+                onChange={(event) => setTaskChildId(event.target.value)}
+              >
+                {children.map((child) => (
+                  <option key={child.id} value={child.id}>
+                    {child.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
 
           {error && <p className="form-error">{error}</p>}
 
@@ -108,7 +171,7 @@ export function AddChoreModal({
               Cancel
             </button>
             <button className="primary-button" type="submit" disabled={!canSubmit || submitting}>
-              {submitting ? "Saving..." : "Add Chore"}
+              {submitting ? "Saving..." : `Add ${mode === "task" ? "Task" : "Chore"}`}
             </button>
           </footer>
         </form>
