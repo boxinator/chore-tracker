@@ -1,4 +1,4 @@
-import { CheckCircle2, ClipboardCheck, Send, Trash2, Zap } from "lucide-react";
+import { CheckCircle2, ClipboardCheck, Pencil, Trash2, Zap } from "lucide-react";
 
 type ChoreCardProps = {
   id: string;
@@ -54,28 +54,27 @@ export function ChoreCard({
         </span>
       )}
 
-      <button
-        className="complete-pill"
-        type="button"
-        aria-label={done ? `Mark ${title} incomplete` : `Mark ${title} complete`}
-        aria-pressed={done}
-        disabled={!canComplete}
-        onClick={() => onToggleComplete?.(id, done, assigneeChildId, kind)}
-      >
-        <CheckCircle2 aria-hidden="true" />
-        <span>Done</span>
-      </button>
-
-      <button
-        className="chore-detail-button"
-        type="button"
-        aria-label={`Show details for ${title}`}
-        onClick={() => {
-          if (!isTask) {
-            onOpenDetails?.(id);
-          }
-        }}
-      >
+      {isTask ? (
+        <div className="chore-detail-button chore-task-content">
+          <div className="chore-copy">
+            <h3>{title}</h3>
+            {description && <p className="chore-description">{description}</p>}
+            <div className="chore-labels" aria-label="Schedule and status">
+              {labels.map((label) => (
+                <span key={label} className="chore-label">
+                  {label}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <button
+          className="chore-detail-button"
+          type="button"
+          aria-label={`Show details for ${title}`}
+          onClick={() => onOpenDetails?.(id)}
+        >
         <div className="chore-copy">
           <h3>{title}</h3>
           {description && <p className="chore-description">{description}</p>}
@@ -87,34 +86,42 @@ export function ChoreCard({
             ))}
           </div>
         </div>
-      </button>
+        </button>
+      )}
 
-      <div className="chore-footer">
-        <div className="card-actions">
-          {canAssign && (
-            <button
-              className="icon-text-button"
-              type="button"
-              disabled={assignmentPending}
-              onClick={() => onOpenDetails?.(id)}
-            >
-              <Send aria-hidden="true" />
-              Assign
-            </button>
-          )}
-          {onDelete && (
-            <button
-              className="icon-text-button danger-button"
-              type="button"
-              aria-label={`Delete ${title}`}
-              onClick={() => onDelete(id, kind)}
-            >
-              <Trash2 aria-hidden="true" />
-            </button>
-          )}
-        </div>
+      <div className="card-action-column">
+        <button
+          className="complete-pill"
+          type="button"
+          aria-label={done ? `Mark ${title} incomplete` : `Mark ${title} complete`}
+          aria-pressed={done}
+          disabled={!canComplete}
+          onClick={() => onToggleComplete?.(id, done, assigneeChildId, kind)}
+        >
+          <CheckCircle2 aria-hidden="true" />
+        </button>
+        {canAssign && (
+          <button
+            className="icon-text-button"
+            type="button"
+            aria-label={`Edit ${title}`}
+            disabled={assignmentPending}
+            onClick={() => onOpenDetails?.(id)}
+          >
+            <Pencil aria-hidden="true" />
+          </button>
+        )}
+        {onDelete && (
+          <button
+            className="icon-text-button danger-button"
+            type="button"
+            aria-label={`Delete ${title}`}
+            onClick={() => onDelete(id, kind)}
+          >
+            <Trash2 aria-hidden="true" />
+          </button>
+        )}
       </div>
-
     </article>
   );
 }

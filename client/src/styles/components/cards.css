@@ -1,10 +1,12 @@
 .chore-card {
   position: relative;
   display: grid;
-  grid-template-rows: 1fr auto;
-  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr;
+  column-gap: 14px;
+  row-gap: 10px;
   min-height: 204px;
-  padding: 58px 14px 14px;
+  padding: 14px;
   border-radius: var(--radius-sm);
   background: var(--color-surface-strong);
   border: 1px solid var(--color-border);
@@ -34,39 +36,16 @@
     var(--color-surface-strong);
 }
 
-.chore-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-}
-
-.chore-footer {
-  min-width: 0;
-  flex-wrap: wrap;
-  margin-top: auto;
-}
-
-.chore-footer .card-actions {
-  flex: 1 1 auto;
-  width: 100%;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  justify-content: stretch;
-}
-
 .points-ribbon,
-.task-ribbon,
-.complete-pill {
-  position: absolute;
-  top: 14px;
+.task-ribbon {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
   min-height: 34px;
   z-index: 1;
 }
 
 .points-ribbon {
-  left: 14px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -79,7 +58,6 @@
 }
 
 .task-ribbon {
-  left: 14px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -98,42 +76,59 @@
 }
 
 .complete-pill {
-  right: 14px;
-  max-width: calc(100% - 118px);
-  padding: 0 11px;
+  width: 100%;
+  min-height: 46px;
+  padding: 0;
   border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-accent) 18%, transparent);
-  color: var(--color-accent-strong);
+  background: var(--color-success);
+  border: 1px solid color-mix(in srgb, var(--color-success) 72%, white);
+  color: #06180f;
   font-weight: 800;
+  box-shadow: 0 0 16px color-mix(in srgb, var(--color-success) 24%, transparent);
+}
+
+.complete-pill:not(:disabled):not([aria-pressed="true"]):hover,
+.complete-pill:not(:disabled):not([aria-pressed="true"]):focus-visible {
+  background: color-mix(in srgb, var(--color-success) 84%, white);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--color-success) 20%, transparent),
+    0 0 22px color-mix(in srgb, var(--color-success) 34%, transparent);
 }
 
 .complete-pill[aria-pressed="true"] {
   background: var(--color-success-bg);
   border-color: color-mix(in srgb, var(--color-success) 34%, transparent);
   color: var(--color-success);
+  box-shadow: none;
 }
 
 .complete-pill:disabled {
   opacity: 0.45;
+  box-shadow: none;
 }
 
-.complete-pill span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.complete-pill svg {
+  width: 22px;
+  height: 22px;
 }
 
 .chore-detail-button {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: stretch;
   width: 100%;
   min-width: 0;
   min-height: 72px;
   display: block;
-  padding: 8px 0 4px;
+  padding: 0;
   border: 0;
   background: transparent;
   color: inherit;
   text-align: left;
+}
+
+.chore-task-content {
+  cursor: default;
 }
 
 .chore-detail-button:hover h3,
@@ -183,6 +178,26 @@
   line-height: 1;
 }
 
+.card-action-column {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: 48px;
+}
+
+.card-action-column .icon-text-button {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+}
+
+.card-action-column .danger-button {
+  margin-top: auto;
+}
+
 .points-pill {
   display: inline-flex;
   align-items: center;
@@ -209,19 +224,6 @@
   gap: 8px;
 }
 
-.chore-footer .card-actions > .icon-text-button:not(.danger-button) {
-  width: auto;
-  min-width: 0;
-}
-
-.chore-footer .card-actions > .danger-button {
-  justify-self: end;
-}
-
-.chore-footer .card-actions > .danger-button:only-child {
-  grid-column: 2;
-}
-
 .card-actions .danger-button {
   width: 46px;
   min-width: 46px;
@@ -229,51 +231,33 @@
 }
 
 @media (max-width: 480px) {
-  .chore-footer {
-    align-items: stretch;
-  }
-
-  .chore-footer .card-actions {
-    justify-content: stretch;
-  }
-
-  .chore-footer .card-actions > button {
-    flex: initial;
-  }
-
-  .complete-pill {
-    max-width: calc(100% - 112px);
+  .card-action-column {
+    width: 46px;
   }
 }
 
 @media (min-width: 1000px) and (max-width: 1280px) {
   .chore-card {
     min-height: 162px;
-    gap: 10px;
-    padding: 48px 12px 12px;
+    column-gap: 10px;
+    padding: 12px;
   }
 
   .points-ribbon,
-  .task-ribbon,
-  .complete-pill {
-    top: 12px;
+  .task-ribbon {
     min-height: 30px;
     font-size: 0.84rem;
   }
 
   .points-ribbon {
-    left: 12px;
     padding: 0 9px;
   }
 
   .task-ribbon {
-    left: 12px;
     padding: 0 9px;
   }
 
   .complete-pill {
-    right: 12px;
-    max-width: calc(100% - 104px);
     padding: 0 9px;
   }
 
@@ -298,6 +282,10 @@
   .card-actions .danger-button {
     width: 42px;
     min-width: 42px;
+  }
+
+  .card-action-column {
+    width: 44px;
   }
 }
 
