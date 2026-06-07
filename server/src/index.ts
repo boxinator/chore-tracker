@@ -14,7 +14,12 @@ import {
   RewardValidationError,
   updateReward
 } from "./services/rewards.js";
-import { listRecentHistory } from "./services/history.js";
+import {
+  createManualAdjustment,
+  HistoryValidationError,
+  listRecentHistory,
+  parseAdjustmentInput
+} from "./services/history.js";
 import {
   ChildValidationError,
   createChild,
@@ -277,6 +282,19 @@ app.get("/api/history/recent", (req, res) => {
       : 20;
 
   res.json({ entries: listRecentHistory(db, limit) });
+});
+
+app.post("/api/ledger/adjustments", (req, res) => {
+  try {
+    res.status(201).json(createManualAdjustment(db, parseAdjustmentInput(req.body)));
+  } catch (error) {
+    if (error instanceof HistoryValidationError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to adjust points" });
+  }
 });
 
 app.post("/api/rewards/:id/redeem", (req, res) => {

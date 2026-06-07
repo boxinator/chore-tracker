@@ -112,6 +112,13 @@ export type HistoryResponse = {
   entries: HistoryEntry[];
 };
 
+export type AdjustmentInput = {
+  childId: string;
+  operation: "add" | "subtract";
+  amount: number;
+  reason: string;
+};
+
 export type RedeemRewardResult = {
   previousTotal: number;
   newTotal: number;

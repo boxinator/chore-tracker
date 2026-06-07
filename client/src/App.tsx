@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { DashboardPage } from "./pages/DashboardPage";
 import type {
+  AdjustmentInput,
   Child,
   ChildInput,
   ChildrenResponse,
@@ -64,6 +65,7 @@ export function App() {
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [historyEntries, setHistoryEntries] = useState<HistoryEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [historySubmitting, setHistorySubmitting] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [debugTimeEnabled, setDebugTimeEnabled] = useState(false);
   const [debugDateInput, setDebugDateInput] = useState("");
@@ -380,6 +382,33 @@ export function App() {
     }
   };
 
+  const handleAdjustPoints = async (input: AdjustmentInput) => {
+    try {
+      setHistorySubmitting(true);
+      setHistoryError(null);
+      const response = await apiFetch("/api/ledger/adjustments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(input)
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? `Point adjustment failed with ${response.status}`);
+      }
+
+      await Promise.all([fetchData(), fetchHistory()]);
+      showSuccess("Points adjusted");
+    } catch (err) {
+      setHistoryError(err instanceof Error ? err.message : "Unknown error");
+      throw err;
+    } finally {
+      setHistorySubmitting(false);
+    }
+  };
+
   const refreshManagementData = async () => {
     await Promise.all([fetchChildren(), fetchManagedRewards()]);
   };
@@ -682,6 +711,7 @@ export function App() {
       historyModalOpen={historyModalOpen}
       historyEntries={historyEntries}
       historyLoading={historyLoading}
+      historySubmitting={historySubmitting}
       historyError={historyError}
       debugTimeEnabled={debugTimeEnabled}
       debugDateInput={debugDateInput}
@@ -690,6 +720,7 @@ export function App() {
       onOpenHistory={() => {
         void handleOpenHistory();
       }}
+      onAdjustPoints={handleAdjustPoints}
       onToggleDebugTime={() => {
         setDebugTimeEnabled((current) => {
           const next = !current;
@@ -711,7 +742,7 @@ export function App() {
         setDebugTimeInput("");
       }}
       onCloseHistory={() => {
-        if (historyLoading) {
+        if (historyLoading || historySubmitting) {
           return;
         }
 

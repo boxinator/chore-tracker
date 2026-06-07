@@ -1,6 +1,7 @@
 import { CalendarDays, ChevronLeft, ChevronRight, History, Settings, Wrench, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type {
+  AdjustmentInput,
   Child,
   ChildInput,
   CreateChoreInput,
@@ -31,7 +32,7 @@ type LaneItem = {
   title: string;
   description: string;
   points: number;
-  meta: string;
+  labels: string[];
   done?: boolean;
   assigneeChildId: string | null;
   scheduledDays: number[];
@@ -103,12 +104,14 @@ type DashboardPageProps = {
   historyModalOpen: boolean;
   historyEntries: HistoryEntry[];
   historyLoading: boolean;
+  historySubmitting: boolean;
   historyError: string | null;
   debugTimeEnabled: boolean;
   debugDateInput: string;
   debugTimeInput: string;
   debugPreview: string;
   onOpenHistory: () => void;
+  onAdjustPoints: (input: AdjustmentInput) => Promise<void>;
   onToggleDebugTime: () => void;
   onChangeDebugDate: (value: string) => void;
   onChangeDebugTime: (value: string) => void;
@@ -132,12 +135,16 @@ const themeLabels = {
   quest: "Quest"
 };
 
-function formatSchedule(days: number[]) {
+function formatScheduleLabels(days: number[]) {
   if (days.length === 0) {
-    return "Always available";
+    return ["Always available"];
   }
 
-  return days.map((day) => weekdayLabels[day]).join(", ");
+  if (days.length === 7) {
+    return ["Daily"];
+  }
+
+  return days.map((day) => weekdayLabels[day]);
 }
 
 function toLaneItem(chore: VisibleChore): LaneItem {
@@ -147,7 +154,10 @@ function toLaneItem(chore: VisibleChore): LaneItem {
     title: chore.title,
     description: chore.description,
     points: chore.pointValue,
-    meta: chore.isCompletedToday ? "Completed today" : formatSchedule(chore.scheduledDays),
+    labels: [
+      ...(chore.isCompletedToday ? ["Completed today"] : []),
+      ...formatScheduleLabels(chore.scheduledDays)
+    ],
     done: chore.isCompletedToday,
     assigneeChildId: chore.assigneeChildId,
     scheduledDays: chore.scheduledDays,
@@ -163,7 +173,7 @@ function toTaskLaneItem(task: VisibleTask): LaneItem {
     title: task.title,
     description: task.description,
     points: 0,
-    meta: task.isCompletedToday ? "Completed today" : task.description || "Task",
+    labels: [task.isCompletedToday ? "Completed today" : "Task"],
     done: task.isCompletedToday,
     assigneeChildId: task.assigneeChildId,
     scheduledDays: [],
@@ -364,12 +374,14 @@ export function DashboardPage({
   historyModalOpen,
   historyEntries,
   historyLoading,
+  historySubmitting,
   historyError,
   debugTimeEnabled,
   debugDateInput,
   debugTimeInput,
   debugPreview,
   onOpenHistory,
+  onAdjustPoints,
   onToggleDebugTime,
   onChangeDebugDate,
   onChangeDebugTime,
@@ -574,11 +586,14 @@ export function DashboardPage({
         />
       )}
 
-      {historyModalOpen && (
+      {historyModalOpen && dashboardData && (
         <HistoryModal
           entries={historyEntries}
           loading={historyLoading}
+          submitting={historySubmitting}
           error={historyError}
+          children={dashboardData.children}
+          onAdjust={onAdjustPoints}
           onClose={onCloseHistory}
         />
       )}

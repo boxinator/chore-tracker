@@ -126,8 +126,9 @@ export function BoardLane({
             id={item.id}
             kind={item.kind}
             title={item.title}
+            description={item.description}
             points={item.points}
-            meta={item.meta}
+            labels={item.labels}
             assigneeChildId={item.assigneeChildId}
             done={item.done}
             onDelete={onDelete}

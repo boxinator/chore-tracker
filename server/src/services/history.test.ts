@@ -1,7 +1,12 @@
 import { afterEach, describe, expect, it } from "vitest";
 import type { DatabaseConnection } from "../db/connection.js";
 import { createTestDatabase } from "../db/test-helpers.js";
-import { listRecentHistory } from "./history.js";
+import {
+  createManualAdjustment,
+  HistoryValidationError,
+  listRecentHistory,
+  parseAdjustmentInput
+} from "./history.js";
 
 let db: DatabaseConnection | null = null;
 
@@ -75,5 +80,58 @@ describe("listRecentHistory", () => {
         timestamp: "2026-04-23T10:00:00.000Z"
       }
     ]);
+  });
+});
+
+describe("manual adjustments", () => {
+  it("creates auditable additive and subtractive ledger entries", () => {
+    const fixtureDb = createBaseFixture();
+
+    expect(
+      createManualAdjustment(fixtureDb, {
+        childId: "child-1",
+        operation: "add",
+        amount: 12,
+        reason: "Amazing report card"
+      })
+    ).toMatchObject({ previousTotal: 0, newTotal: 12 });
+
+    expect(
+      createManualAdjustment(fixtureDb, {
+        childId: "child-1",
+        operation: "subtract",
+        amount: 5,
+        reason: "Correcting a mistake"
+      })
+    ).toMatchObject({ previousTotal: 12, newTotal: 7 });
+
+    const entries = listRecentHistory(fixtureDb);
+    expect(entries.map(({ eventType, sourceName, pointDelta }) => ({
+      eventType,
+      sourceName,
+      pointDelta
+    }))).toEqual(expect.arrayContaining([
+      {
+        eventType: "manual_adjustment",
+        sourceName: "Correcting a mistake",
+        pointDelta: -5
+      },
+      {
+        eventType: "manual_adjustment",
+        sourceName: "Amazing report card",
+        pointDelta: 12
+      }
+    ]));
+  });
+
+  it("requires a child, positive whole-number amount, operation, and reason", () => {
+    expect(() =>
+      parseAdjustmentInput({
+        childId: "",
+        operation: "add",
+        amount: 0,
+        reason: ""
+      })
+    ).toThrow(HistoryValidationError);
   });
 });

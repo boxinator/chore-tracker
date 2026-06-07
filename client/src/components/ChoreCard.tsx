@@ -4,8 +4,9 @@ type ChoreCardProps = {
   id: string;
   kind?: "chore" | "task";
   title: string;
+  description: string;
   points: number;
-  meta: string;
+  labels: string[];
   assigneeChildId?: string | null;
   done?: boolean;
   onDelete?: (id: string, kind: "chore" | "task") => void;
@@ -24,8 +25,9 @@ export function ChoreCard({
   id,
   kind = "chore",
   title,
+  description,
   points,
-  meta,
+  labels,
   assigneeChildId = null,
   done = false,
   onDelete,
@@ -76,7 +78,14 @@ export function ChoreCard({
       >
         <div className="chore-copy">
           <h3>{title}</h3>
-          <p>{meta}</p>
+          {description && <p className="chore-description">{description}</p>}
+          <div className="chore-labels" aria-label="Schedule and status">
+            {labels.map((label) => (
+              <span key={label} className="chore-label">
+                {label}
+              </span>
+            ))}
+          </div>
         </div>
       </button>
 

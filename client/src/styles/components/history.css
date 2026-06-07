@@ -2,6 +2,30 @@
   margin-top: 16px;
 }
 
+.history-adjust-button {
+  margin-top: 16px;
+}
+
+.history-adjust-form {
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+}
+
+.history-operation {
+  width: 100%;
+  margin-top: 0;
+}
+
+.history-equation {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-align: center;
+}
+
 .history-list {
   display: grid;
   gap: 12px;
