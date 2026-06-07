@@ -185,6 +185,10 @@ Recommended setup:
 Important:
 
 - The SQLite file should live on the mounted `/data` path, not inside the container filesystem.
+- `DATA_DIR` and `DATABASE_PATH` are paths inside the container, not Synology host paths.
+- Recommended folder mount: map the Synology folder containing the DB to `/data`, then set `DATA_DIR=/data`.
+- If using `DATABASE_PATH`, set it to the container path of the file, usually `/data/chore-tracker.db`.
+- Runtime startup never creates, seeds, or migrates database content. Start new installations by copying `sample.db` to the configured database path.
 - If the timezone matters for chore schedule boundaries, set `TZ` explicitly.
 - If you are using an older Synology setup that still calls the package "Docker" or "Container Station", the same core settings still apply: image source, port mapping, `/data` volume mount, and restart policy.
 
@@ -217,7 +221,10 @@ After deploying to Synology, verify:
 
 - Primary data store: SQLite
 - Default local DB path: `data/chore-tracker.db`
+- Empty schema-only starter DB: `data/sample.db`
 - Recommended container DB path: `/data/chore-tracker.db`
+
+For a new installation, copy `sample.db` to `chore-tracker.db` in the mounted data folder before starting the container.
 
 Back up the SQLite file by copying the DB file from the mounted data directory while the app is stopped, or by using your normal volume/folder backup workflow.
 

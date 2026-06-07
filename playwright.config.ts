@@ -4,8 +4,10 @@ import { defineConfig } from "@playwright/test";
 
 const e2eDir = path.join(process.cwd(), "e2e", ".tmp");
 const databasePath = path.join(e2eDir, `chore-tracker.e2e.${Date.now()}.db`);
+const sampleDatabasePath = path.join(process.cwd(), "data", "sample.db");
 
 fs.mkdirSync(e2eDir, { recursive: true });
+fs.copyFileSync(sampleDatabasePath, databasePath);
 
 export default defineConfig({
   testDir: "./e2e",

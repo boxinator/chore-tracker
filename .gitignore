@@ -4,7 +4,8 @@ client-dist
 *.log
 .env
 .env.*
-data
+data/*
+!data/sample.db
 test-results
 playwright-report
 e2e/.tmp
