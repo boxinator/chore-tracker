@@ -13,6 +13,7 @@
 @import "./components/manage.css";
 @import "./components/rewards.css";
 @import "./components/history.css";
-@import "./components/debug.css";
 @import "./components/space-background.css";
 @import "./components/quest-background.css";
+@import "./components/weekly.css";
+@import "./components/period-navigator.css";

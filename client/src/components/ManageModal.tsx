@@ -1,15 +1,29 @@
 import { useMemo, useState } from "react";
 import { Palette, X, Zap } from "lucide-react";
 import { Avatar } from "./Avatar";
-import type { Child, ChildInput, Reward, RewardInput } from "../types";
+import type {
+  AdjustmentInput,
+  Child,
+  ChildInput,
+  DashboardChild,
+  HistoryEntry,
+  Reward,
+  RewardInput
+} from "../types";
 import { useModalDismiss } from "./modalDismiss";
+import { HistoryPanel, PointsOverrideForm } from "./HistoryModal";
 
 type ManageModalProps = {
   children: Child[];
   rewards: Reward[];
+  dashboardChildren: DashboardChild[];
   loading: boolean;
   error: string | null;
   saving: boolean;
+  historyEntries: HistoryEntry[];
+  historyLoading: boolean;
+  historySubmitting: boolean;
+  historyError: string | null;
   themeLabel: string;
   onClose: () => void;
   onOpenAvatarPicker: (child: Child) => void;
@@ -19,14 +33,17 @@ type ManageModalProps = {
   onCreateReward: (input: RewardInput) => Promise<void>;
   onUpdateReward: (rewardId: string, input: RewardInput) => Promise<void>;
   onDeactivateReward: (rewardId: string) => Promise<void>;
+  onOpenHistory: () => void;
+  onAdjustPoints: (input: AdjustmentInput) => Promise<void>;
 };
 
-type TabKey = "children" | "rewards";
+type TabKey = "children" | "rewards" | "history";
 type RewardSubtabKey = "active" | "inactive";
 
 const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "rewards", label: "Rewards" },
-  { key: "children", label: "People" }
+  { key: "children", label: "People" },
+  { key: "history", label: "History" }
 ];
 
 const rewardSubtabs: Array<{ key: RewardSubtabKey; label: string }> = [
@@ -46,9 +63,14 @@ function RewardCostRibbon({ cost }: { cost: number }) {
 export function ManageModal({
   children,
   rewards,
+  dashboardChildren,
   loading,
   error,
   saving,
+  historyEntries,
+  historyLoading,
+  historySubmitting,
+  historyError,
   themeLabel,
   onClose,
   onOpenAvatarPicker,
@@ -57,7 +79,9 @@ export function ManageModal({
   onUpdateChild,
   onCreateReward,
   onUpdateReward,
-  onDeactivateReward
+  onDeactivateReward,
+  onOpenHistory,
+  onAdjustPoints
 }: ManageModalProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("rewards");
   const [activeRewardSubtab, setActiveRewardSubtab] = useState<RewardSubtabKey>("active");
@@ -115,7 +139,12 @@ export function ManageModal({
                 type="button"
                 role="tab"
                 aria-selected={activeTab === tab.key}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => {
+                  setActiveTab(tab.key);
+                  if (tab.key === "history") {
+                    onOpenHistory();
+                  }
+                }}
               >
                 {tab.label}
               </button>
@@ -396,6 +425,7 @@ export function ManageModal({
               )}
             </section>
 
+            <div className="manage-side-stack">
             <section className="manage-section">
               <header className="manage-section-header">
                 <h3>Add reward</h3>
@@ -450,7 +480,34 @@ export function ManageModal({
                 </div>
               </form>
             </section>
+            <section className="manage-section">
+              <header className="manage-section-header">
+                <h3>Add points override</h3>
+                <p>Add or subtract points while preserving the ledger history.</p>
+              </header>
+              <PointsOverrideForm
+                children={dashboardChildren}
+                submitting={historySubmitting}
+                onAdjust={onAdjustPoints}
+              />
+              {historyError && <p className="form-error">{historyError}</p>}
+            </section>
+            </div>
           </div>
+        )}
+
+        {activeTab === "history" && (
+          <section className="manage-section manage-history-section">
+            <header className="manage-section-header">
+              <h3>Points history</h3>
+              <p>Recent chore, reward, and points override ledger entries.</p>
+            </header>
+            <HistoryPanel
+              entries={historyEntries}
+              loading={historyLoading}
+              error={historyError}
+            />
+          </section>
         )}
       </section>
     </div>

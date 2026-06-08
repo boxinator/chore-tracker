@@ -1,5 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { DashboardPage } from "./pages/DashboardPage";
+import { WeeklyPage } from "./pages/WeeklyPage";
+import { ManageModal } from "./components/ManageModal";
+import { AvatarPickerModal } from "./components/AvatarPickerModal";
 import type {
   AdjustmentInput,
   Child,
@@ -8,7 +11,6 @@ import type {
   CreateChoreInput,
   CreateTaskInput,
   DashboardResponse,
-  HealthResponse,
   HistoryEntry,
   HistoryResponse,
   RedeemRewardResult,
@@ -20,26 +22,48 @@ import type {
 
 type ThemeName = "default" | "space" | "quest";
 const themeCycle: ThemeName[] = ["space", "quest", "default"];
+const themeLabels = { default: "Default", space: "Space", quest: "Quest" };
 
-function formatDateInputValue(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+function formatDate(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-function formatTimeInputValue(date: Date) {
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  return `${hours}:${minutes}`;
+function parseDate(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day, 12);
+}
+
+function getWeekStart(date: Date) {
+  const start = new Date(date);
+  start.setDate(start.getDate() - start.getDay());
+  return start;
+}
+
+function getDateParam(name: string, fallback: string) {
+  const value = new URLSearchParams(window.location.search).get(name);
+  return value && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : fallback;
+}
+
+function formatDailyLabel(value: string) {
+  return parseDate(value).toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
+}
+
+function formatWeeklyLabel(value: string) {
+  const start = getWeekStart(parseDate(value));
+  const end = new Date(start);
+  end.setDate(end.getDate() + 6);
+  return `${start.toLocaleDateString(undefined, { month: "short", day: "numeric" })} - ${end.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
 }
 
 export function App() {
+  const [route, setRoute] = useState(`${window.location.pathname}${window.location.search}`);
+  const todayLocal = formatDate(new Date());
+  const currentPath = window.location.pathname;
+  const dailyDate = getDateParam("date", todayLocal);
   const [theme, setTheme] = useState<ThemeName>(() => {
     const storedTheme = window.localStorage.getItem("chore-theme");
     return themeCycle.includes(storedTheme as ThemeName) ? (storedTheme as ThemeName) : "space";
   });
-  const [health, setHealth] = useState<HealthResponse | null>(null);
   const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,54 +86,20 @@ export function App() {
   const [avatarPickerChild, setAvatarPickerChild] = useState<Child | null>(null);
   const [avatarPickerSaving, setAvatarPickerSaving] = useState(false);
   const [avatarPickerError, setAvatarPickerError] = useState<string | null>(null);
-  const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [historyEntries, setHistoryEntries] = useState<HistoryEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historySubmitting, setHistorySubmitting] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
-  const [debugTimeEnabled, setDebugTimeEnabled] = useState(false);
-  const [debugDateInput, setDebugDateInput] = useState("");
-  const [debugTimeInput, setDebugTimeInput] = useState("");
   const [rewardModalChildId, setRewardModalChildId] = useState<string | null>(null);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [rewardsLoading, setRewardsLoading] = useState(false);
   const [rewardsError, setRewardsError] = useState<string | null>(null);
   const [redeemResult, setRedeemResult] = useState<RedeemRewardResult | null>(null);
 
-  const debugNowIso = useMemo(() => {
-    if (!debugTimeEnabled || !debugDateInput || !debugTimeInput) {
-      return null;
-    }
-
-    const debugNow = new Date(`${debugDateInput}T${debugTimeInput}`);
-    return Number.isNaN(debugNow.getTime()) ? null : debugNow.toISOString();
-  }, [debugDateInput, debugTimeEnabled, debugTimeInput]);
-
-  const debugPreview = useMemo(() => {
-    if (!debugNowIso) {
-      return "Using real time";
-    }
-
-    return new Date(debugNowIso).toLocaleString(undefined, {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit"
-    });
-  }, [debugNowIso]);
-
   const apiFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-    const headers = new Headers(init?.headers);
-
-    if (debugNowIso) {
-      headers.set("X-Debug-Now", debugNowIso);
-    }
-
     return fetch(input, {
       cache: "no-store",
-      ...init,
-      headers
+      ...init
     });
   };
 
@@ -119,6 +109,22 @@ export function App() {
       window.localStorage.setItem("chore-theme", next);
       return next;
     });
+  };
+
+  useEffect(() => {
+    if (window.location.pathname === "/") {
+      window.history.replaceState({}, "", `/daily?date=${todayLocal}`);
+      setRoute(`/daily?date=${todayLocal}`);
+    }
+
+    const handlePopState = () => setRoute(`${window.location.pathname}${window.location.search}`);
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  const navigate = (path: string) => {
+    window.history.pushState({}, "", path);
+    setRoute(path);
   };
 
   const showSuccess = (message: string) => {
@@ -135,22 +141,14 @@ export function App() {
     }, 1400);
   };
 
-  const fetchData = async () => {
+  const fetchData = async (date = dailyDate) => {
     try {
-      const [healthResponse, dashboardResponse] = await Promise.all([
-        apiFetch("/api/health"),
-        apiFetch("/api/dashboard")
-      ]);
-
-      if (!healthResponse.ok) {
-        throw new Error(`Health check failed with ${healthResponse.status}`);
-      }
+      const dashboardResponse = await apiFetch(`/api/dashboard?date=${date}`);
 
       if (!dashboardResponse.ok) {
         throw new Error(`Dashboard failed with ${dashboardResponse.status}`);
       }
 
-      setHealth((await healthResponse.json()) as HealthResponse);
       setDashboardData((await dashboardResponse.json()) as DashboardResponse);
       setError(null);
     } catch (err) {
@@ -161,8 +159,10 @@ export function App() {
   };
 
   useEffect(() => {
-    void fetchData();
-  }, [debugNowIso]);
+    if (currentPath === "/daily" || currentPath === "/") {
+      void fetchData(dailyDate);
+    }
+  }, [route]);
 
   const fetchRewards = async () => {
     const response = await apiFetch("/api/rewards");
@@ -371,7 +371,6 @@ export function App() {
 
   const handleOpenHistory = async () => {
     try {
-      setHistoryModalOpen(true);
       setHistoryLoading(true);
       setHistoryError(null);
       await fetchHistory();
@@ -621,10 +620,46 @@ export function App() {
     }
   };
 
+  const handleWeeklyUpdateChore = async (id: string, input: UpdateChoreInput) => {
+    const response = await apiFetch(`/api/chores/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input)
+    });
+
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+      throw new Error(payload?.error ?? `Update chore failed with ${response.status}`);
+    }
+
+    await fetchData();
+    showSuccess("Chore updated");
+  };
+
+  const handleWeeklyDeleteChore = async (id: string) => {
+    const response = await apiFetch(`/api/chores/${id}`, { method: "DELETE" });
+
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+      throw new Error(payload?.error ?? `Delete chore failed with ${response.status}`);
+    }
+
+    await fetchData();
+    showSuccess("Chore deleted");
+  };
+
   return (
     <div className="app-root" data-theme={theme}>
+    {currentPath === "/weekly" ? (
+      <WeeklyPage
+        apiFetch={apiFetch}
+        onNavigate={navigate}
+        onOpenManage={() => void handleOpenManage()}
+        onUpdateChore={handleWeeklyUpdateChore}
+        onDeleteChore={handleWeeklyDeleteChore}
+      />
+    ) : (
     <DashboardPage
-      health={health}
       dashboardData={dashboardData}
       loading={loading}
       error={error}
@@ -651,12 +686,6 @@ export function App() {
       detailError={detailError}
       highlightedChoreId={highlightedChoreId}
       successMessage={successMessage}
-      manageModalOpen={manageModalOpen}
-      manageChildren={managedChildren}
-      manageRewards={managedRewards}
-      manageLoading={manageLoading}
-      manageSaving={manageSaving}
-      manageError={manageError}
       onOpenDetails={(id) => {
         setError(null);
         setDetailError(null);
@@ -666,35 +695,10 @@ export function App() {
       onOpenManage={() => {
         void handleOpenManage();
       }}
-      onCloseManage={() => {
-        if (manageSaving) {
-          return;
-        }
-
-        setManageModalOpen(false);
-        setManageError(null);
-      }}
-      avatarPickerChild={avatarPickerChild}
-      avatarPickerSaving={avatarPickerSaving}
-      avatarPickerError={avatarPickerError}
       onOpenAvatarPicker={(child) => {
         setAvatarPickerChild(child);
         setAvatarPickerError(null);
       }}
-      onCloseAvatarPicker={() => {
-        if (avatarPickerSaving) {
-          return;
-        }
-
-        setAvatarPickerChild(null);
-        setAvatarPickerError(null);
-      }}
-      onSelectAvatar={handleSelectAvatar}
-      onCreateChild={handleCreateChild}
-      onUpdateChild={handleUpdateChild}
-      onCreateReward={handleCreateReward}
-      onUpdateReward={handleUpdateReward}
-      onDeactivateReward={handleDeactivateReward}
       onCloseDetails={() => {
         if (detailSubmitting) {
           return;
@@ -708,54 +712,38 @@ export function App() {
       onDeleteItem={handleDeleteItem}
       assignmentPendingChoreId={assignmentPendingChoreId}
       onToggleComplete={handleToggleComplete}
-      historyModalOpen={historyModalOpen}
       historyEntries={historyEntries}
       historyLoading={historyLoading}
       historySubmitting={historySubmitting}
       historyError={historyError}
-      debugTimeEnabled={debugTimeEnabled}
-      debugDateInput={debugDateInput}
-      debugTimeInput={debugTimeInput}
-      debugPreview={debugPreview}
       onOpenHistory={() => {
         void handleOpenHistory();
       }}
       onAdjustPoints={handleAdjustPoints}
-      onToggleDebugTime={() => {
-        setDebugTimeEnabled((current) => {
-          const next = !current;
-
-          if (next && (!debugDateInput || !debugTimeInput)) {
-            const now = new Date();
-            setDebugDateInput(formatDateInputValue(now));
-            setDebugTimeInput(formatTimeInputValue(now));
-          }
-
-          return next;
-        });
-      }}
-      onChangeDebugDate={setDebugDateInput}
-      onChangeDebugTime={setDebugTimeInput}
-      onResetDebugTime={() => {
-        setDebugTimeEnabled(false);
-        setDebugDateInput("");
-        setDebugTimeInput("");
-      }}
-      onCloseHistory={() => {
-        if (historyLoading || historySubmitting) {
-          return;
-        }
-
-        setHistoryModalOpen(false);
-        setHistoryError(null);
-      }}
       rewardModalChildId={rewardModalChildId}
       rewards={rewards}
       rewardsLoading={rewardsLoading}
       rewardsError={rewardsError}
       redeemResult={redeemResult}
-      theme={theme}
-      onToggleTheme={handleToggleTheme}
+      isCurrentDay={dailyDate === todayLocal}
+      dailyLabel={formatDailyLabel(dailyDate)}
+      weeklyLabel={formatWeeklyLabel(dailyDate)}
+      onPreviousDay={() => {
+        const previous = parseDate(dailyDate);
+        previous.setDate(previous.getDate() - 1);
+        navigate(`/daily?date=${formatDate(previous)}`);
+      }}
+      onNextDay={() => {
+        const next = parseDate(dailyDate);
+        next.setDate(next.getDate() + 1);
+        navigate(`/daily?date=${formatDate(next)}`);
+      }}
+      onToday={() => navigate(`/daily?date=${todayLocal}`)}
+      onChangeView={(view) => {
+        if (view === "weekly") {
+          navigate(`/weekly?start=${formatDate(getWeekStart(parseDate(dailyDate)))}`);
+        }
+      }}
       onOpenRewards={handleOpenRewards}
       onCloseRewards={() => {
         if (rewardsLoading) {
@@ -768,6 +756,53 @@ export function App() {
       }}
       onRedeemReward={handleRedeemReward}
     />
+    )}
+    {manageModalOpen && (
+      <ManageModal
+        children={managedChildren}
+        rewards={managedRewards}
+        dashboardChildren={dashboardData?.children ?? []}
+        loading={manageLoading}
+        error={manageError}
+        saving={manageSaving}
+        historyEntries={historyEntries}
+        historyLoading={historyLoading}
+        historySubmitting={historySubmitting}
+        historyError={historyError}
+        onClose={() => {
+          if (manageSaving) return;
+          setManageModalOpen(false);
+          setManageError(null);
+        }}
+        onOpenAvatarPicker={(child) => {
+          setAvatarPickerChild(child);
+          setAvatarPickerError(null);
+        }}
+        themeLabel={themeLabels[theme]}
+        onToggleTheme={handleToggleTheme}
+        onCreateChild={handleCreateChild}
+        onUpdateChild={handleUpdateChild}
+        onCreateReward={handleCreateReward}
+        onUpdateReward={handleUpdateReward}
+        onDeactivateReward={handleDeactivateReward}
+        onOpenHistory={() => void handleOpenHistory()}
+        onAdjustPoints={handleAdjustPoints}
+      />
+    )}
+    {avatarPickerChild && (
+      <AvatarPickerModal
+        childName={avatarPickerChild.name}
+        selectedAvatarKey={avatarPickerChild.avatarKey}
+        saving={avatarPickerSaving}
+        error={avatarPickerError}
+        onClose={() => {
+          if (avatarPickerSaving) return;
+          setAvatarPickerChild(null);
+          setAvatarPickerError(null);
+        }}
+        onSelect={(avatarKey) => void handleSelectAvatar(avatarKey)}
+      />
+    )}
     </div>
   );
 }

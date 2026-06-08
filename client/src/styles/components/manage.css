@@ -234,6 +234,16 @@
   margin-top: 0;
 }
 
+.manage-side-stack {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+}
+
+.manage-history-section {
+  margin-top: 18px;
+}
+
 @media (max-width: 720px) {
   .manage-modal {
     min-height: min(680px, calc(100vh - 24px));

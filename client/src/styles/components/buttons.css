@@ -7,8 +7,6 @@
 .icon-text-button,
 .modal-close,
 .toolbar-button,
-.debug-float-button,
-.floating-tool-button,
 .scroll-button,
 .segment-button,
 .weekday-button {
@@ -38,15 +36,12 @@
 .icon-text-button:hover,
 .modal-close:hover,
 .toolbar-button:hover,
-.debug-float-button:hover,
-.floating-tool-button:hover,
 .scroll-button:hover {
   transform: translateY(-1px);
 }
 
 .icon-button,
 .modal-close,
-.debug-float-button,
 .scroll-button {
   width: 48px;
   min-width: 48px;
@@ -69,8 +64,6 @@
 .modal-close svg,
 .secondary-button svg,
 .primary-button svg,
-.debug-float-button svg,
-.floating-tool-button svg,
 .scroll-button svg,
 .board-date svg {
   width: 18px;
@@ -186,7 +179,6 @@
 @media (min-width: 1000px) and (max-width: 1280px) {
   .icon-button,
   .modal-close,
-  .debug-float-button,
   .scroll-button {
     width: 42px;
     min-width: 42px;

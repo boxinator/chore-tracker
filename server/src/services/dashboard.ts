@@ -270,7 +270,8 @@ export function getVisibleChoresForDate(
 
 function getVisibleTasksForDate(
   db: DatabaseConnection,
-  currentDateLocal: string
+  currentDateLocal: string,
+  includeOpenTasks: boolean
 ): InternalVisibleTask[] {
   const tasks = db
     .prepare(
@@ -287,7 +288,7 @@ function getVisibleTasksForDate(
         FROM tasks
         WHERE is_active = 1
           AND (
-            status = 'open'
+            (status = 'open' AND ? = 1)
             OR (status = 'completed' AND completion_date_local = ?)
           )
         ORDER BY
@@ -296,7 +297,7 @@ function getVisibleTasksForDate(
           datetime(created_at) ASC
       `
     )
-    .all(currentDateLocal) as TaskRow[];
+    .all(includeOpenTasks ? 1 : 0, currentDateLocal) as TaskRow[];
 
   return tasks.map((task) => ({
     id: task.id,
@@ -313,11 +314,12 @@ function getVisibleTasksForDate(
 export function getDashboardData(
   db: DatabaseConnection,
   currentDateLocal: string,
-  dayOfWeek: number
+  dayOfWeek: number,
+  includeOpenTasks = true
 ): DashboardData {
   const totals = getChildPointTotals(db);
   const visibleChores = getVisibleChoreRecordsForDate(db, currentDateLocal, dayOfWeek);
-  const visibleTasks = getVisibleTasksForDate(db, currentDateLocal);
+  const visibleTasks = getVisibleTasksForDate(db, currentDateLocal, includeOpenTasks);
 
   const choresByChildId = visibleChores.reduce<Map<string, VisibleChore[]>>((map, chore) => {
     if (!chore.assigneeChildId) {

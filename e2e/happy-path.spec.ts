@@ -12,6 +12,7 @@ test("happy path: add, assign, complete, redeem", async ({ page, context, reques
   });
 
   await page.goto("/");
+  await expect(page).toHaveURL(/\/daily\?date=\d{4}-\d{2}-\d{2}$/);
 
   await expect(page.getByRole("heading", { name: "Quest Board" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Sample Child 1" })).toBeVisible();
@@ -60,4 +61,43 @@ test("happy path: add, assign, complete, redeem", async ({ page, context, reques
   await expect(page.getByText("Playwright Chore")).toHaveCount(0);
 
   await context.close();
+});
+
+test("weekly view shows scheduled chores and supports week navigation", async ({ page, request }) => {
+  const childResponse = await request.post("/api/children", { data: { name: "Weekly Kid" } });
+  const child = (await childResponse.json()) as { id: string };
+
+  await request.post("/api/chores", {
+    data: {
+      title: "Weekly View Chore",
+      description: "Visible in every weekly day column",
+      pointValue: 4,
+      assignments: [{ childId: child.id, days: [0, 1, 2, 3, 4, 5, 6] }],
+      unassignedScheduleDays: []
+    }
+  });
+
+  await page.goto("/");
+  await page.getByLabel("Calendar view").selectOption("weekly");
+
+  await expect(page).toHaveURL(/\/weekly\?start=\d{4}-\d{2}-\d{2}$/);
+  await expect(page.getByRole("heading", { name: "Weekly View" })).toBeVisible();
+  await expect(page.getByText("Weekly View Chore")).toHaveCount(7);
+  await expect(page.getByRole("heading", { name: "Ongoing Tasks" })).toBeVisible();
+  await page.getByRole("button", { name: "Manage" }).click();
+  const manageDialog = page.getByRole("dialog", { name: "Household setup" });
+  await expect(manageDialog).toBeVisible();
+  await manageDialog.getByRole("button", { name: "Close" }).click();
+
+  await page.getByLabel("Calendar view").selectOption("daily");
+  await expect(page).toHaveURL(/\/daily\?date=\d{4}-\d{2}-\d{2}$/);
+  await page.getByLabel("Calendar view").selectOption("weekly");
+
+  const originalUrl = page.url();
+  await page.getByRole("button", { name: "Next week" }).click();
+  await expect(page).not.toHaveURL(originalUrl);
+
+  await page.getByText("Weekly View Chore").first().click();
+  await expect(page.getByRole("dialog", { name: "Weekly View Chore" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Mark Weekly View Chore complete/ })).toHaveCount(0);
 });

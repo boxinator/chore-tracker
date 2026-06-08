@@ -19,12 +19,9 @@
 }
 
 .topbar,
-.status-panel,
 .lane,
 .chore-card,
-.modal,
-.debug-dock,
-.floating-tool-button {
+.modal {
   backdrop-filter: blur(18px);
 }
 
@@ -125,40 +122,6 @@
   white-space: nowrap;
 }
 
-.status-panel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px 16px;
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-panel);
-}
-
-.status-panel.is-error {
-  border-color: rgba(239, 68, 68, 0.34);
-  background: color-mix(in srgb, var(--color-danger-bg) 34%, var(--color-surface));
-}
-
-.status-copy,
-.status-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.status-copy strong {
-  color: var(--color-text-strong);
-}
-
-.status-meta {
-  text-align: right;
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-}
-
 .status-inline {
   min-height: 32px;
   display: flex;
@@ -221,35 +184,6 @@
   right: 8px;
 }
 
-.floating-tools {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  z-index: 8;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  gap: 10px;
-  max-width: min(620px, calc(100vw - 36px));
-}
-
-.floating-tool-button {
-  width: 48px;
-  min-width: 48px;
-  aspect-ratio: 1;
-  padding: 0;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-strong);
-  color: var(--color-accent-strong);
-  box-shadow: var(--shadow-button);
-}
-
-.floating-tool-button svg {
-  width: 18px;
-  height: 18px;
-}
-
 @media (max-width: 1024px) {
   .topbar {
     align-items: stretch;
@@ -304,15 +238,6 @@
     padding-bottom: 0;
   }
 
-  .floating-tools {
-    right: 12px;
-    bottom: 12px;
-  }
-
-  .floating-tool-button {
-    width: 42px;
-    min-width: 42px;
-  }
 }
 
 @media (max-width: 720px) {
@@ -320,8 +245,7 @@
     padding: 16px;
   }
 
-  .topbar,
-  .status-panel {
+  .topbar {
     flex-direction: column;
     align-items: stretch;
   }
@@ -336,9 +260,6 @@
     order: -1;
   }
 
-  .status-meta {
-    text-align: left;
-  }
 }
 
 @media (max-width: 480px) {

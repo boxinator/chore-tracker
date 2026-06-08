@@ -1,4 +1,4 @@
-import { CalendarDays, ChevronLeft, ChevronRight, History, Settings, Wrench, X } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type {
   AdjustmentInput,
@@ -7,7 +7,6 @@ import type {
   CreateChoreInput,
   CreateTaskInput,
   DashboardResponse,
-  HealthResponse,
   HistoryEntry,
   RedeemRewardResult,
   Reward,
@@ -19,12 +18,11 @@ import type {
 import { AddChoreModal } from "../components/AddChoreModal";
 import { BoardLane } from "../components/BoardLane";
 import { ChoreDetailModal } from "../components/ChoreDetailModal";
-import { HistoryModal } from "../components/HistoryModal";
-import { ManageModal } from "../components/ManageModal";
-import { AvatarPickerModal } from "../components/AvatarPickerModal";
 import { QuestBackground } from "../components/QuestBackground";
 import { RewardModal } from "../components/RewardModal";
 import { SpaceBackground } from "../components/SpaceBackground";
+import { PeriodNavigator } from "../components/PeriodNavigator";
+import { GlobalNav } from "../components/GlobalNav";
 
 type LaneItem = {
   id: string;
@@ -52,7 +50,6 @@ type Lane = {
 };
 
 type DashboardPageProps = {
-  health: HealthResponse | null;
   dashboardData: DashboardResponse | null;
   loading: boolean;
   error: string | null;
@@ -69,28 +66,16 @@ type DashboardPageProps = {
   detailError: string | null;
   highlightedChoreId: string | null;
   successMessage: string | null;
-  manageModalOpen: boolean;
-  manageChildren: Child[];
-  manageRewards: Reward[];
-  manageLoading: boolean;
-  manageSaving: boolean;
-  manageError: string | null;
-  theme: "default" | "space" | "quest";
-  onToggleTheme: () => void;
+  isCurrentDay: boolean;
+  dailyLabel: string;
+  weeklyLabel: string;
+  onPreviousDay: () => void;
+  onNextDay: () => void;
+  onToday: () => void;
+  onChangeView: (view: "daily" | "weekly") => void;
   onOpenDetails: (id: string) => void;
   onOpenManage: () => void;
-  onCloseManage: () => void;
-  avatarPickerChild: Child | null;
-  avatarPickerSaving: boolean;
-  avatarPickerError: string | null;
   onOpenAvatarPicker: (child: Child) => void;
-  onCloseAvatarPicker: () => void;
-  onSelectAvatar: (avatarKey: string) => Promise<void>;
-  onCreateChild: (input: ChildInput) => Promise<void>;
-  onUpdateChild: (childId: string, input: ChildInput) => Promise<void>;
-  onCreateReward: (input: RewardInput) => Promise<void>;
-  onUpdateReward: (rewardId: string, input: RewardInput) => Promise<void>;
-  onDeactivateReward: (rewardId: string) => Promise<void>;
   onCloseDetails: () => void;
   onSubmitChoreUpdate: (id: string, input: UpdateChoreInput) => Promise<void>;
   onDeleteItem: (id: string, kind: "chore" | "task") => Promise<void>;
@@ -101,22 +86,12 @@ type DashboardPageProps = {
     childId: string | null,
     kind: "chore" | "task"
   ) => Promise<void>;
-  historyModalOpen: boolean;
   historyEntries: HistoryEntry[];
   historyLoading: boolean;
   historySubmitting: boolean;
   historyError: string | null;
-  debugTimeEnabled: boolean;
-  debugDateInput: string;
-  debugTimeInput: string;
-  debugPreview: string;
   onOpenHistory: () => void;
   onAdjustPoints: (input: AdjustmentInput) => Promise<void>;
-  onToggleDebugTime: () => void;
-  onChangeDebugDate: (value: string) => void;
-  onChangeDebugTime: (value: string) => void;
-  onResetDebugTime: () => void;
-  onCloseHistory: () => void;
   rewardModalChildId: string | null;
   rewards: Reward[];
   rewardsLoading: boolean;
@@ -129,12 +104,6 @@ type DashboardPageProps = {
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const accentPalette = ["var(--lane-1)", "var(--lane-2)", "var(--lane-3)"];
-const themeLabels = {
-  default: "Default",
-  space: "Space",
-  quest: "Quest"
-};
-
 function formatScheduleLabels(days: number[]) {
   if (days.length === 0) {
     return ["Always available"];
@@ -209,125 +178,7 @@ function buildLanes(data: DashboardResponse | null): Lane[] {
   ];
 }
 
-function formatBoardDate(data: DashboardResponse | null) {
-  if (!data) {
-    return "Waiting for today";
-  }
-
-  const [year, month, day] = data.currentDateLocal.split("-").map(Number);
-  const date = new Date(year, month - 1, day);
-  return date.toLocaleDateString(undefined, {
-    weekday: "long",
-    month: "short",
-    day: "numeric"
-  });
-}
-
-type DebugDockProps = {
-  health: HealthResponse | null;
-  debugTimeEnabled: boolean;
-  debugDateInput: string;
-  debugTimeInput: string;
-  debugPreview: string;
-  onToggleDebugTime: () => void;
-  onChangeDebugDate: (value: string) => void;
-  onChangeDebugTime: (value: string) => void;
-  onResetDebugTime: () => void;
-};
-
-function DebugDock({
-  health,
-  debugTimeEnabled,
-  debugDateInput,
-  debugTimeInput,
-  debugPreview,
-  onToggleDebugTime,
-  onChangeDebugDate,
-  onChangeDebugTime,
-  onResetDebugTime
-}: DebugDockProps) {
-  const [minimized, setMinimized] = useState(true);
-
-  if (minimized) {
-    return (
-      <aside className="debug-dock is-minimized" aria-label="Debug tools">
-        <button
-          className="debug-float-button"
-          type="button"
-          aria-label="Open debug tools"
-          onClick={() => setMinimized(false)}
-        >
-          <Wrench aria-hidden="true" />
-        </button>
-      </aside>
-    );
-  }
-
-  return (
-    <aside className="debug-dock" aria-label="Debug tools">
-      <div className="debug-panel">
-        <header className="debug-panel-header">
-          <div className="debug-panel-title">
-            <strong>Debug tools</strong>
-            <span>Phase 14</span>
-            <span>{debugPreview}</span>
-          </div>
-          <button
-            className="modal-close"
-            type="button"
-            aria-label="Minimize debug tools"
-            onClick={() => setMinimized(true)}
-          >
-            <X aria-hidden="true" />
-          </button>
-        </header>
-
-        <label className="debug-toggle">
-          <input type="checkbox" checked={debugTimeEnabled} onChange={onToggleDebugTime} />
-          <span>Simulated time</span>
-        </label>
-        <div className="debug-time-row">
-          <input
-            className="debug-input"
-            type="date"
-            value={debugDateInput}
-            disabled={!debugTimeEnabled}
-            onChange={(event) => onChangeDebugDate(event.target.value)}
-          />
-          <input
-            className="debug-input"
-            type="time"
-            value={debugTimeInput}
-            disabled={!debugTimeEnabled}
-            onChange={(event) => onChangeDebugTime(event.target.value)}
-          />
-          <button
-            className="secondary-button debug-reset-button"
-            type="button"
-            onClick={onResetDebugTime}
-          >
-            Reset
-          </button>
-        </div>
-
-        <div className="debug-health">
-          {health ? (
-            <>
-              <span>{health.app}</span>
-              <span>{health.databasePath}</span>
-              <span>{new Date(health.timestamp).toLocaleString()}</span>
-            </>
-          ) : (
-            <span>Waiting for local API</span>
-          )}
-        </div>
-      </div>
-    </aside>
-  );
-}
-
 export function DashboardPage({
-  health,
   dashboardData,
   loading,
   error,
@@ -344,49 +195,27 @@ export function DashboardPage({
   detailError,
   highlightedChoreId,
   successMessage,
-  manageModalOpen,
-  manageChildren,
-  manageRewards,
-  manageLoading,
-  manageSaving,
-  manageError,
-  theme,
-  onToggleTheme,
+  isCurrentDay,
+  dailyLabel,
+  weeklyLabel,
+  onPreviousDay,
+  onNextDay,
+  onToday,
+  onChangeView,
   onOpenDetails,
   onOpenManage,
-  onCloseManage,
-  avatarPickerChild,
-  avatarPickerSaving,
-  avatarPickerError,
   onOpenAvatarPicker,
-  onCloseAvatarPicker,
-  onSelectAvatar,
-  onCreateChild,
-  onUpdateChild,
-  onCreateReward,
-  onUpdateReward,
-  onDeactivateReward,
   onCloseDetails,
   onSubmitChoreUpdate,
   onDeleteItem,
   assignmentPendingChoreId,
   onToggleComplete,
-  historyModalOpen,
   historyEntries,
   historyLoading,
   historySubmitting,
   historyError,
-  debugTimeEnabled,
-  debugDateInput,
-  debugTimeInput,
-  debugPreview,
   onOpenHistory,
   onAdjustPoints,
-  onToggleDebugTime,
-  onChangeDebugDate,
-  onChangeDebugTime,
-  onResetDebugTime,
-  onCloseHistory,
   rewardModalChildId,
   rewards,
   rewardsLoading,
@@ -450,34 +279,22 @@ export function DashboardPage({
     <div className="app-shell">
       <SpaceBackground />
       <QuestBackground />
-      <header className="topbar">
-        <div className="topbar-copy">
-          <div className="title-block">
-            <h1>Quest Board</h1>
-          </div>
-        </div>
-
-        <div className="topbar-tools">
-          <button
-            className="text-button toolbar-button"
-            type="button"
-            aria-label="Manage"
-            onClick={onOpenManage}
-          >
-            <Settings aria-hidden="true" />
-            <span className="button-label-compact">Manage</span>
-          </button>
-          <div className="board-date" aria-label="Current board date">
-            <CalendarDays aria-hidden="true" />
-            {formatBoardDate(dashboardData)}
-          </div>
-        </div>
-      </header>
+      <GlobalNav title="Quest Board" onOpenManage={onOpenManage}>
+        <PeriodNavigator
+            view="daily"
+            dailyLabel={dailyLabel}
+            weeklyLabel={weeklyLabel}
+            isToday={isCurrentDay}
+            onPrevious={onPreviousDay}
+            onNext={onNextDay}
+            onToday={onToday}
+            onChangeView={onChangeView}
+        />
+      </GlobalNav>
 
       <div className="status-inline" aria-live="polite">
         {!loading && error && <strong>Unavailable: {error}</strong>}
         {!loading && !error && successMessage && <span className="success-toast">{successMessage}</span>}
-        {debugTimeEnabled && <span className="status-meta">{debugPreview}</span>}
       </div>
 
       <div className="board-shell">
@@ -542,7 +359,7 @@ export function DashboardPage({
                     : undefined
                 }
                 onDelete={onDeleteItem}
-                onToggleComplete={onToggleComplete}
+                onToggleComplete={isCurrentDay ? onToggleComplete : undefined}
                 assignmentPendingChoreId={
                   lane.id === "unassigned" ? assignmentPendingChoreId : undefined
                 }
@@ -586,50 +403,6 @@ export function DashboardPage({
         />
       )}
 
-      {historyModalOpen && dashboardData && (
-        <HistoryModal
-          entries={historyEntries}
-          loading={historyLoading}
-          submitting={historySubmitting}
-          error={historyError}
-          children={dashboardData.children}
-          onAdjust={onAdjustPoints}
-          onClose={onCloseHistory}
-        />
-      )}
-
-      {manageModalOpen && (
-        <ManageModal
-          children={manageChildren}
-          rewards={manageRewards}
-          loading={manageLoading}
-          error={manageError}
-          saving={manageSaving}
-          onClose={onCloseManage}
-          onOpenAvatarPicker={onOpenAvatarPicker}
-          themeLabel={themeLabels[theme]}
-          onToggleTheme={onToggleTheme}
-          onCreateChild={onCreateChild}
-          onUpdateChild={onUpdateChild}
-          onCreateReward={onCreateReward}
-          onUpdateReward={onUpdateReward}
-          onDeactivateReward={onDeactivateReward}
-        />
-      )}
-
-      {avatarPickerChild && (
-        <AvatarPickerModal
-          childName={avatarPickerChild.name}
-          selectedAvatarKey={avatarPickerChild.avatarKey}
-          saving={avatarPickerSaving}
-          error={avatarPickerError}
-          onClose={onCloseAvatarPicker}
-          onSelect={(avatarKey) => {
-            void onSelectAvatar(avatarKey);
-          }}
-        />
-      )}
-
       {detailChore && dashboardData && (
         <ChoreDetailModal
           chore={detailChore}
@@ -644,27 +417,6 @@ export function DashboardPage({
         />
       )}
 
-      <div className="floating-tools" aria-label="Quick tools">
-        <button
-          className="floating-tool-button"
-          type="button"
-          aria-label="History"
-          onClick={onOpenHistory}
-        >
-          <History aria-hidden="true" />
-        </button>
-        <DebugDock
-          health={health}
-          debugTimeEnabled={debugTimeEnabled}
-          debugDateInput={debugDateInput}
-          debugTimeInput={debugTimeInput}
-          debugPreview={debugPreview}
-          onToggleDebugTime={onToggleDebugTime}
-          onChangeDebugDate={onChangeDebugDate}
-          onChangeDebugTime={onChangeDebugTime}
-          onResetDebugTime={onResetDebugTime}
-        />
-      </div>
     </div>
   );
 }

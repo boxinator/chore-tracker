@@ -1,10 +1,3 @@
-export type HealthResponse = {
-  status: string;
-  timestamp: string;
-  app: string;
-  databasePath: string;
-};
-
 export type VisibleChore = {
   id: string;
   title: string;
@@ -44,6 +37,33 @@ export type DashboardResponse = {
   dayOfWeek: number;
   unassignedChores: VisibleChore[];
   children: DashboardChild[];
+};
+
+export type CalendarChild = {
+  id: string;
+  name: string;
+  avatarKey: string | null;
+};
+
+export type CalendarTask = {
+  id: string;
+  title: string;
+  description: string;
+  assigneeChildId: string;
+};
+
+export type CalendarDay = {
+  dateLocal: string;
+  dayOfWeek: number;
+  chores: VisibleChore[];
+};
+
+export type WeekCalendarResponse = {
+  weekStartLocal: string;
+  weekEndLocal: string;
+  children: CalendarChild[];
+  days: CalendarDay[];
+  ongoingTasks: CalendarTask[];
 };
 
 export type CreateChoreInput = {

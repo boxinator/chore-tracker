@@ -41,6 +41,7 @@ import {
   uncompleteChore
 } from "./services/chores.js";
 import { getDashboardData } from "./services/dashboard.js";
+import { getWeekCalendarData } from "./services/calendar.js";
 import {
   TaskValidationError,
   completeTask,
@@ -52,17 +53,6 @@ import {
 
 const db = setupDatabase(config.databasePath);
 const app = express();
-
-function getEffectiveNow(req: express.Request) {
-  const debugNowHeader = req.get("X-Debug-Now");
-
-  if (!debugNowHeader) {
-    return new Date();
-  }
-
-  const debugNow = new Date(debugNowHeader);
-  return Number.isNaN(debugNow.getTime()) ? new Date() : debugNow;
-}
 
 app.use(express.json());
 app.use("/api", (_req, res, next) => {
@@ -82,11 +72,29 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.get("/api/dashboard", (req, res) => {
-  const now = getEffectiveNow(req);
-  const currentDateLocal = getCurrentLocalDateString(now);
-  const dayOfWeek = now.getDay();
+  const now = new Date();
+  const todayLocal = getCurrentLocalDateString(now);
+  const requestedDate = typeof req.query.date === "string" ? req.query.date : todayLocal;
+  const parsedDate = new Date(`${requestedDate}T12:00:00`);
 
-  res.json(getDashboardData(db, currentDateLocal, dayOfWeek));
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(requestedDate) || Number.isNaN(parsedDate.getTime())) {
+    res.status(400).json({ error: "A valid dashboard date is required" });
+    return;
+  }
+
+  res.json(getDashboardData(db, requestedDate, parsedDate.getDay(), requestedDate === todayLocal));
+});
+
+app.get("/api/calendar/week", (req, res) => {
+  const start = typeof req.query.start === "string" ? req.query.start : "";
+  const parsedStart = new Date(`${start}T12:00:00`);
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || Number.isNaN(parsedStart.getTime())) {
+    res.status(400).json({ error: "A valid week start date is required" });
+    return;
+  }
+
+  res.json(getWeekCalendarData(db, start));
 });
 
 app.get("/api/children", (_req, res) => {
@@ -181,7 +189,7 @@ app.patch("/api/chores/:id/assign", (req, res) => {
 
 app.post("/api/chores/:id/complete", (req, res) => {
   try {
-    const now = getEffectiveNow(req);
+    const now = new Date();
     const childId = typeof req.body?.childId === "string" ? req.body.childId : "";
     completeChore(db, req.params.id, childId, getCurrentLocalDateString(now), now.getDay());
     res.status(204).send();
@@ -197,7 +205,7 @@ app.post("/api/chores/:id/complete", (req, res) => {
 
 app.post("/api/chores/:id/uncomplete", (req, res) => {
   try {
-    const now = getEffectiveNow(req);
+    const now = new Date();
     const childId = typeof req.body?.childId === "string" ? req.body.childId : "";
     uncompleteChore(db, req.params.id, childId, getCurrentLocalDateString(now));
     res.status(204).send();
@@ -240,7 +248,7 @@ app.delete("/api/tasks/:id", (req, res) => {
 
 app.post("/api/tasks/:id/complete", (req, res) => {
   try {
-    const now = getEffectiveNow(req);
+    const now = new Date();
     completeTask(db, req.params.id, getCurrentLocalDateString(now));
     res.status(204).send();
   } catch (error) {

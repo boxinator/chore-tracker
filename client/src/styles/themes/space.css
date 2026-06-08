@@ -32,12 +32,9 @@
 }
 
 [data-theme="space"] .topbar,
-[data-theme="space"] .status-panel,
 [data-theme="space"] .lane,
 [data-theme="space"] .chore-card,
-[data-theme="space"] .modal,
-[data-theme="space"] .debug-dock,
-[data-theme="space"] .floating-tool-button {
+[data-theme="space"] .modal {
   backdrop-filter: saturate(1.1) blur(10px);
 }
 

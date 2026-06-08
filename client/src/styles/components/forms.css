@@ -23,8 +23,7 @@
 .field input,
 .field textarea,
 .field select,
-.inline-form input,
-.debug-input {
+.inline-form input {
   width: 100%;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -37,8 +36,7 @@
 .field input:focus,
 .field textarea:focus,
 .field select:focus,
-.inline-form input:focus,
-.debug-input:focus {
+.inline-form input:focus {
   border-color: var(--color-border-strong);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 14%, transparent);
 }

@@ -37,7 +37,7 @@ export function ChoreCard({
   highlighted = false
 }: ChoreCardProps) {
   const isTask = kind === "task";
-  const canComplete = isTask || done || Boolean(onToggleComplete && assigneeChildId);
+  const canComplete = Boolean(onToggleComplete) && (isTask || done || Boolean(assigneeChildId));
   const canAssign = !isTask && !done && !assigneeChildId && Boolean(onOpenDetails);
 
   return (

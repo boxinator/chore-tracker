@@ -113,6 +113,12 @@ describe("completeTask and uncompleteTask", () => {
     const nextDayDashboard = getDashboardData(fixtureDb, "2026-04-24", 5);
     expect(nextDayDashboard.children[0]?.tasks).toEqual([]);
 
+    const historicalDashboard = getDashboardData(fixtureDb, "2026-04-23", 4, false);
+    expect(historicalDashboard.children[0]?.tasks[0]).toMatchObject({
+      id,
+      isCompletedToday: true
+    });
+
     uncompleteTask(fixtureDb, id);
 
     dashboard = getDashboardData(fixtureDb, "2026-04-24", 5);
@@ -121,6 +127,9 @@ describe("completeTask and uncompleteTask", () => {
       id,
       isCompletedToday: false
     });
+
+    const futureDashboard = getDashboardData(fixtureDb, "2026-04-25", 6, false);
+    expect(futureDashboard.children[0]?.tasks).toEqual([]);
 
     const ledgerEntries = fixtureDb
       .prepare(
