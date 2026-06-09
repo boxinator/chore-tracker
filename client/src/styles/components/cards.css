@@ -1,5 +1,6 @@
 .chore-card {
   position: relative;
+  flex: 0 0 auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-rows: auto 1fr;
