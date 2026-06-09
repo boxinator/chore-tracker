@@ -23,6 +23,18 @@
   width: min(920px, 100%);
 }
 
+.auto-refresh-backdrop {
+  z-index: 20;
+}
+
+.auto-refresh-modal {
+  width: min(480px, 100%);
+}
+
+.auto-refresh-modal > p {
+  color: var(--color-text-muted);
+}
+
 .modal-header {
   display: flex;
   align-items: flex-start;

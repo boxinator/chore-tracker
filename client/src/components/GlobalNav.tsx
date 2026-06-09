@@ -1,4 +1,4 @@
-import { Settings } from "lucide-react";
+import { RefreshCw, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 
 type GlobalNavProps = {
@@ -17,6 +17,14 @@ export function GlobalNav({ title, children, onOpenManage }: GlobalNavProps) {
       </div>
       <div className="topbar-tools">
         {children}
+        <button
+          className="toolbar-button manage-icon-button"
+          type="button"
+          aria-label="Refresh kiosk"
+          onClick={() => window.location.reload()}
+        >
+          <RefreshCw aria-hidden="true" />
+        </button>
         <button
           className="toolbar-button manage-icon-button"
           type="button"

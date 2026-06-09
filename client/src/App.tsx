@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DashboardPage } from "./pages/DashboardPage";
 import { WeeklyPage } from "./pages/WeeklyPage";
 import { ManageModal } from "./components/ManageModal";
@@ -55,6 +55,24 @@ function formatWeeklyLabel(value: string) {
   return `${start.toLocaleDateString(undefined, { month: "short", day: "numeric" })} - ${end.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
 }
 
+function getAutoRefreshTrigger(date: Date) {
+  const trigger = new Date(date);
+  trigger.setHours(0, 1, 0, 0);
+  return trigger;
+}
+
+function reloadKioskForCurrentPeriod() {
+  const now = new Date();
+
+  if (window.location.pathname === "/weekly") {
+    window.history.replaceState({}, "", `/weekly?start=${formatDate(getWeekStart(now))}`);
+  } else {
+    window.history.replaceState({}, "", `/daily?date=${formatDate(now)}`);
+  }
+
+  window.location.reload();
+}
+
 export function App() {
   const [route, setRoute] = useState(`${window.location.pathname}${window.location.search}`);
   const todayLocal = formatDate(new Date());
@@ -95,6 +113,11 @@ export function App() {
   const [rewardsLoading, setRewardsLoading] = useState(false);
   const [rewardsError, setRewardsError] = useState<string | null>(null);
   const [redeemResult, setRedeemResult] = useState<RedeemRewardResult | null>(null);
+  const [refreshCountdown, setRefreshCountdown] = useState<number | null>(null);
+  const initialRefreshCheck = new Date();
+  const handledAutoRefreshDate = useRef<string | null>(
+    initialRefreshCheck >= getAutoRefreshTrigger(initialRefreshCheck) ? formatDate(initialRefreshCheck) : null
+  );
 
   const apiFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     return fetch(input, {
@@ -121,6 +144,40 @@ export function App() {
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
+
+  useEffect(() => {
+    const checkForAutoRefresh = () => {
+      const now = new Date();
+      const triggerDate = formatDate(now);
+
+      if (now >= getAutoRefreshTrigger(now) && handledAutoRefreshDate.current !== triggerDate) {
+        handledAutoRefreshDate.current = triggerDate;
+        setRefreshCountdown(60);
+      }
+    };
+
+    const intervalId = window.setInterval(checkForAutoRefresh, 15_000);
+    checkForAutoRefresh();
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    if (refreshCountdown === null) {
+      return;
+    }
+
+    if (refreshCountdown <= 0) {
+      reloadKioskForCurrentPeriod();
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setRefreshCountdown((current) => (current === null ? null : current - 1));
+    }, 1_000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [refreshCountdown]);
 
   const navigate = (path: string) => {
     window.history.pushState({}, "", path);
@@ -788,6 +845,29 @@ export function App() {
         onOpenHistory={() => void handleOpenHistory()}
         onAdjustPoints={handleAdjustPoints}
       />
+    )}
+    {refreshCountdown !== null && (
+      <div className="modal-backdrop auto-refresh-backdrop" role="presentation">
+        <section
+          className="modal auto-refresh-modal"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="auto-refresh-title"
+        >
+          <div className="modal-header">
+            <div>
+              <p className="modal-eyebrow">Daily refresh</p>
+              <h2 id="auto-refresh-title">Kiosk refreshing in {refreshCountdown} seconds</h2>
+            </div>
+          </div>
+          <p>The kiosk will reload to show the new day's chores and clear its current state.</p>
+          <div className="modal-actions">
+            <button className="secondary-button" type="button" onClick={() => setRefreshCountdown(null)}>
+              Cancel
+            </button>
+          </div>
+        </section>
+      </div>
     )}
     {avatarPickerChild && (
       <AvatarPickerModal
