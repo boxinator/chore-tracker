@@ -1,5 +1,7 @@
 .lane {
   position: relative;
+  flex: 1 0 280px;
+  min-width: 280px;
   min-height: 0;
   height: 100%;
   display: flex;
@@ -10,6 +12,30 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-panel);
+}
+
+.lane-collapsed {
+  flex: 0 0 64px;
+  min-width: 64px;
+  width: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px;
+}
+
+.lane-collapse-button,
+.lane-add-button-icon {
+  width: 48px;
+  min-width: 48px;
+  padding: 0;
+  aspect-ratio: 1;
+}
+
+.lane-collapsed .lane-collapse-button,
+.lane-collapsed .lane-add-button-icon {
+  width: 46px;
+  min-width: 46px;
 }
 
 .lane-empty {
@@ -158,8 +184,24 @@
 
 @media (min-width: 1000px) and (max-width: 1280px) {
   .lane {
+    flex-basis: 260px;
     gap: 10px;
     padding: 12px;
+  }
+
+  .lane-collapsed {
+    flex-basis: 58px;
+    min-width: 58px;
+    width: 58px;
+    padding: 8px;
+  }
+
+  .lane-collapse-button,
+  .lane-add-button-icon,
+  .lane-collapsed .lane-collapse-button,
+  .lane-collapsed .lane-add-button-icon {
+    width: 40px;
+    min-width: 40px;
   }
 
   .lane-header,

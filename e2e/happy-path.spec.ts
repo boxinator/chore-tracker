@@ -18,7 +18,13 @@ test("happy path: add, assign, complete, redeem", async ({ page, context, reques
   await expect(page.getByRole("heading", { name: "Sample Child 1" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Sample Child 2" })).toBeVisible();
 
-  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Expand Unassigned" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Unassigned" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Expand Unassigned" }).click();
+  await expect(page.getByRole("heading", { name: "Unassigned" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Collapse Unassigned" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Add chore" }).click();
   const addDialog = page.getByRole("dialog", { name: "Add chore" });
   await addDialog.getByLabel("Title").fill("Playwright Chore");
   await addDialog.getByLabel("Description").fill("Created by end-to-end verification");

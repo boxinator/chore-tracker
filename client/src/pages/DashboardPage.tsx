@@ -227,6 +227,7 @@ export function DashboardPage({
 }: DashboardPageProps) {
   const boardRef = useRef<HTMLElement | null>(null);
   const [boardScrollState, setBoardScrollState] = useState({ canScrollLeft: false, canScrollRight: false });
+  const [unassignedCollapsed, setUnassignedCollapsed] = useState(true);
   const lanes = buildLanes(dashboardData);
   const rewardChild = dashboardData?.children.find((child) => child.id === rewardModalChildId) ?? null;
   const allChores = lanes.flatMap((lane) => lane.items).filter((item) => item.kind === "chore");
@@ -273,7 +274,7 @@ export function DashboardPage({
     updateBoardScrollState();
     window.addEventListener("resize", updateBoardScrollState);
     return () => window.removeEventListener("resize", updateBoardScrollState);
-  }, [lanes.length, loading, error]);
+  }, [lanes.length, loading, error, unassignedCollapsed]);
 
   return (
     <div className="app-shell">
@@ -345,6 +346,13 @@ export function DashboardPage({
                 items={lane.items}
                 emptyMessage={lane.emptyMessage}
                 showRewards={lane.showRewards}
+                collapsible={lane.id === "unassigned"}
+                collapsed={lane.id === "unassigned" && unassignedCollapsed}
+                onToggleCollapsed={
+                  lane.id === "unassigned"
+                    ? () => setUnassignedCollapsed((current) => !current)
+                    : undefined
+                }
                 onOpenRewards={lane.showRewards ? () => onOpenRewards(lane.id) : undefined}
                 onOpenAddChore={lane.id === "unassigned" ? onOpenAddModal : undefined}
                 onOpenAvatarPicker={

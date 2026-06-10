@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, Gift, Plus } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Gift, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Avatar } from "./Avatar";
 import { ChoreCard } from "./ChoreCard";
@@ -22,6 +22,9 @@ type BoardLaneProps = {
   items: LaneItem[];
   emptyMessage: string;
   showRewards?: boolean;
+  collapsible?: boolean;
+  collapsed?: boolean;
+  onToggleCollapsed?: () => void;
   onOpenRewards?: () => void;
   onOpenAddChore?: () => void;
   onOpenAvatarPicker?: () => void;
@@ -46,6 +49,9 @@ export function BoardLane({
   items,
   emptyMessage,
   showRewards = false,
+  collapsible = false,
+  collapsed = false,
+  onToggleCollapsed,
   onOpenRewards,
   onOpenAddChore,
   onOpenAvatarPicker,
@@ -91,6 +97,35 @@ export function BoardLane({
     return () => window.removeEventListener("resize", updateListScrollState);
   }, [items.length]);
 
+  if (collapsible && collapsed) {
+    return (
+      <section
+        className="lane lane-collapsed"
+        style={{ ["--lane-accent" as string]: accent }}
+        aria-label={`${name} collapsed`}
+      >
+        <button
+          className="secondary-button lane-collapse-button"
+          type="button"
+          aria-label={`Expand ${name}`}
+          onClick={onToggleCollapsed}
+        >
+          <ChevronRight aria-hidden="true" />
+        </button>
+        {onOpenAddChore && (
+          <button
+            className="primary-button lane-add-button lane-add-button-icon"
+            type="button"
+            aria-label="Add chore"
+            onClick={onOpenAddChore}
+          >
+            <Plus aria-hidden="true" />
+          </button>
+        )}
+      </section>
+    );
+  }
+
   return (
     <section key={id} className="lane" style={{ ["--lane-accent" as string]: accent }}>
       <header className="lane-header">
@@ -112,10 +147,22 @@ export function BoardLane({
         )}
 
         {!showRewards && (
-          <div>
-            <h2>{name}</h2>
-            <p>{subtitle}</p>
-          </div>
+          <>
+            <div>
+              <h2>{name}</h2>
+              <p>{subtitle}</p>
+            </div>
+            {collapsible && (
+              <button
+                className="secondary-button lane-collapse-button"
+                type="button"
+                aria-label={`Collapse ${name}`}
+                onClick={onToggleCollapsed}
+              >
+                <ChevronLeft aria-hidden="true" />
+              </button>
+            )}
+          </>
         )}
       </header>
 
@@ -174,9 +221,13 @@ export function BoardLane({
 
       {!showRewards && onOpenAddChore && (
         <footer className="lane-footer">
-          <button className="primary-button lane-add-button" type="button" onClick={onOpenAddChore}>
+          <button
+            className="primary-button lane-add-button lane-add-button-icon"
+            type="button"
+            aria-label="Add chore"
+            onClick={onOpenAddChore}
+          >
             <Plus aria-hidden="true" />
-            Add
           </button>
         </footer>
       )}
