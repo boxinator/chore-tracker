@@ -151,6 +151,10 @@ function toTaskLaneItem(task: VisibleTask): LaneItem {
   };
 }
 
+function sortCompletedLast(items: LaneItem[]) {
+  return items.sort((left, right) => Number(Boolean(left.done)) - Number(Boolean(right.done)));
+}
+
 function buildLanes(data: DashboardResponse | null): Lane[] {
   if (!data) {
     return [];
@@ -171,7 +175,10 @@ function buildLanes(data: DashboardResponse | null): Lane[] {
       avatarKey: child.avatarKey,
       accent: accentPalette[index % accentPalette.length],
       subtitle: `${child.totalPoints} pts`,
-      items: [...child.tasks.map(toTaskLaneItem), ...child.chores.map(toLaneItem)],
+      items: sortCompletedLast([
+        ...child.tasks.map(toTaskLaneItem),
+        ...child.chores.map(toLaneItem)
+      ]),
       emptyMessage: "No visible chores today.",
       showRewards: true
     }))

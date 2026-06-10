@@ -48,10 +48,22 @@ test("happy path: add, assign, complete, redeem", async ({ page, context, reques
   await expect(sampleChild2Lane.getByText("Playwright Chore")).toBeVisible();
   await expect(sampleChild2Total).toHaveText("0 pts");
 
+  await request.post("/api/tasks", {
+    data: {
+      title: "Playwright Task",
+      description: "Should remain above completed chores",
+      childId: (await request.get("/api/children").then((response) => response.json())).children.find(
+        (child: { name: string }) => child.name === "Sample Child 2"
+      ).id
+    }
+  });
+  await page.reload();
+
   const choreCard = page.locator(".chore-card").filter({ hasText: "Playwright Chore" });
   await choreCard.getByRole("button", { name: "Mark Playwright Chore complete" }).click();
   await expect(choreCard.getByText("Completed today")).toBeVisible();
   await expect(sampleChild2Total).toHaveText("6 pts");
+  await expect(sampleChild2Lane.locator(".chore-card h3")).toHaveText(["Playwright Task", "Playwright Chore"]);
 
   await sampleChild2Lane.getByRole("button", { name: "Rewards" }).click();
   const rewardDialog = page.getByRole("dialog", { name: "Sample Child 2" });
