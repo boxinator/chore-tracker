@@ -93,7 +93,10 @@ export function initializeSchema(db: DatabaseConnection) {
       reversal_ledger_entry_id TEXT REFERENCES ledger_entries(id)
     );
 
+    DROP INDEX IF EXISTS idx_chore_completions_active_per_child_day;
+
     CREATE UNIQUE INDEX IF NOT EXISTS idx_chore_completions_active_per_child_day
-      ON chore_completions (chore_id, child_id, completion_date_local, status);
+      ON chore_completions (chore_id, child_id, completion_date_local)
+      WHERE status = 'completed';
   `);
 }

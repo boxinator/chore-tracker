@@ -315,4 +315,52 @@ describe("completeChore and uncompleteChore", () => {
       { event_type: "chore_uncomplete", point_delta: -5 }
     ]);
   });
+
+  it("can complete and uncomplete the same chore repeatedly on one day", () => {
+    const fixtureDb = createBaseFixture();
+    const now = "2026-04-23T08:00:00.000Z";
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chores (
+          id,
+          title,
+          description,
+          point_value,
+          assignee_child_id,
+          is_active,
+          created_at,
+          updated_at
+        ) VALUES
+          ('chore-1', 'Clear table', '', 5, 'child-1', 1, @now, @now)
+      `
+    ).run({ now });
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chore_assignments (id, chore_id, child_id, day_of_week)
+        VALUES ('assignment-1', 'chore-1', 'child-1', 4)
+      `
+    ).run();
+
+    completeChore(fixtureDb, "chore-1", "child-1", "2026-04-23", 4);
+    uncompleteChore(fixtureDb, "chore-1", "child-1", "2026-04-23");
+    completeChore(fixtureDb, "chore-1", "child-1", "2026-04-23", 4);
+    uncompleteChore(fixtureDb, "chore-1", "child-1", "2026-04-23");
+
+    const completions = fixtureDb
+      .prepare(
+        `
+          SELECT status
+          FROM chore_completions
+          WHERE chore_id = 'chore-1'
+            AND child_id = 'child-1'
+            AND completion_date_local = '2026-04-23'
+        `
+      )
+      .all() as Array<{ status: string }>;
+
+    expect(completions).toEqual([{ status: "reversed" }, { status: "reversed" }]);
+    expect(getDashboardData(fixtureDb, "2026-04-23", 4).children[0]?.totalPoints).toBe(0);
+  });
 });
