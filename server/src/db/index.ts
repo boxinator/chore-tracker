@@ -1,4 +1,5 @@
 import { createDatabaseConnection, type DatabaseConnection } from "./connection.js";
+import { initializeSchema } from "./schema.js";
 
 export function setupDatabase(databasePath: string): DatabaseConnection {
   const db = createDatabaseConnection(databasePath);
@@ -11,6 +12,8 @@ export function setupDatabase(databasePath: string): DatabaseConnection {
       `Database at ${databasePath} is not initialized. Start from the provided sample.db.`
     );
   }
+
+  initializeSchema(db);
 
   return db;
 }
