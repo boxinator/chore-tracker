@@ -122,6 +122,11 @@
   white-space: nowrap;
 }
 
+.status-stack {
+  display: grid;
+  gap: 10px;
+}
+
 .status-inline {
   min-height: 32px;
   display: flex;
@@ -141,6 +146,78 @@
   min-height: 0;
   min-width: 0;
   overflow: hidden;
+}
+
+.progress-goal-bar {
+  display: grid;
+  grid-template-columns: minmax(140px, 0.8fr) minmax(180px, 2fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--color-accent) 10%, transparent), transparent 46%),
+    var(--color-surface);
+  box-shadow: var(--shadow-panel);
+  backdrop-filter: blur(18px);
+}
+
+.progress-goal-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.progress-goal-label {
+  color: var(--color-accent-strong);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.progress-goal-copy strong {
+  overflow: hidden;
+  color: var(--color-text-strong);
+  font-size: 1.08rem;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progress-goal-track {
+  position: relative;
+  overflow: hidden;
+  height: 22px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  background: color-mix(in srgb, var(--color-surface-strong) 72%, transparent);
+}
+
+.progress-goal-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--lane-1), var(--color-accent));
+  box-shadow: 0 0 18px color-mix(in srgb, var(--color-accent) 42%, transparent);
+  transition: width 260ms ease;
+}
+
+.progress-goal-bar.is-complete .progress-goal-fill {
+  background: linear-gradient(90deg, var(--color-success), var(--lane-unassigned));
+}
+
+.progress-goal-points {
+  min-width: 92px;
+  text-align: right;
+  color: var(--color-text-muted);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.progress-goal-points strong {
+  color: var(--color-text-strong);
+  font-size: 1.22rem;
 }
 
 .board {
@@ -230,6 +307,11 @@
     font-size: 0.9rem;
   }
 
+  .progress-goal-bar {
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
   .board {
     gap: 12px;
     padding-bottom: 0;
@@ -255,6 +337,15 @@
   .topbar-tools .board-date {
     grid-column: 1 / -1;
     order: -1;
+  }
+
+  .progress-goal-bar {
+    grid-template-columns: 1fr auto;
+  }
+
+  .progress-goal-track {
+    grid-column: 1 / -1;
+    order: 3;
   }
 
 }

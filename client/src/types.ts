@@ -35,6 +35,7 @@ export type DashboardChild = {
 export type DashboardResponse = {
   currentDateLocal: string;
   dayOfWeek: number;
+  progressGoal: ProgressGoal | null;
   unassignedChores: VisibleChore[];
   children: DashboardChild[];
 };
@@ -126,6 +127,27 @@ export type RewardInput = {
   name: string;
   description: string;
   cost: number;
+};
+
+export type ProgressGoal = {
+  id: string;
+  name: string;
+  targetPoints: number;
+  startDateLocal: string;
+  status: "active" | "awarded";
+  awardedAt: string | null;
+  earnedPoints: number;
+  percentComplete: number;
+};
+
+export type ProgressGoalResponse = {
+  progressGoal: ProgressGoal | null;
+};
+
+export type ProgressGoalInput = {
+  name: string;
+  targetPoints: number;
+  startDateLocal: string;
 };
 
 export type HistoryResponse = {

@@ -15,6 +15,14 @@ import {
   updateReward
 } from "./services/rewards.js";
 import {
+  awardProgressGoal,
+  createProgressGoal,
+  getActiveProgressGoalWithProgress,
+  parseProgressGoalInput,
+  ProgressGoalValidationError,
+  updateProgressGoal
+} from "./services/progressGoals.js";
+import {
   createManualAdjustment,
   HistoryValidationError,
   listRecentHistory,
@@ -280,6 +288,51 @@ app.get("/api/rewards", (req, res) => {
     req.query.includeInactive === "1" || req.query.includeInactive === "true";
 
   res.json({ rewards: includeInactive ? listAllRewards(db) : listActiveRewards(db) });
+});
+
+app.get("/api/progress-goals/active", (_req, res) => {
+  res.json({ progressGoal: getActiveProgressGoalWithProgress(db) });
+});
+
+app.post("/api/progress-goals", (req, res) => {
+  try {
+    res.status(201).json(createProgressGoal(db, parseProgressGoalInput(req.body)));
+  } catch (error) {
+    if (error instanceof ProgressGoalValidationError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to create progress goal" });
+  }
+});
+
+app.patch("/api/progress-goals/:id", (req, res) => {
+  try {
+    updateProgressGoal(db, req.params.id, parseProgressGoalInput(req.body));
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof ProgressGoalValidationError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to update progress goal" });
+  }
+});
+
+app.post("/api/progress-goals/:id/award", (req, res) => {
+  try {
+    awardProgressGoal(db, req.params.id);
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof ProgressGoalValidationError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res.status(500).json({ error: "Failed to award progress goal" });
+  }
 });
 
 app.get("/api/history/recent", (req, res) => {

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Palette, X, Zap } from "lucide-react";
 import { Avatar } from "./Avatar";
 import type {
@@ -7,6 +7,8 @@ import type {
   ChildInput,
   DashboardChild,
   HistoryEntry,
+  ProgressGoal,
+  ProgressGoalInput,
   Reward,
   RewardInput
 } from "../types";
@@ -16,6 +18,7 @@ import { HistoryPanel, PointsOverrideForm } from "./HistoryModal";
 type ManageModalProps = {
   children: Child[];
   rewards: Reward[];
+  progressGoal: ProgressGoal | null;
   dashboardChildren: DashboardChild[];
   loading: boolean;
   error: string | null;
@@ -33,12 +36,15 @@ type ManageModalProps = {
   onCreateReward: (input: RewardInput) => Promise<void>;
   onUpdateReward: (rewardId: string, input: RewardInput) => Promise<void>;
   onDeactivateReward: (rewardId: string) => Promise<void>;
+  onCreateProgressGoal: (input: ProgressGoalInput) => Promise<void>;
+  onUpdateProgressGoal: (goalId: string, input: ProgressGoalInput) => Promise<void>;
+  onAwardProgressGoal: (goalId: string) => Promise<void>;
   onOpenHistory: () => void;
   onAdjustPoints: (input: AdjustmentInput) => Promise<void>;
 };
 
 type TabKey = "children" | "rewards" | "history";
-type RewardSubtabKey = "active" | "inactive";
+type RewardSubtabKey = "active" | "inactive" | "progress";
 
 const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "rewards", label: "Rewards" },
@@ -48,8 +54,14 @@ const tabs: Array<{ key: TabKey; label: string }> = [
 
 const rewardSubtabs: Array<{ key: RewardSubtabKey; label: string }> = [
   { key: "active", label: "Active" },
-  { key: "inactive", label: "Inactive" }
+  { key: "inactive", label: "Inactive" },
+  { key: "progress", label: "Progress Goal" }
 ];
+
+function getTodayLocalInputValue() {
+  const today = new Date();
+  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+}
 
 function RewardCostRibbon({ cost }: { cost: number }) {
   return (
@@ -63,6 +75,7 @@ function RewardCostRibbon({ cost }: { cost: number }) {
 export function ManageModal({
   children,
   rewards,
+  progressGoal,
   dashboardChildren,
   loading,
   error,
@@ -80,6 +93,9 @@ export function ManageModal({
   onCreateReward,
   onUpdateReward,
   onDeactivateReward,
+  onCreateProgressGoal,
+  onUpdateProgressGoal,
+  onAwardProgressGoal,
   onOpenHistory,
   onAdjustPoints
 }: ManageModalProps) {
@@ -96,9 +112,25 @@ export function ManageModal({
   const [editingRewardName, setEditingRewardName] = useState("");
   const [editingRewardDescription, setEditingRewardDescription] = useState("");
   const [editingRewardCost, setEditingRewardCost] = useState("10");
+  const [progressGoalName, setProgressGoalName] = useState("");
+  const [progressGoalTargetPoints, setProgressGoalTargetPoints] = useState("100");
+  const [progressGoalStartDate, setProgressGoalStartDate] = useState(getTodayLocalInputValue());
 
   const activeRewards = useMemo(() => rewards.filter((reward) => reward.isActive), [rewards]);
   const inactiveRewards = useMemo(() => rewards.filter((reward) => !reward.isActive), [rewards]);
+
+  useEffect(() => {
+    if (!progressGoal) {
+      setProgressGoalName("");
+      setProgressGoalTargetPoints("100");
+      setProgressGoalStartDate(getTodayLocalInputValue());
+      return;
+    }
+
+    setProgressGoalName(progressGoal.name);
+    setProgressGoalTargetPoints(String(progressGoal.targetPoints));
+    setProgressGoalStartDate(progressGoal.startDateLocal);
+  }, [progressGoal]);
 
   return (
     <div className="modal-backdrop" {...backdropProps}>
@@ -298,7 +330,11 @@ export function ManageModal({
                     ))}
                   </div>
                 </div>
-                <p>Active rewards show in each kid's reward list.</p>
+                <p>
+                  {activeRewardSubtab === "progress"
+                    ? "Track one shared milestone that all participants contribute toward."
+                    : "Active rewards show in each kid's reward list."}
+                </p>
               </header>
 
               {activeRewardSubtab === "active" && (
@@ -423,8 +459,100 @@ export function ManageModal({
                   {inactiveRewards.length === 0 && <p className="empty-copy">No inactive rewards yet.</p>}
                 </div>
               )}
+
+              {activeRewardSubtab === "progress" && (
+                <div className="manage-progress-goal">
+                  {progressGoal && (
+                    <div className="manage-progress-summary">
+                      <div className="manage-copy">
+                        <strong>{progressGoal.name}</strong>
+                        <p>
+                          {progressGoal.earnedPoints} / {progressGoal.targetPoints} pts since{" "}
+                          {progressGoal.startDateLocal}
+                        </p>
+                      </div>
+                      <div className="manage-progress-track" aria-hidden="true">
+                        <div
+                          className="manage-progress-fill"
+                          style={{ width: `${progressGoal.percentComplete}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <form
+                    className="modal-form manage-form"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      const input = {
+                        name: progressGoalName,
+                        targetPoints: Number(progressGoalTargetPoints),
+                        startDateLocal: progressGoalStartDate
+                      };
+
+                      const request = progressGoal
+                        ? onUpdateProgressGoal(progressGoal.id, input)
+                        : onCreateProgressGoal(input);
+
+                      void request.catch(() => undefined);
+                    }}
+                  >
+                    <label className="field">
+                      <span>Goal name</span>
+                      <input
+                        value={progressGoalName}
+                        onChange={(event) => setProgressGoalName(event.target.value)}
+                      />
+                    </label>
+                    <label className="field">
+                      <span>Points needed</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={progressGoalTargetPoints}
+                        onChange={(event) => setProgressGoalTargetPoints(event.target.value)}
+                      />
+                    </label>
+                    <label className="field">
+                      <span>Start date</span>
+                      <input
+                        type="date"
+                        value={progressGoalStartDate}
+                        onChange={(event) => setProgressGoalStartDate(event.target.value)}
+                      />
+                    </label>
+                    <div className="inline-actions">
+                      <button
+                        className="primary-button"
+                        type="submit"
+                        disabled={
+                          saving ||
+                          progressGoalName.trim().length === 0 ||
+                          Number(progressGoalTargetPoints) <= 0 ||
+                          progressGoalStartDate.length === 0
+                        }
+                      >
+                        {progressGoal ? "Save Goal" : "Create Goal"}
+                      </button>
+                      {progressGoal && (
+                        <button
+                          className="secondary-button"
+                          type="button"
+                          disabled={saving}
+                          onClick={() =>
+                            void onAwardProgressGoal(progressGoal.id).catch(() => undefined)
+                          }
+                        >
+                          Mark Awarded
+                        </button>
+                      )}
+                    </div>
+                  </form>
+                </div>
+              )}
             </section>
 
+            {activeRewardSubtab !== "progress" && (
             <div className="manage-side-stack">
             <section className="manage-section">
               <header className="manage-section-header">
@@ -493,6 +621,7 @@ export function ManageModal({
               {historyError && <p className="form-error">{historyError}</p>}
             </section>
             </div>
+            )}
           </div>
         )}
 

@@ -13,6 +13,9 @@ import type {
   DashboardResponse,
   HistoryEntry,
   HistoryResponse,
+  ProgressGoal,
+  ProgressGoalInput,
+  ProgressGoalResponse,
   RedeemRewardResult,
   Reward,
   RewardInput,
@@ -101,6 +104,7 @@ export function App() {
   const [manageError, setManageError] = useState<string | null>(null);
   const [managedChildren, setManagedChildren] = useState<Child[]>([]);
   const [managedRewards, setManagedRewards] = useState<Reward[]>([]);
+  const [managedProgressGoal, setManagedProgressGoal] = useState<ProgressGoal | null>(null);
   const [avatarPickerChild, setAvatarPickerChild] = useState<Child | null>(null);
   const [avatarPickerSaving, setAvatarPickerSaving] = useState(false);
   const [avatarPickerError, setAvatarPickerError] = useState<string | null>(null);
@@ -252,6 +256,17 @@ export function App() {
 
     const payload = (await response.json()) as RewardsResponse;
     setManagedRewards(payload.rewards);
+  };
+
+  const fetchManagedProgressGoal = async () => {
+    const response = await apiFetch("/api/progress-goals/active");
+
+    if (!response.ok) {
+      throw new Error(`Progress goal failed with ${response.status}`);
+    }
+
+    const payload = (await response.json()) as ProgressGoalResponse;
+    setManagedProgressGoal(payload.progressGoal);
   };
 
   const fetchHistory = async () => {
@@ -466,7 +481,7 @@ export function App() {
   };
 
   const refreshManagementData = async () => {
-    await Promise.all([fetchChildren(), fetchManagedRewards()]);
+    await Promise.all([fetchChildren(), fetchManagedRewards(), fetchManagedProgressGoal()]);
   };
 
   const handleOpenManage = async () => {
@@ -632,6 +647,82 @@ export function App() {
 
       await Promise.all([fetchRewards(), refreshManagementData()]);
       showSuccess("Reward deactivated");
+    } catch (err) {
+      setManageError(err instanceof Error ? err.message : "Unknown error");
+      throw err;
+    } finally {
+      setManageSaving(false);
+    }
+  };
+
+  const handleCreateProgressGoal = async (input: ProgressGoalInput) => {
+    try {
+      setManageSaving(true);
+      setManageError(null);
+
+      const response = await apiFetch("/api/progress-goals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input)
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? `Create progress goal failed with ${response.status}`);
+      }
+
+      await Promise.all([fetchData(), refreshManagementData()]);
+      showSuccess("Progress goal created");
+    } catch (err) {
+      setManageError(err instanceof Error ? err.message : "Unknown error");
+      throw err;
+    } finally {
+      setManageSaving(false);
+    }
+  };
+
+  const handleUpdateProgressGoal = async (goalId: string, input: ProgressGoalInput) => {
+    try {
+      setManageSaving(true);
+      setManageError(null);
+
+      const response = await apiFetch(`/api/progress-goals/${goalId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input)
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? `Update progress goal failed with ${response.status}`);
+      }
+
+      await Promise.all([fetchData(), refreshManagementData()]);
+      showSuccess("Progress goal updated");
+    } catch (err) {
+      setManageError(err instanceof Error ? err.message : "Unknown error");
+      throw err;
+    } finally {
+      setManageSaving(false);
+    }
+  };
+
+  const handleAwardProgressGoal = async (goalId: string) => {
+    try {
+      setManageSaving(true);
+      setManageError(null);
+
+      const response = await apiFetch(`/api/progress-goals/${goalId}/award`, {
+        method: "POST"
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? `Award progress goal failed with ${response.status}`);
+      }
+
+      await Promise.all([fetchData(), refreshManagementData()]);
+      showSuccess("Progress goal awarded");
     } catch (err) {
       setManageError(err instanceof Error ? err.message : "Unknown error");
       throw err;
@@ -818,6 +909,7 @@ export function App() {
       <ManageModal
         children={managedChildren}
         rewards={managedRewards}
+        progressGoal={managedProgressGoal}
         dashboardChildren={dashboardData?.children ?? []}
         loading={manageLoading}
         error={manageError}
@@ -842,6 +934,9 @@ export function App() {
         onCreateReward={handleCreateReward}
         onUpdateReward={handleUpdateReward}
         onDeactivateReward={handleDeactivateReward}
+        onCreateProgressGoal={handleCreateProgressGoal}
+        onUpdateProgressGoal={handleUpdateProgressGoal}
+        onAwardProgressGoal={handleAwardProgressGoal}
         onOpenHistory={() => void handleOpenHistory()}
         onAdjustPoints={handleAdjustPoints}
       />

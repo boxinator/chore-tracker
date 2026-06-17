@@ -1,4 +1,5 @@
 import type { DatabaseConnection } from "../db/connection.js";
+import { getActiveProgressGoalWithProgress, type ActiveProgressGoal } from "./progressGoals.js";
 
 export type ChildPointTotal = {
   childId: string;
@@ -44,6 +45,7 @@ export type DashboardChild = {
 export type DashboardData = {
   currentDateLocal: string;
   dayOfWeek: number;
+  progressGoal: ActiveProgressGoal | null;
   unassignedChores: VisibleChore[];
   children: DashboardChild[];
 };
@@ -381,6 +383,7 @@ export function getDashboardData(
   return {
     currentDateLocal,
     dayOfWeek,
+    progressGoal: getActiveProgressGoalWithProgress(db),
     unassignedChores,
     children: totals.map((child) => ({
       id: child.childId,

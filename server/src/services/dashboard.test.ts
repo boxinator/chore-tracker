@@ -234,6 +234,7 @@ describe("getDashboardData", () => {
 
     expect(dashboard.currentDateLocal).toBe("2026-04-23");
     expect(dashboard.dayOfWeek).toBe(4);
+    expect(dashboard.progressGoal).toBeNull();
     expect(dashboard.unassignedChores.map((chore) => chore.id)).toEqual(["unassigned-1"]);
     expect(dashboard.children).toEqual([
       {

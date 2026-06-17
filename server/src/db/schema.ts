@@ -51,6 +51,17 @@ export function initializeSchema(db: DatabaseConnection) {
       updated_at TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS progress_goals (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      target_points INTEGER NOT NULL,
+      start_date_local TEXT NOT NULL,
+      status TEXT NOT NULL CHECK (status IN ('active', 'awarded')),
+      awarded_at TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS tasks (
       id TEXT PRIMARY KEY,
       title TEXT NOT NULL,

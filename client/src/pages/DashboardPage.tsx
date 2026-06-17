@@ -10,6 +10,7 @@ import type {
   HistoryEntry,
   RedeemRewardResult,
   Reward,
+  ProgressGoal,
   RewardInput,
   UpdateChoreInput,
   VisibleChore,
@@ -185,6 +186,29 @@ function buildLanes(data: DashboardResponse | null): Lane[] {
   ];
 }
 
+function ProgressGoalBar({ goal }: { goal: ProgressGoal }) {
+  const reached = goal.earnedPoints >= goal.targetPoints;
+
+  return (
+    <section className={`progress-goal-bar${reached ? " is-complete" : ""}`} aria-label="Family progress goal">
+      <div className="progress-goal-copy">
+        <span className="progress-goal-label">{reached ? "Goal reached" : "Family goal"}</span>
+        <strong>{goal.name}</strong>
+      </div>
+      <div className="progress-goal-track" aria-hidden="true">
+        <div
+          className="progress-goal-fill"
+          style={{ width: `${goal.percentComplete}%` }}
+        />
+      </div>
+      <div className="progress-goal-points">
+        <strong>{goal.earnedPoints}</strong>
+        <span>/ {goal.targetPoints} pts</span>
+      </div>
+    </section>
+  );
+}
+
 export function DashboardPage({
   dashboardData,
   loading,
@@ -300,9 +324,15 @@ export function DashboardPage({
         />
       </GlobalNav>
 
-      <div className="status-inline" aria-live="polite">
-        {!loading && error && <strong>Unavailable: {error}</strong>}
-        {!loading && !error && successMessage && <span className="success-toast">{successMessage}</span>}
+      <div className="status-stack">
+        <div className="status-inline" aria-live="polite">
+          {!loading && error && <strong>Unavailable: {error}</strong>}
+          {!loading && !error && successMessage && <span className="success-toast">{successMessage}</span>}
+        </div>
+
+        {!loading && !error && dashboardData?.progressGoal && (
+          <ProgressGoalBar goal={dashboardData.progressGoal} />
+        )}
       </div>
 
       <div className="board-shell">
