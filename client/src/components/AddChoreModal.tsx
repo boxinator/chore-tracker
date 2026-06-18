@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { X } from "lucide-react";
-import type { ChoreAssignment, CreateChoreInput, CreateTaskInput, DashboardChild } from "../types";
+import type { ChoreAssignment, ChoreRotation, CreateChoreInput, CreateTaskInput, DashboardChild } from "../types";
 import { useModalDismiss } from "./modalDismiss";
 import { ChoreAssignmentEditor } from "./ChoreAssignmentEditor";
 
@@ -32,18 +32,24 @@ export function AddChoreModal({
   const [taskChildId, setTaskChildId] = useState(children[0]?.id ?? "");
   const [assignments, setAssignments] = useState<ChoreAssignment[]>([]);
   const [unassignedScheduleDays, setUnassignedScheduleDays] = useState<number[]>(allDays);
+  const [rotation, setRotation] = useState<ChoreRotation | null>(null);
 
   const canSubmit = useMemo(() => {
     if (mode === "task") {
       return title.trim().length > 0 && taskChildId.length > 0;
     }
 
-    return title.trim().length > 0 && Number(pointValue) > 0;
+    return (
+      title.trim().length > 0 &&
+      Number(pointValue) > 0 &&
+      (!rotation || (rotation.childIds.length >= 2 && rotation.days.length > 0))
+    );
   }, [
     mode,
     title,
     pointValue,
-    taskChildId
+    taskChildId,
+    rotation
   ]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -66,8 +72,9 @@ export function AddChoreModal({
         title,
         description,
         pointValue: Number(pointValue),
-        assignments,
-        unassignedScheduleDays: assignments.length === 0 ? unassignedScheduleDays : []
+        assignments: rotation ? [] : assignments,
+        unassignedScheduleDays: assignments.length === 0 && !rotation ? unassignedScheduleDays : [],
+        rotation
       });
   };
 
@@ -142,8 +149,10 @@ export function AddChoreModal({
                 children={children}
                 assignments={assignments}
                 unassignedScheduleDays={unassignedScheduleDays}
+                rotation={rotation}
                 onChangeAssignments={setAssignments}
                 onChangeUnassignedScheduleDays={setUnassignedScheduleDays}
+                onChangeRotation={setRotation}
               />
             </>
           )}

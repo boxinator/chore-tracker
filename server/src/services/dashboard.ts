@@ -18,11 +18,18 @@ export type VisibleChore = {
   scheduledDays: number[];
   assignments: ChoreAssignment[];
   unassignedScheduleDays: number[];
+  rotation: ChoreRotation | null;
 };
 
 export type ChoreAssignment = {
   childId: string;
   days: number[];
+};
+
+export type ChoreRotation = {
+  childIds: string[];
+  days: number[];
+  startDateLocal: string;
 };
 
 export type VisibleTask = {
@@ -70,6 +77,18 @@ type AssignmentRow = {
   dayOfWeek: number;
 };
 
+type RotationChildRow = {
+  choreId: string;
+  rotationId: string;
+  childId: string;
+  startDateLocal: string;
+};
+
+type RotationDayRow = {
+  rotationId: string;
+  dayOfWeek: number;
+};
+
 type CompletionRow = {
   choreId: string;
   childId: string;
@@ -96,6 +115,25 @@ type InternalVisibleTask = VisibleTask & {
   updatedAt: string;
   status: string;
 };
+
+function parseLocalDate(dateLocal: string) {
+  const [year, month, day] = dateLocal.split("-").map(Number);
+  return new Date(year, month - 1, day, 12);
+}
+
+function weekStart(date: Date) {
+  const start = new Date(date);
+  start.setDate(start.getDate() - start.getDay());
+  return start;
+}
+
+function weeksSinceRotationStart(currentDateLocal: string, startDateLocal: string) {
+  const current = weekStart(parseLocalDate(currentDateLocal));
+  const start = weekStart(parseLocalDate(startDateLocal));
+  const diffMs = current.getTime() - start.getTime();
+
+  return Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000));
+}
 
 export function getChildPointTotals(db: DatabaseConnection): ChildPointTotal[] {
   return db
@@ -141,6 +179,31 @@ function getVisibleChoreRecordsForDate(
       `
     )
     .all() as AssignmentRow[];
+  const rotationChildRows = db
+    .prepare(
+      `
+        SELECT
+          cr.chore_id as choreId,
+          cr.id as rotationId,
+          crc.child_id as childId,
+          cr.start_date_local as startDateLocal
+        FROM chore_rotations cr
+        INNER JOIN chore_rotation_children crc ON crc.rotation_id = cr.id
+        ORDER BY cr.chore_id ASC, crc.sort_order ASC
+      `
+    )
+    .all() as RotationChildRow[];
+  const rotationDayRows = db
+    .prepare(
+      `
+        SELECT
+          rotation_id as rotationId,
+          day_of_week as dayOfWeek
+        FROM chore_rotation_days
+        ORDER BY day_of_week ASC
+      `
+    )
+    .all() as RotationDayRow[];
 
   const completionRows = db
     .prepare(
@@ -186,6 +249,28 @@ function getVisibleChoreRecordsForDate(
     }
   }
 
+  const rotationDaysByRotationId = rotationDayRows.reduce<Map<string, number[]>>((map, row) => {
+    const existing = map.get(row.rotationId) ?? [];
+    existing.push(row.dayOfWeek);
+    map.set(row.rotationId, existing);
+    return map;
+  }, new Map());
+
+  const rotationsByChoreId = rotationChildRows.reduce<Map<string, ChoreRotation>>((map, row) => {
+    const existing = map.get(row.choreId);
+    if (existing) {
+      existing.childIds.push(row.childId);
+    } else {
+      map.set(row.choreId, {
+        childIds: [row.childId],
+        days: rotationDaysByRotationId.get(row.rotationId) ?? [],
+        startDateLocal: row.startDateLocal
+      });
+    }
+
+    return map;
+  }, new Map());
+
   const completedToday = completionRows.reduce<Set<string>>((set, row) => {
     set.add(`${row.choreId}:${row.childId}`);
     return set;
@@ -211,6 +296,41 @@ function getVisibleChoreRecordsForDate(
   return allChores.flatMap<InternalVisibleChore>((chore) => {
     const assignments = assignmentsByChoreId.get(chore.id) ?? [];
     const unassignedScheduleDays = scheduleMap.get(chore.id) ?? [];
+    const rotation = rotationsByChoreId.get(chore.id) ?? null;
+
+    if (rotation) {
+      if (
+        currentDateLocal < rotation.startDateLocal ||
+        !rotation.days.includes(dayOfWeek) ||
+        rotation.childIds.length < 2
+      ) {
+        return [];
+      }
+
+      const weekIndex = weeksSinceRotationStart(currentDateLocal, rotation.startDateLocal);
+      const assigneeChildId = rotation.childIds[weekIndex % rotation.childIds.length] ?? null;
+
+      if (!assigneeChildId) {
+        return [];
+      }
+
+      return [
+        {
+          id: chore.id,
+          title: chore.title,
+          description: chore.description,
+          pointValue: chore.point_value,
+          assigneeChildId,
+          isCompletedToday: completedToday.has(`${chore.id}:${assigneeChildId}`),
+          scheduledDays: rotation.days,
+          assignments,
+          unassignedScheduleDays,
+          rotation,
+          createdAt: chore.created_at,
+          updatedAt: chore.updated_at
+        }
+      ];
+    }
 
     if (assignments.length === 0) {
       if (!unassignedScheduleDays.includes(dayOfWeek)) {
@@ -228,6 +348,7 @@ function getVisibleChoreRecordsForDate(
           scheduledDays: unassignedScheduleDays,
           assignments,
           unassignedScheduleDays,
+          rotation,
           createdAt: chore.created_at,
           updatedAt: chore.updated_at
         }
@@ -246,6 +367,7 @@ function getVisibleChoreRecordsForDate(
         scheduledDays: assignment.days,
         assignments,
         unassignedScheduleDays,
+        rotation,
         createdAt: chore.created_at,
         updatedAt: chore.updated_at
       }));
@@ -266,7 +388,8 @@ export function getVisibleChoresForDate(
     isCompletedToday: chore.isCompletedToday,
     scheduledDays: chore.scheduledDays,
     assignments: chore.assignments,
-    unassignedScheduleDays: chore.unassignedScheduleDays
+    unassignedScheduleDays: chore.unassignedScheduleDays,
+    rotation: chore.rotation
   }));
 }
 
@@ -338,7 +461,8 @@ export function getDashboardData(
       isCompletedToday: chore.isCompletedToday,
       scheduledDays: chore.scheduledDays,
       assignments: chore.assignments,
-      unassignedScheduleDays: chore.unassignedScheduleDays
+      unassignedScheduleDays: chore.unassignedScheduleDays,
+      rotation: chore.rotation
     });
     map.set(chore.assigneeChildId, chores);
     return map;
@@ -377,7 +501,8 @@ export function getDashboardData(
       isCompletedToday: chore.isCompletedToday,
       scheduledDays: chore.scheduledDays,
       assignments: chore.assignments,
-      unassignedScheduleDays: chore.unassignedScheduleDays
+      unassignedScheduleDays: chore.unassignedScheduleDays,
+      rotation: chore.rotation
     }));
 
   return {

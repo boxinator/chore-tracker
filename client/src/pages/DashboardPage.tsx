@@ -37,6 +37,7 @@ type LaneItem = {
   scheduledDays: number[];
   assignments: VisibleChore["assignments"];
   unassignedScheduleDays: number[];
+  rotation: VisibleChore["rotation"];
 };
 
 type Lane = {
@@ -132,7 +133,8 @@ function toLaneItem(chore: VisibleChore): LaneItem {
     assigneeChildId: chore.assigneeChildId,
     scheduledDays: chore.scheduledDays,
     assignments: chore.assignments,
-    unassignedScheduleDays: chore.unassignedScheduleDays
+    unassignedScheduleDays: chore.unassignedScheduleDays,
+    rotation: chore.rotation
   };
 }
 
@@ -148,7 +150,8 @@ function toTaskLaneItem(task: VisibleTask): LaneItem {
     assigneeChildId: task.assigneeChildId,
     scheduledDays: [],
     assignments: [],
-    unassignedScheduleDays: []
+    unassignedScheduleDays: [],
+    rotation: null
   };
 }
 
@@ -273,7 +276,8 @@ export function DashboardPage({
         isCompletedToday: detailLaneItem.done ?? false,
         scheduledDays: detailLaneItem.scheduledDays,
         assignments: detailLaneItem.assignments,
-        unassignedScheduleDays: detailLaneItem.unassignedScheduleDays
+        unassignedScheduleDays: detailLaneItem.unassignedScheduleDays,
+        rotation: detailLaneItem.rotation
       }
     : null;
   const scrollBoard = (direction: -1 | 1) => {

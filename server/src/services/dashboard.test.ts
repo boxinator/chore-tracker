@@ -168,7 +168,8 @@ describe("getVisibleChoresForDate", () => {
         isCompletedToday: true,
         scheduledDays: [4],
         assignments: [{ childId: "child-2", days: [4] }],
-        unassignedScheduleDays: []
+        unassignedScheduleDays: [],
+        rotation: null
       }
     ]);
   });
@@ -253,7 +254,8 @@ describe("getDashboardData", () => {
             isCompletedToday: false,
             scheduledDays: [4],
             assignments: [{ childId: "child-1", days: [4] }],
-            unassignedScheduleDays: []
+            unassignedScheduleDays: [],
+            rotation: null
           }
         ]
       },
@@ -273,7 +275,8 @@ describe("getDashboardData", () => {
             isCompletedToday: false,
             scheduledDays: [4],
             assignments: [{ childId: "child-2", days: [4] }],
-            unassignedScheduleDays: []
+            unassignedScheduleDays: [],
+            rotation: null
           }
         ]
       }
@@ -313,6 +316,66 @@ describe("getDashboardData", () => {
 
     expect(dashboard.children[0]?.chores.map((chore) => chore.id)).toEqual(["workbooks"]);
     expect(dashboard.children[1]?.chores.map((chore) => chore.id)).toEqual(["workbooks"]);
+  });
+
+  it("shows a weekly rotation chore only under the current child for that week", () => {
+    const fixtureDb = createBaseFixture();
+    const now = "2026-04-23T08:00:00.000Z";
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chores (
+          id,
+          title,
+          description,
+          point_value,
+          assignee_child_id,
+          is_active,
+          created_at,
+          updated_at
+        ) VALUES
+          ('trash', 'Trash bins', 'Curb', 8, NULL, 1, @now, @now)
+      `
+    ).run({ now });
+    fixtureDb.prepare(
+      `
+        INSERT INTO chore_rotations (id, chore_id, start_date_local)
+        VALUES ('rotation-1', 'trash', '2026-04-19')
+      `
+    ).run();
+    fixtureDb.prepare(
+      `
+        INSERT INTO chore_rotation_children (id, rotation_id, child_id, sort_order)
+        VALUES
+          ('rotation-child-1', 'rotation-1', 'child-1', 0),
+          ('rotation-child-2', 'rotation-1', 'child-2', 1)
+      `
+    ).run();
+    fixtureDb.prepare(
+      `
+        INSERT INTO chore_rotation_days (id, rotation_id, day_of_week)
+        VALUES ('rotation-day-1', 'rotation-1', 4)
+      `
+    ).run();
+
+    const startWeek = getDashboardData(fixtureDb, "2026-04-23", 4);
+    expect(startWeek.children[0]?.chores[0]).toMatchObject({
+      id: "trash",
+      assigneeChildId: "child-1",
+      scheduledDays: [4],
+      assignments: [],
+      unassignedScheduleDays: [],
+      rotation: {
+        childIds: ["child-1", "child-2"],
+        days: [4],
+        startDateLocal: "2026-04-19"
+      }
+    });
+    expect(startWeek.children[1]?.chores).toEqual([]);
+
+    const nextWeek = getDashboardData(fixtureDb, "2026-04-30", 4);
+    expect(nextWeek.children[0]?.chores).toEqual([]);
+    expect(nextWeek.children[1]?.chores[0]?.assigneeChildId).toBe("child-2");
   });
 
   it("shows open tasks above chores and hides completed tasks after the completion day", () => {

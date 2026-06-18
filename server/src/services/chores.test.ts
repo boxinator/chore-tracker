@@ -55,7 +55,32 @@ describe("parseCreateChoreInput", () => {
       description: "Quick clean",
       pointValue: 5,
       assignments: [{ childId: "child-2", days: [1, 2, 4] }],
-      unassignedScheduleDays: [6]
+      unassignedScheduleDays: [6],
+      rotation: null
+    });
+  });
+
+  it("normalizes weekly rotation payloads", () => {
+    const parsed = parseCreateChoreInput({
+      title: "Trash bins",
+      pointValue: 10,
+      assignments: [{ childId: "child-1", days: [1] }],
+      unassignedScheduleDays: [1],
+      rotation: {
+        childIds: ["child-2", "child-1", "child-2"],
+        days: [4, 4, 1],
+        startDateLocal: "2026-04-19"
+      }
+    });
+
+    expect(parsed).toMatchObject({
+      assignments: [{ childId: "child-1", days: [1] }],
+      unassignedScheduleDays: [1],
+      rotation: {
+        childIds: ["child-2", "child-1"],
+        days: [1, 4],
+        startDateLocal: "2026-04-19"
+      }
     });
   });
 
@@ -89,7 +114,48 @@ describe("createChore", () => {
       assigneeChildId: "child-1",
       scheduledDays: [4],
       assignments: [{ childId: "child-1", days: [4] }],
-      unassignedScheduleDays: []
+      unassignedScheduleDays: [],
+      rotation: null
+    });
+  });
+
+  it("creates a weekly rotation chore that alternates kids by week", () => {
+    const fixtureDb = createBaseFixture();
+
+    createChore(
+      fixtureDb,
+      parseCreateChoreInput({
+        title: "Take out trash",
+        description: "Curb bins",
+        pointValue: 8,
+        assignments: [],
+        unassignedScheduleDays: [],
+        rotation: {
+          childIds: ["child-1", "child-2"],
+          days: [4],
+          startDateLocal: "2026-04-19"
+        }
+      })
+    );
+
+    const startWeekDashboard = getDashboardData(fixtureDb, "2026-04-23", 4);
+    expect(startWeekDashboard.children[0]?.chores[0]).toMatchObject({
+      title: "Take out trash",
+      assigneeChildId: "child-1",
+      scheduledDays: [4],
+      rotation: {
+        childIds: ["child-1", "child-2"],
+        days: [4],
+        startDateLocal: "2026-04-19"
+      }
+    });
+    expect(startWeekDashboard.children[1]?.chores).toEqual([]);
+
+    const nextWeekDashboard = getDashboardData(fixtureDb, "2026-04-30", 4);
+    expect(nextWeekDashboard.children[0]?.chores).toEqual([]);
+    expect(nextWeekDashboard.children[1]?.chores[0]).toMatchObject({
+      title: "Take out trash",
+      assigneeChildId: "child-2"
     });
   });
 });
@@ -134,11 +200,69 @@ describe("updateChore", () => {
       assigneeChildId: "child-2",
       scheduledDays: [1, 6],
       assignments: [{ childId: "child-2", days: [1, 6] }],
-      unassignedScheduleDays: []
+      unassignedScheduleDays: [],
+      rotation: null
     });
 
     const offDayDashboard = getDashboardData(fixtureDb, "2026-04-28", 2);
     expect(offDayDashboard.children[1]?.chores).toEqual([]);
+  });
+
+  it("updates an existing chore into a weekly rotation", () => {
+    const fixtureDb = createBaseFixture();
+    const now = "2026-04-23T08:00:00.000Z";
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chores (
+          id,
+          title,
+          description,
+          point_value,
+          assignee_child_id,
+          is_active,
+          created_at,
+          updated_at
+        ) VALUES
+          ('chore-1', 'Clear table', 'After dinner', 5, NULL, 1, @now, @now)
+      `
+    ).run({ now });
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chore_assignments (id, chore_id, child_id, day_of_week)
+        VALUES ('assignment-1', 'chore-1', 'child-1', 4)
+      `
+    ).run();
+
+    updateChore(
+      fixtureDb,
+      "chore-1",
+      parseUpdateChoreInput({
+        title: "Clear table",
+        description: "After dinner",
+        pointValue: 5,
+        assignments: [],
+        unassignedScheduleDays: [],
+        rotation: {
+          childIds: ["child-2", "child-1"],
+          days: [4],
+          startDateLocal: "2026-04-19"
+        }
+      })
+    );
+
+    const dashboard = getDashboardData(fixtureDb, "2026-04-23", 4);
+    expect(dashboard.children[0]?.chores).toEqual([]);
+    expect(dashboard.children[1]?.chores[0]).toMatchObject({
+      id: "chore-1",
+      assigneeChildId: "child-2",
+      rotation: {
+        childIds: ["child-2", "child-1"],
+        days: [4],
+        startDateLocal: "2026-04-19"
+      }
+    });
   });
 });
 
@@ -362,5 +486,56 @@ describe("completeChore and uncompleteChore", () => {
 
     expect(completions).toEqual([{ status: "reversed" }, { status: "reversed" }]);
     expect(getDashboardData(fixtureDb, "2026-04-23", 4).children[0]?.totalPoints).toBe(0);
+  });
+
+  it("awards points only to the current weekly rotation child", () => {
+    const fixtureDb = createBaseFixture();
+    const now = "2026-04-23T08:00:00.000Z";
+
+    fixtureDb.prepare(
+      `
+        INSERT INTO chores (
+          id,
+          title,
+          description,
+          point_value,
+          assignee_child_id,
+          is_active,
+          created_at,
+          updated_at
+        ) VALUES
+          ('chore-1', 'Trash bins', '', 9, NULL, 1, @now, @now)
+      `
+    ).run({ now });
+    fixtureDb.prepare(
+      `
+        INSERT INTO chore_rotations (id, chore_id, start_date_local)
+        VALUES ('rotation-1', 'chore-1', '2026-04-19')
+      `
+    ).run();
+    fixtureDb.prepare(
+      `
+        INSERT INTO chore_rotation_children (id, rotation_id, child_id, sort_order)
+        VALUES
+          ('rotation-child-1', 'rotation-1', 'child-1', 0),
+          ('rotation-child-2', 'rotation-1', 'child-2', 1)
+      `
+    ).run();
+    fixtureDb.prepare(
+      `
+        INSERT INTO chore_rotation_days (id, rotation_id, day_of_week)
+        VALUES ('rotation-day-1', 'rotation-1', 4)
+      `
+    ).run();
+
+    expect(() => completeChore(fixtureDb, "chore-1", "child-2", "2026-04-23", 4)).toThrow(
+      ChoreValidationError
+    );
+
+    completeChore(fixtureDb, "chore-1", "child-1", "2026-04-23", 4);
+
+    const dashboard = getDashboardData(fixtureDb, "2026-04-23", 4);
+    expect(dashboard.children[0]?.totalPoints).toBe(9);
+    expect(dashboard.children[1]?.totalPoints).toBe(0);
   });
 });

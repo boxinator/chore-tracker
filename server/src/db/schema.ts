@@ -41,6 +41,34 @@ export function initializeSchema(db: DatabaseConnection) {
     CREATE UNIQUE INDEX IF NOT EXISTS idx_chore_assignments_unique
       ON chore_assignments (chore_id, child_id, day_of_week);
 
+    CREATE TABLE IF NOT EXISTS chore_rotations (
+      id TEXT PRIMARY KEY,
+      chore_id TEXT NOT NULL UNIQUE REFERENCES chores(id) ON DELETE CASCADE,
+      start_date_local TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS chore_rotation_children (
+      id TEXT PRIMARY KEY,
+      rotation_id TEXT NOT NULL REFERENCES chore_rotations(id) ON DELETE CASCADE,
+      child_id TEXT NOT NULL REFERENCES children(id) ON DELETE CASCADE,
+      sort_order INTEGER NOT NULL
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_chore_rotation_children_unique
+      ON chore_rotation_children (rotation_id, child_id);
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_chore_rotation_children_order_unique
+      ON chore_rotation_children (rotation_id, sort_order);
+
+    CREATE TABLE IF NOT EXISTS chore_rotation_days (
+      id TEXT PRIMARY KEY,
+      rotation_id TEXT NOT NULL REFERENCES chore_rotations(id) ON DELETE CASCADE,
+      day_of_week INTEGER NOT NULL CHECK (day_of_week >= 0 AND day_of_week <= 6)
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_chore_rotation_days_unique
+      ON chore_rotation_days (rotation_id, day_of_week);
+
     CREATE TABLE IF NOT EXISTS rewards (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,

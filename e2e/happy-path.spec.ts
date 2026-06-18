@@ -1,5 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+function formatDate(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
 test("happy path: add, assign, complete, redeem", async ({ page, context, request }) => {
   await request.post("/api/children", { data: { name: "Sample Child 1" } });
   await request.post("/api/children", { data: { name: "Sample Child 2" } });
@@ -118,4 +122,52 @@ test("weekly view shows scheduled chores and supports week navigation", async ({
   await page.getByText("Weekly View Chore").first().click();
   await expect(page.getByRole("dialog", { name: "Weekly View Chore" })).toBeVisible();
   await expect(page.getByRole("button", { name: /Mark Weekly View Chore complete/ })).toHaveCount(0);
+});
+
+test("add chore supports weekly kid rotation", async ({ page, request }) => {
+  await request.post("/api/children", { data: { name: "Rotation One" } });
+  await request.post("/api/children", { data: { name: "Rotation Two" } });
+  await request.post("/api/children", { data: { name: "Rotation Three" } });
+  const children = (await request.get("/api/children").then((response) => response.json()))
+    .children as Array<{ id: string; name: string }>;
+  const firstRotationChild = children[0]!;
+  const secondRotationChild = children[1]!;
+
+  const today = new Date();
+  const todayLocal = formatDate(today);
+  const todayDay = today.getDay();
+  const nextWeek = new Date(today);
+  nextWeek.setDate(nextWeek.getDate() + 7);
+
+  await page.goto(`/daily?date=${todayLocal}`);
+  await page.getByRole("button", { name: "Add chore" }).click();
+
+  const addDialog = page.getByRole("dialog", { name: "Add chore" });
+  await addDialog.getByLabel("Title").fill("Rotating Trash");
+  await addDialog.getByLabel("Description").fill("Alternates weekly");
+  await addDialog.getByLabel("Points").fill("9");
+  await addDialog.getByRole("tab", { name: "Weekly Rotation" }).click();
+
+  const rotationDays = addDialog.locator(".rotation-editor .weekday-button");
+  if (todayDay !== 1) {
+    await rotationDays.nth(1).click();
+    await rotationDays.nth(todayDay).click();
+  }
+  await addDialog.getByRole("button", { name: "Add Chore" }).click();
+
+  const firstLane = page.locator("section.lane").filter({
+    has: page.getByRole("heading", { name: firstRotationChild.name })
+  });
+  await expect(firstLane.getByText("Rotating Trash")).toBeVisible();
+
+  const nextWeekDashboard = await request
+    .get(`/api/dashboard?date=${formatDate(nextWeek)}`)
+    .then((response) => response.json());
+  const secondChild = nextWeekDashboard.children.find(
+    (child: { id: string }) => child.id === secondRotationChild.id
+  );
+
+  expect(secondChild.chores.map((chore: { title: string }) => chore.title)).toContain(
+    "Rotating Trash"
+  );
 });

@@ -8,11 +8,18 @@ export type VisibleChore = {
   scheduledDays: number[];
   assignments: ChoreAssignment[];
   unassignedScheduleDays: number[];
+  rotation: ChoreRotation | null;
 };
 
 export type ChoreAssignment = {
   childId: string;
   days: number[];
+};
+
+export type ChoreRotation = {
+  childIds: string[];
+  days: number[];
+  startDateLocal: string;
 };
 
 export type VisibleTask = {
@@ -73,6 +80,7 @@ export type CreateChoreInput = {
   pointValue: number;
   assignments: ChoreAssignment[];
   unassignedScheduleDays: number[];
+  rotation: ChoreRotation | null;
 };
 
 export type UpdateChoreInput = CreateChoreInput;

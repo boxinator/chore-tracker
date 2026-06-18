@@ -95,14 +95,21 @@
   gap: 12px;
 }
 
+.assignment-mode-control {
+  margin-top: 0;
+}
+
 .assignment-grid,
-.unassigned-schedule {
+.unassigned-schedule,
+.rotation-editor,
+.rotation-kids {
   display: grid;
   gap: 12px;
 }
 
 .assignment-row,
-.unassigned-schedule {
+.unassigned-schedule,
+.rotation-editor {
   padding: 12px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -124,6 +131,41 @@
 .assignment-all-button {
   min-height: 34px;
   padding: 0 12px;
+}
+
+.rotation-kids > span {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.rotation-kid-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.rotation-kid-toggle {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-strong);
+  color: var(--color-text);
+  font-weight: 800;
+  text-align: left;
+}
+
+.rotation-kid-toggle.is-selected {
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent) 38%, transparent);
+  color: var(--color-accent-strong);
+}
+
+.rotation-order-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .inline-form {
@@ -152,6 +194,14 @@
 
   .segmented-control {
     display: flex;
+  }
+
+  .rotation-kid-row {
+    grid-template-columns: 1fr;
+  }
+
+  .rotation-order-actions {
+    justify-content: flex-end;
   }
 }
 

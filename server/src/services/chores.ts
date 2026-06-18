@@ -21,7 +21,16 @@ const choreInputSchema = z.object({
     .array(z.number().int().min(0).max(6))
     .max(7)
     .optional()
-    .default(allDays)
+    .default(allDays),
+  rotation: z
+    .object({
+      childIds: z.array(z.string().trim().min(1)).min(2),
+      days: z.array(z.number().int().min(0).max(6)).min(1).max(7),
+      startDateLocal: z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
+    })
+    .nullable()
+    .optional()
+    .default(null)
 });
 
 const createChoreSchema = choreInputSchema;
@@ -36,6 +45,125 @@ export type UpdateChoreInput = z.infer<typeof updateChoreSchema>;
 export type AssignChoreInput = z.infer<typeof assignChoreSchema>;
 
 export class ChoreValidationError extends Error {}
+
+type AssignedChoreForDate = {
+  id: string;
+  title: string;
+  point_value: number;
+  child_name: string | null;
+};
+
+function parseLocalDate(dateLocal: string) {
+  const [year, month, day] = dateLocal.split("-").map(Number);
+  return new Date(year, month - 1, day, 12);
+}
+
+function weekStart(date: Date) {
+  const start = new Date(date);
+  start.setDate(start.getDate() - start.getDay());
+  return start;
+}
+
+function weeksSinceRotationStart(currentDateLocal: string, startDateLocal: string) {
+  const current = weekStart(parseLocalDate(currentDateLocal));
+  const start = weekStart(parseLocalDate(startDateLocal));
+  const diffMs = current.getTime() - start.getTime();
+
+  return Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000));
+}
+
+function getChoreAssignedToChildForDate(
+  db: DatabaseConnection,
+  choreId: string,
+  childId: string,
+  currentDateLocal: string,
+  dayOfWeek: number
+): AssignedChoreForDate | undefined {
+  const fixedAssignment = db
+    .prepare(
+      `
+        SELECT
+          ch.id,
+          ch.title,
+          ch.point_value,
+          c.name as child_name
+        FROM chores ch
+        INNER JOIN chore_assignments ca
+          ON ca.chore_id = ch.id
+          AND ca.child_id = ?
+          AND ca.day_of_week = ?
+        INNER JOIN children c ON c.id = ca.child_id
+        WHERE ch.id = ? AND ch.is_active = 1
+        LIMIT 1
+      `
+    )
+    .get(childId, dayOfWeek, choreId) as AssignedChoreForDate | undefined;
+
+  if (fixedAssignment) {
+    return fixedAssignment;
+  }
+
+  const rotation = db
+    .prepare(
+      `
+        SELECT
+          cr.id as rotationId,
+          cr.start_date_local as startDateLocal
+        FROM chore_rotations cr
+        INNER JOIN chore_rotation_days crd
+          ON crd.rotation_id = cr.id
+          AND crd.day_of_week = ?
+        INNER JOIN chores ch ON ch.id = cr.chore_id
+        WHERE cr.chore_id = ?
+          AND ch.is_active = 1
+        LIMIT 1
+      `
+    )
+    .get(dayOfWeek, choreId) as { rotationId: string; startDateLocal: string } | undefined;
+
+  if (!rotation || currentDateLocal < rotation.startDateLocal) {
+    return undefined;
+  }
+
+  const rotationChildren = db
+    .prepare(
+      `
+        SELECT child_id as childId
+        FROM chore_rotation_children
+        WHERE rotation_id = ?
+        ORDER BY sort_order ASC
+      `
+    )
+    .all(rotation.rotationId) as Array<{ childId: string }>;
+
+  if (rotationChildren.length < 2) {
+    return undefined;
+  }
+
+  const weekIndex = weeksSinceRotationStart(currentDateLocal, rotation.startDateLocal);
+  const currentChildId = rotationChildren[weekIndex % rotationChildren.length]?.childId;
+
+  if (currentChildId !== childId) {
+    return undefined;
+  }
+
+  return db
+    .prepare(
+      `
+        SELECT
+          ch.id,
+          ch.title,
+          ch.point_value,
+          c.name as child_name
+        FROM chores ch
+        INNER JOIN children c ON c.id = ?
+        WHERE ch.id = ?
+          AND ch.is_active = 1
+        LIMIT 1
+      `
+    )
+    .get(childId, choreId) as AssignedChoreForDate | undefined;
+}
 
 function normalizeChoreInput(
   result:
@@ -57,6 +185,17 @@ function normalizeChoreInput(
     },
     new Map()
   );
+  const rotation = result.data.rotation
+    ? {
+        childIds: [...new Set(result.data.rotation.childIds)],
+        days: [...new Set(result.data.rotation.days)].sort((a, b) => a - b),
+        startDateLocal: result.data.rotation.startDateLocal
+      }
+    : null;
+
+  if (rotation && rotation.childIds.length < 2) {
+    throw new ChoreValidationError("A weekly rotation needs at least two kids");
+  }
 
   return {
     ...result.data,
@@ -67,7 +206,8 @@ function normalizeChoreInput(
         days: [...days].sort((a, b) => a - b)
       }))
       .sort((left, right) => left.childId.localeCompare(right.childId)),
-    unassignedScheduleDays: [...new Set(result.data.unassignedScheduleDays)].sort((a, b) => a - b)
+    unassignedScheduleDays: [...new Set(result.data.unassignedScheduleDays)].sort((a, b) => a - b),
+    rotation
   };
 }
 
@@ -99,6 +239,11 @@ export function createChore(db: DatabaseConnection, input: CreateChoreInput) {
       throw new ChoreValidationError("Selected child does not exist");
     }
   }
+  for (const childId of input.rotation?.childIds ?? []) {
+    if (!childExistsStatement.get(childId)) {
+      throw new ChoreValidationError("Selected child does not exist");
+    }
+  }
 
   const insertChore = db.prepare(`
     INSERT INTO chores (
@@ -122,6 +267,18 @@ export function createChore(db: DatabaseConnection, input: CreateChoreInput) {
     INSERT INTO chore_assignments (id, chore_id, child_id, day_of_week)
     VALUES (?, ?, ?, ?)
   `);
+  const insertRotation = db.prepare(`
+    INSERT INTO chore_rotations (id, chore_id, start_date_local)
+    VALUES (?, ?, ?)
+  `);
+  const insertRotationChild = db.prepare(`
+    INSERT INTO chore_rotation_children (id, rotation_id, child_id, sort_order)
+    VALUES (?, ?, ?, ?)
+  `);
+  const insertRotationDay = db.prepare(`
+    INSERT INTO chore_rotation_days (id, rotation_id, day_of_week)
+    VALUES (?, ?, ?)
+  `);
 
   const transaction = db.transaction(() => {
     insertChore.run(
@@ -134,11 +291,11 @@ export function createChore(db: DatabaseConnection, input: CreateChoreInput) {
       now
     );
 
-    for (const dayOfWeek of input.assignments.length === 0 ? input.unassignedScheduleDays : []) {
+    for (const dayOfWeek of input.assignments.length === 0 && !input.rotation ? input.unassignedScheduleDays : []) {
       insertScheduleDay.run(`schedule-${crypto.randomUUID()}`, choreId, dayOfWeek);
     }
 
-    for (const assignment of input.assignments) {
+    for (const assignment of input.rotation ? [] : input.assignments) {
       for (const dayOfWeek of assignment.days) {
         insertAssignment.run(
           `assignment-${crypto.randomUUID()}`,
@@ -146,6 +303,17 @@ export function createChore(db: DatabaseConnection, input: CreateChoreInput) {
           assignment.childId,
           dayOfWeek
         );
+      }
+    }
+
+    if (input.rotation) {
+      const rotationId = `rotation-${crypto.randomUUID()}`;
+      insertRotation.run(rotationId, choreId, input.rotation.startDateLocal);
+      input.rotation.childIds.forEach((childId, index) => {
+        insertRotationChild.run(`rotation-child-${crypto.randomUUID()}`, rotationId, childId, index);
+      });
+      for (const dayOfWeek of input.rotation.days) {
+        insertRotationDay.run(`rotation-day-${crypto.randomUUID()}`, rotationId, dayOfWeek);
       }
     }
   });
@@ -159,6 +327,11 @@ export function updateChore(db: DatabaseConnection, choreId: string, input: Upda
   const childExistsStatement = db.prepare("SELECT 1 FROM children WHERE id = ? LIMIT 1");
   for (const assignment of input.assignments) {
     if (!childExistsStatement.get(assignment.childId)) {
+      throw new ChoreValidationError("Selected child does not exist");
+    }
+  }
+  for (const childId of input.rotation?.childIds ?? []) {
+    if (!childExistsStatement.get(childId)) {
       throw new ChoreValidationError("Selected child does not exist");
     }
   }
@@ -179,6 +352,18 @@ export function updateChore(db: DatabaseConnection, choreId: string, input: Upda
   const insertAssignment = db.prepare(`
     INSERT INTO chore_assignments (id, chore_id, child_id, day_of_week)
     VALUES (?, ?, ?, ?)
+  `);
+  const insertRotation = db.prepare(`
+    INSERT INTO chore_rotations (id, chore_id, start_date_local)
+    VALUES (?, ?, ?)
+  `);
+  const insertRotationChild = db.prepare(`
+    INSERT INTO chore_rotation_children (id, rotation_id, child_id, sort_order)
+    VALUES (?, ?, ?, ?)
+  `);
+  const insertRotationDay = db.prepare(`
+    INSERT INTO chore_rotation_days (id, rotation_id, day_of_week)
+    VALUES (?, ?, ?)
   `);
 
   const transaction = db.transaction(() => {
@@ -202,12 +387,13 @@ export function updateChore(db: DatabaseConnection, choreId: string, input: Upda
 
     db.prepare("DELETE FROM chore_schedule_days WHERE chore_id = ?").run(choreId);
     db.prepare("DELETE FROM chore_assignments WHERE chore_id = ?").run(choreId);
+    db.prepare("DELETE FROM chore_rotations WHERE chore_id = ?").run(choreId);
 
-    for (const dayOfWeek of input.assignments.length === 0 ? input.unassignedScheduleDays : []) {
+    for (const dayOfWeek of input.assignments.length === 0 && !input.rotation ? input.unassignedScheduleDays : []) {
       insertScheduleDay.run(`schedule-${crypto.randomUUID()}`, choreId, dayOfWeek);
     }
 
-    for (const assignment of input.assignments) {
+    for (const assignment of input.rotation ? [] : input.assignments) {
       for (const dayOfWeek of assignment.days) {
         insertAssignment.run(
           `assignment-${crypto.randomUUID()}`,
@@ -215,6 +401,17 @@ export function updateChore(db: DatabaseConnection, choreId: string, input: Upda
           assignment.childId,
           dayOfWeek
         );
+      }
+    }
+
+    if (input.rotation) {
+      const rotationId = `rotation-${crypto.randomUUID()}`;
+      insertRotation.run(rotationId, choreId, input.rotation.startDateLocal);
+      input.rotation.childIds.forEach((childId, index) => {
+        insertRotationChild.run(`rotation-child-${crypto.randomUUID()}`, rotationId, childId, index);
+      });
+      for (const dayOfWeek of input.rotation.days) {
+        insertRotationDay.run(`rotation-day-${crypto.randomUUID()}`, rotationId, dayOfWeek);
       }
     }
   });
@@ -265,6 +462,7 @@ export function assignChore(db: DatabaseConnection, choreId: string, childId: st
   const now = new Date().toISOString();
   const transaction = db.transaction(() => {
     db.prepare("DELETE FROM chore_schedule_days WHERE chore_id = ?").run(choreId);
+    db.prepare("DELETE FROM chore_rotations WHERE chore_id = ?").run(choreId);
     const insertAssignment = db.prepare(`
       INSERT OR IGNORE INTO chore_assignments (id, chore_id, child_id, day_of_week)
       VALUES (?, ?, ?, ?)
@@ -293,32 +491,7 @@ export function completeChore(
   currentDateLocal: string,
   dayOfWeek: number
 ) {
-  const chore = db
-    .prepare(
-      `
-        SELECT
-          ch.id,
-          ch.title,
-          ch.point_value,
-          c.name as child_name
-        FROM chores ch
-        INNER JOIN chore_assignments ca
-          ON ca.chore_id = ch.id
-          AND ca.child_id = ?
-          AND ca.day_of_week = ?
-        INNER JOIN children c ON c.id = ca.child_id
-        WHERE ch.id = ? AND ch.is_active = 1
-        LIMIT 1
-      `
-    )
-    .get(childId, dayOfWeek, choreId) as
-    | {
-        id: string;
-        title: string;
-        point_value: number;
-        child_name: string | null;
-      }
-    | undefined;
+  const chore = getChoreAssignedToChildForDate(db, choreId, childId, currentDateLocal, dayOfWeek);
 
   if (!chore) {
     throw new ChoreValidationError("This chore is not assigned to this child today");

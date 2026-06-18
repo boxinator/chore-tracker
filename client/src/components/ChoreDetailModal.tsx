@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Trash2, X, Zap } from "lucide-react";
-import type { ChoreAssignment, DashboardChild, UpdateChoreInput, VisibleChore } from "../types";
+import type { ChoreAssignment, ChoreRotation, DashboardChild, UpdateChoreInput, VisibleChore } from "../types";
 import { useModalDismiss } from "./modalDismiss";
 import { ChoreAssignmentEditor } from "./ChoreAssignmentEditor";
 
@@ -59,9 +59,15 @@ export function ChoreDetailModal({
   const [unassignedScheduleDays, setUnassignedScheduleDays] = useState<number[]>(
     chore.unassignedScheduleDays.length > 0 ? chore.unassignedScheduleDays : allDays
   );
+  const [rotation, setRotation] = useState<ChoreRotation | null>(chore.rotation);
 
-  const canSubmit = useMemo(() => title.trim().length > 0 && Number(pointValue) > 0, [
+  const canSubmit = useMemo(() => (
+    title.trim().length > 0 &&
+    Number(pointValue) > 0 &&
+    (!rotation || (rotation.childIds.length >= 2 && rotation.days.length > 0))
+  ), [
     pointValue,
+    rotation,
     title
   ]);
 
@@ -76,8 +82,9 @@ export function ChoreDetailModal({
       title,
       description,
       pointValue: Number(pointValue),
-      assignments,
-      unassignedScheduleDays: assignments.length === 0 ? unassignedScheduleDays : []
+      assignments: rotation ? [] : assignments,
+      unassignedScheduleDays: assignments.length === 0 && !rotation ? unassignedScheduleDays : [],
+      rotation
     });
   };
 
@@ -143,8 +150,10 @@ export function ChoreDetailModal({
             children={children}
             assignments={assignments}
             unassignedScheduleDays={unassignedScheduleDays}
+            rotation={rotation}
             onChangeAssignments={setAssignments}
             onChangeUnassignedScheduleDays={setUnassignedScheduleDays}
+            onChangeRotation={setRotation}
           />
 
           {error && <p className="form-error">{error}</p>}
