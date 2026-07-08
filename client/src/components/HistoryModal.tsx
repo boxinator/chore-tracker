@@ -47,11 +47,11 @@ export function PointsOverrideForm({
   );
   const numericAmount = Number(amount);
   const signedAmount = operation === "add" ? numericAmount : numericAmount * -1;
-  const canSubmit =
+  const canAttemptSubmit =
     Boolean(selectedChild) &&
     Number.isInteger(numericAmount) &&
-    numericAmount > 0 &&
-    reason.trim().length >= 3;
+    numericAmount > 0;
+  const canSubmit = canAttemptSubmit && reason.trim().length >= 3;
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -103,7 +103,13 @@ export function PointsOverrideForm({
       </div>
       <label className="field">
         <span>Reason</span>
-        <textarea maxLength={200} required value={reason} onChange={(event) => setReason(event.target.value)} />
+        <textarea
+          maxLength={200}
+          minLength={3}
+          required
+          value={reason}
+          onChange={(event) => setReason(event.target.value)}
+        />
       </label>
       {selectedChild && numericAmount > 0 && (
         <p className="history-equation">
@@ -111,7 +117,7 @@ export function PointsOverrideForm({
         </p>
       )}
       <div className="modal-actions">
-        <button className="primary-button" type="submit" disabled={!canSubmit || submitting}>
+        <button className="primary-button" type="submit" disabled={!canAttemptSubmit || submitting}>
           {submitting ? "Saving..." : "Add points override"}
         </button>
       </div>
