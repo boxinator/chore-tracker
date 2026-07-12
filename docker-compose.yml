@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: chore-tracker
     ports:
-      - "3001:3001"
+      - "3200:3001"
     environment:
       NODE_ENV: production
       PORT: 3001
@@ -23,4 +23,3 @@ services:
 
 volumes:
   chore_tracker_data:
-

@@ -83,7 +83,7 @@ Run it:
 ```bash
 docker run -d \
   --name chore-tracker \
-  -p 3001:3001 \
+  -p 3200:3001 \
   -e TZ=America/Los_Angeles \
   -e DATA_DIR=/data \
   -v chore_tracker_data:/data \
@@ -92,8 +92,8 @@ docker run -d \
 
 Open:
 
-- App: [http://localhost:3001](http://localhost:3001)
-- Health: [http://localhost:3001/api/health](http://localhost:3001/api/health)
+- App: [http://localhost:3200](http://localhost:3200)
+- Health: [http://localhost:3200/api/health](http://localhost:3200/api/health)
 
 Stop:
 
@@ -172,7 +172,7 @@ Recommended setup:
 
 1. Build the image locally or pull it from your registry once you publish it.
 2. Create a container from the image.
-3. Map container port `3001` to a host port, usually `3001`.
+3. Map container port `3001` to host port `3200`.
 4. Mount a persistent folder or volume to `/data`.
 5. Set environment variables:
    - `NODE_ENV=production`
@@ -180,7 +180,7 @@ Recommended setup:
    - `DATA_DIR=/data`
    - `TZ=America/Los_Angeles` or your household timezone
 6. Enable restart policy `unless-stopped` or equivalent.
-7. Open `http://<synology-ip>:3001` from another device on your network and confirm the app loads.
+7. Open `http://<synology-ip>:3200` from another device on your network and confirm the app loads.
 
 Important:
 
@@ -197,7 +197,7 @@ Important:
 Once the app is reachable on your network, add it to Home Assistant with a Webpage/Iframe-style card pointing at:
 
 ```text
-http://<your-host-ip>:3001
+http://<your-host-ip>:3200
 ```
 
 Notes:
@@ -211,8 +211,8 @@ Notes:
 
 After deploying to Synology, verify:
 
-1. `http://<synology-ip>:3001/api/health` responds
-2. `http://<synology-ip>:3001` loads the board
+1. `http://<synology-ip>:3200/api/health` responds
+2. `http://<synology-ip>:3200` loads the board
 3. A newly created chore still exists after container restart
 4. The SQLite file is being written under the mounted `/data` path
 5. Home Assistant iframe loads the app without clipping or reachability issues
