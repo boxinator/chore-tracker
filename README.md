@@ -1,14 +1,130 @@
 # Chore Tracker
 
-A small chore-and-rewards kiosk app for a family dashboard, designed to run locally first and then deploy cleanly in Docker for Synology and Home Assistant embedding.
+Chore Tracker is a small, self-hosted chore-and-rewards board for a shared household display. It runs as a local web app with no authentication, stores durable state in SQLite, and keeps point balances auditable through an append-only ledger.
 
-## What It Does
+The app is intentionally focused on one home and one trusted display. It is not a general project manager or multi-user SaaS app.
 
-- Shows unassigned chores and chores per child
-- Tracks points through an immutable ledger
-- Supports recurring weekday chores
-- Lets kids redeem rewards against current point totals
-- Stores data in SQLite
+The screenshots below use mocked household data and the built-in Space theme.
+
+<img src="./docs/screenshots/space-board-overview.png" alt="Chore Tracker board populated with mocked household chores in the Space theme" width="100%">
+
+## Supported Features
+
+### Kiosk Chore Board
+
+- Shows one unassigned lane plus one lane per child/person.
+- Displays each child with an avatar, visible chores, and current point total.
+- Uses large, touch-friendly controls intended for a tablet, kiosk, or shared browser.
+- Keeps completed chores visible and visually muted for the rest of the day.
+- Horizontally scrolls lanes and vertically scrolls long chore lists when space is tight.
+
+<img src="./docs/screenshots/feature-kiosk-board.png" alt="Board lanes with unassigned chores and child chore lists" width="560">
+
+### Chores And Scheduling
+
+- Add chores with title, description, point value, and schedule.
+- Edit existing chores from the chore detail modal.
+- Soft-delete chores so old ledger history remains intact.
+- Leave chores unassigned, or assign one chore to one or more children.
+- Configure per-child weekday schedules for a chore.
+- Configure weekday availability for unassigned chores.
+- Use `0 = Sunday` through `6 = Saturday` internally, matching JavaScript `Date.getDay()`.
+- Complete and uncomplete chores for the current local day.
+- Block completion unless the chore is assigned to that child today.
+
+<img src="./docs/screenshots/feature-chore-scheduling.png" alt="Chore detail modal showing point value and per-child weekday scheduling" width="420">
+
+### Points And Ledger
+
+- Derives child point totals from `ledger_entries`; balances are not stored as mutable profile fields.
+- Creates positive ledger entries for chore completion.
+- Creates negative reversal entries when a chore is marked incomplete again.
+- Creates negative ledger entries for reward redemption.
+- Stores child and source name snapshots on ledger entries so history remains readable after names change.
+
+<img src="./docs/screenshots/feature-points-ledger.png" alt="Recent activity modal listing ledger-backed point changes" width="420">
+
+### Rewards
+
+- Shows each child's available rewards from their lane.
+- Disables unaffordable rewards in the UI and rejects overspending in the API.
+- Shows a confirmation equation before redemption, for example `42 - 15 = 27`.
+- Updates the total after redemption and briefly shows a success state.
+- Lets household managers create, edit, and deactivate rewards.
+- Keeps inactive rewards out of the redemption list while still visible in management.
+
+<img src="./docs/screenshots/feature-rewards.png" alt="Reward modal showing available rewards and point costs" width="420">
+
+### Household Management
+
+- Add and rename children/people from the Manage modal.
+- Pick avatars for child/person lanes.
+- Add, edit, and deactivate rewards.
+- Switch between the built-in visual themes: Space, Quest, and Default.
+
+<img src="./docs/screenshots/feature-household-management.png" alt="Manage modal for rewards and household setup" width="560">
+
+### History And Debugging
+
+- View recent point activity from the history modal.
+- Inspect health/database details from the floating debug tools.
+- Enable simulated date/time from the debug tools to test weekday scheduling behavior without changing the machine clock.
+
+<img src="./docs/screenshots/feature-history-debugging.png" alt="Floating debug tools showing simulated time and database health" width="560">
+
+## How To Use The App
+
+### Add A Chore
+
+1. Open the app and use the `Add Chore` button in the Unassigned lane.
+2. Enter a title, optional description, and point value.
+3. Choose either unassigned weekday availability or child-specific weekday assignments.
+4. Save. The chore appears on matching days only.
+
+<img src="./docs/screenshots/use-add-chore.png" alt="Add chore modal with title, description, points, and assignment controls" width="420">
+
+### Assign Or Reschedule A Chore
+
+1. Open a chore card or use `Assign` on an unassigned card.
+2. In the chore detail modal, select the weekdays for each child who should see that chore.
+3. Clear a child's weekdays to remove that child from the chore.
+4. Save changes.
+
+<img src="./docs/screenshots/use-assign-reschedule.png" alt="Chore assignment controls showing weekday buttons per child" width="420">
+
+### Complete Or Undo A Chore
+
+1. Tap `Done` on an assigned chore card.
+2. The app creates a completion record and a positive ledger entry for that child.
+3. Tap `Done` again on a completed card to reverse it for the day.
+4. The app preserves the original ledger entry and adds a negative reversal entry.
+
+<img src="./docs/screenshots/use-complete-undo.png" alt="Completed chore card with Done state and point value" width="420">
+
+### Redeem A Reward
+
+1. Tap `Rewards` in a child's lane.
+2. Select an affordable reward.
+3. Confirm the point equation.
+4. The app creates a redemption ledger entry and refreshes the child's total.
+
+<img src="./docs/screenshots/use-redeem-reward.png" alt="Reward confirmation view showing current points minus reward cost equals new total" width="420">
+
+### Manage People, Rewards, And Theme
+
+1. Open `Manage` from the top bar.
+2. Use `Rewards` to create, edit, or deactivate reward catalog entries.
+3. Use `People` to add or rename children/people.
+4. Tap a child's avatar on the board, or from management, to change it.
+5. Use the theme button in management to cycle visual themes.
+
+<img src="./docs/screenshots/use-manage-household.png" alt="Household management modal for rewards and people" width="560">
+
+### View Recent Activity
+
+Use the floating History button to open recent ledger activity. This is useful for checking chore completions, reversals, and reward redemptions.
+
+<img src="./docs/screenshots/use-view-history.png" alt="Points history modal showing recent chore and reward activity" width="420">
 
 ## Local Development
 
@@ -17,13 +133,13 @@ Requirements:
 - Node.js 22+
 - npm
 
-Install:
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-Run locally:
+Run the local dev server:
 
 ```bash
 npm run dev
@@ -32,7 +148,7 @@ npm run dev
 Open:
 
 - App: [http://localhost:5173](http://localhost:5173)
-- API: [http://localhost:3001/api/health](http://localhost:3001/api/health)
+- API healthcheck: [http://localhost:3001/api/health](http://localhost:3001/api/health)
 
 Build:
 
@@ -40,7 +156,7 @@ Build:
 npm run build
 ```
 
-Tests:
+Run tests:
 
 ```bash
 npm test
@@ -51,12 +167,14 @@ npm run test:e2e
 
 Supported environment variables:
 
-- `PORT`: API/server port. Default: `3001`
-- `DATA_DIR`: directory for the SQLite file. Default: `<repo>/data`
-- `DATABASE_PATH`: explicit SQLite file path. Overrides `DATA_DIR`
-- `TZ`: container/server timezone. Recommended for Docker deployments
-- `API_PORT`: dev-only Vite proxy target
-- `VITE_PORT`: dev-only Vite port
+- `PORT`: production API/static server port. Default: `3001`.
+- `DATA_DIR`: directory for the SQLite file. Default: `<repo>/data`.
+- `DATABASE_PATH`: explicit SQLite file path. Overrides `DATA_DIR`.
+- `TZ`: process/container timezone. Recommended for Docker deployments because weekday scheduling follows server-local time.
+- `API_PORT`: dev-only Vite proxy target.
+- `VITE_PORT`: dev-only Vite port.
+
+On startup, the server creates the data directory if needed, opens the SQLite database, initializes the schema, and seeds sample children, chores, rewards, and starter ledger points. Existing rows with the same seed IDs may be refreshed by the seed routine.
 
 ## Docker
 
@@ -66,24 +184,12 @@ Build the image:
 docker build -t chore-tracker .
 ```
 
-Build and tag it for a local registry:
-
-```bash
-docker build -t <local-registry-host>:5050/chore-tracker:latest .
-```
-
-Push it to the local registry:
-
-```bash
-docker push <local-registry-host>:5050/chore-tracker:latest
-```
-
-Run it:
+Run it with a persistent data volume:
 
 ```bash
 docker run -d \
   --name chore-tracker \
-  -p 3001:3001 \
+  -p 8080:3001 \
   -e TZ=America/Los_Angeles \
   -e DATA_DIR=/data \
   -v chore_tracker_data:/data \
@@ -92,8 +198,8 @@ docker run -d \
 
 Open:
 
-- App: [http://localhost:3001](http://localhost:3001)
-- Health: [http://localhost:3001/api/health](http://localhost:3001/api/health)
+- App: [http://localhost:8080](http://localhost:8080)
+- Healthcheck: [http://localhost:8080/api/health](http://localhost:8080/api/health)
 
 Stop:
 
@@ -116,112 +222,115 @@ Stop:
 docker compose down
 ```
 
-The included compose file stores SQLite in a named Docker volume mounted at `/data`.
+The included compose file maps host port `3001` to container port `3001` and stores SQLite in a named Docker volume mounted at `/data`.
 
-## Getting The Image To Synology
+## Deployment Guidance
 
-You do not have to publish the image, but publishing is the cleanest option if you want repeatable updates.
+The app is designed to run as a single Node.js web process. In production it serves both the API and the compiled frontend from the same port.
 
-### Option 1: Push To A Registry
+Common deployment options:
 
-Best for long-term use.
+- Run the Docker image on any host that supports persistent volumes.
+- Use `docker compose` or another container orchestrator to manage restart policy, port mapping, and the SQLite data volume.
+- Run from source with `npm run build` followed by `npm start` if you prefer a non-container deployment.
+- Put the app behind an existing reverse proxy if you need HTTPS, a custom hostname, or path-based routing.
 
-Tag and push the image:
+Production checklist:
 
-```bash
-docker tag chore-tracker:test yourname/chore-tracker:latest
-docker push yourname/chore-tracker:latest
-```
+1. Map container port `3001` to whatever host port you want users to visit.
+2. Mount persistent storage to `/data`, or set `DATABASE_PATH` to a persistent file path.
+3. Set `TZ` to the household's timezone so weekday chore boundaries are predictable.
+4. Set a restart policy appropriate for your host.
+5. Verify `GET /api/health` returns `status: "ok"`.
+6. Create a chore, restart the process/container, and confirm the chore is still present.
 
-For this local registry, the equivalent commands are:
+Network and security notes:
 
-```bash
-docker build -t <local-registry-host>:5050/chore-tracker:latest .
-docker push <local-registry-host>:5050/chore-tracker:latest
-```
+- Chore Tracker does not include authentication or authorization.
+- Treat it as a trusted-network app unless you add access control at a reverse proxy or network layer.
+- If embedding the app in another dashboard or portal, make sure browser mixed-content rules do not block it. Serving both pages over HTTPS is the usual fix.
+- Use a stable hostname or IP address for any shared display that opens the app directly.
 
-Then on Synology:
+## Data And Backups
 
-- open Container Manager
-- pull `yourname/chore-tracker:latest` or `<local-registry-host>:5050/chore-tracker:latest`
-- create the container from that image
+- Primary data store: SQLite.
+- Default local DB path: `data/chore-tracker.db`.
+- Recommended container DB path: `/data/chore-tracker.db`.
+- SQLite runs with WAL mode enabled.
 
-### Option 2: Export And Import A Tar
+Back up the app by backing up the configured SQLite database and WAL files from the mounted data directory. For the simplest file copy, stop the container/server first or use your normal volume backup tooling.
 
-Best for one-off private deployment without using a registry.
+## Technical Details
 
-Export:
+For a deeper contributor-oriented view of runtime shape, service boundaries, data model, and domain invariants, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
-```bash
-docker save chore-tracker:test -o chore-tracker.tar
-```
+### Stack
 
-Copy `chore-tracker.tar` to the NAS, then import/load it there before creating the container.
+- Frontend: React 19, TypeScript, Vite, CSS.
+- UI icons: `lucide-react`.
+- Backend: Node.js 22, Express 5, TypeScript.
+- Database: SQLite through `better-sqlite3`.
+- Validation: `zod`.
+- Tests: Vitest for service/API-adjacent behavior and Playwright for end-to-end browser coverage.
+- Deployment: multi-stage Docker build serving the compiled frontend and API from one Express process.
 
-### Option 3: Build On Synology
+### Runtime Shape
 
-Best if you want the Synology to build directly from the project files.
+In development, Vite serves the client on port `5173` and proxies API calls to the Express server on port `3001`.
 
-- copy the project to the NAS
-- use Container Manager project support or SSH
-- run `docker compose up --build -d`
+In production, the compiled Express server serves:
 
-## Synology Container Manager
+- `/api/*` JSON endpoints.
+- Static frontend assets from `client-dist`.
+- SPA fallback to `index.html` for non-API routes.
 
-Recommended setup:
+### Core Data Model
 
-1. Build the image locally or pull it from your registry once you publish it.
-2. Create a container from the image.
-3. Map container port `3001` to a host port, usually `3001`.
-4. Mount a persistent folder or volume to `/data`.
-5. Set environment variables:
-   - `NODE_ENV=production`
-   - `PORT=3001`
-   - `DATA_DIR=/data`
-   - `TZ=America/Los_Angeles` or your household timezone
-6. Enable restart policy `unless-stopped` or equivalent.
-7. Open `http://<synology-ip>:3001` from another device on your network and confirm the app loads.
+The main tables are:
 
-Important:
+- `children`: board lanes, display names, avatar keys, and sort order.
+- `chores`: chore definitions, point value, active flag, and timestamps.
+- `chore_schedule_days`: weekdays when an unassigned chore is visible.
+- `chore_assignments`: per-child weekday assignments for visible assigned chores.
+- `chore_completions`: per-day completion state with reversal links.
+- `rewards`: reward catalog entries and active/inactive state.
+- `ledger_entries`: immutable point events used to derive balances and history.
 
-- The SQLite file should live on the mounted `/data` path, not inside the container filesystem.
-- If the timezone matters for chore schedule boundaries, set `TZ` explicitly.
-- If you are using an older Synology setup that still calls the package "Docker" or "Container Station", the same core settings still apply: image source, port mapping, `/data` volume mount, and restart policy.
+### API Surface
 
-## Home Assistant Embedding
+Current endpoints include:
 
-Once the app is reachable on your network, add it to Home Assistant with a Webpage/Iframe-style card pointing at:
+- `GET /api/health`
+- `GET /api/dashboard`
+- `GET /api/children`
+- `POST /api/children`
+- `PATCH /api/children/:id`
+- `POST /api/chores`
+- `PATCH /api/chores/:id`
+- `DELETE /api/chores/:id`
+- `PATCH /api/chores/:id/assign`
+- `POST /api/chores/:id/complete`
+- `POST /api/chores/:id/uncomplete`
+- `GET /api/rewards`
+- `POST /api/rewards`
+- `PATCH /api/rewards/:id`
+- `DELETE /api/rewards/:id`
+- `POST /api/rewards/:id/redeem`
+- `GET /api/history/recent`
 
-```text
-http://<your-host-ip>:3001
-```
+The `X-Debug-Now` request header can override the effective current time for dashboard, complete, and uncomplete flows. The frontend debug tools use this for schedule testing.
 
-Notes:
+### Design Constraints
 
-- This app assumes trusted in-home usage and has no auth in v1.
-- Make sure the device running Home Assistant can reach the container host over the local network.
-- Use a stable host IP or hostname so the iframe URL does not drift.
-- If Home Assistant is using HTTPS while the app is served over plain HTTP, mixed-content/browser policy can matter depending on your setup. If that happens, serve the container through a local reverse proxy with HTTPS.
-
-## Deployment Verification
-
-After deploying to Synology, verify:
-
-1. `http://<synology-ip>:3001/api/health` responds
-2. `http://<synology-ip>:3001` loads the board
-3. A newly created chore still exists after container restart
-4. The SQLite file is being written under the mounted `/data` path
-5. Home Assistant iframe loads the app without clipping or reachability issues
-
-## Data and Persistence
-
-- Primary data store: SQLite
-- Default local DB path: `data/chore-tracker.db`
-- Recommended container DB path: `/data/chore-tracker.db`
-
-Back up the SQLite file by copying the DB file from the mounted data directory while the app is stopped, or by using your normal volume/folder backup workflow.
+- No authentication or authorization in the app.
+- Single-household, trusted-network deployment.
+- Ledger entries are append-only for point changes.
+- Chore deletion is soft deletion through `is_active = 0`.
+- Reward deletion deactivates rewards instead of removing historical context.
+- Local date behavior follows the server/container timezone.
 
 ## Verification
 
 See [MANUAL_QA_CHECKLIST.md](./MANUAL_QA_CHECKLIST.md) for a concise manual verification pass.
-See [REMAINING_ROADMAP.md](./REMAINING_ROADMAP.md) for the post-MVP roadmap.
+
+Release history belongs in GitHub Releases and git tags rather than a checked-in roadmap.
