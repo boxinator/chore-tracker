@@ -3,78 +3,36 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { WeeklyPage } from "./pages/WeeklyPage";
 import { ManageModal } from "./components/ManageModal";
 import { AvatarPickerModal } from "./components/AvatarPickerModal";
+import { apiFetch, getJson, sendEmpty, sendJson, sendJsonForResult } from "./api";
+import {
+  formatDailyLabel,
+  formatDate,
+  formatWeeklyLabel,
+  getAutoRefreshTrigger,
+  getDateParam,
+  getWeekStart,
+  parseDate,
+  reloadKioskForCurrentPeriod
+} from "./dateUtils";
 import type {
   AdjustmentInput,
   Child,
   ChildInput,
-  ChildrenResponse,
   CreateChoreInput,
   CreateTaskInput,
   DashboardResponse,
   HistoryEntry,
-  HistoryResponse,
   ProgressGoal,
   ProgressGoalInput,
-  ProgressGoalResponse,
   RedeemRewardResult,
   Reward,
   RewardInput,
-  RewardsResponse,
   UpdateChoreInput
 } from "./types";
 
 type ThemeName = "default" | "space" | "quest";
 const themeCycle: ThemeName[] = ["space", "quest", "default"];
 const themeLabels = { default: "Default", space: "Space", quest: "Quest" };
-
-function formatDate(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
-function parseDate(value: string) {
-  const [year, month, day] = value.split("-").map(Number);
-  return new Date(year, month - 1, day, 12);
-}
-
-function getWeekStart(date: Date) {
-  const start = new Date(date);
-  start.setDate(start.getDate() - start.getDay());
-  return start;
-}
-
-function getDateParam(name: string, fallback: string) {
-  const value = new URLSearchParams(window.location.search).get(name);
-  return value && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : fallback;
-}
-
-function formatDailyLabel(value: string) {
-  return parseDate(value).toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
-}
-
-function formatWeeklyLabel(value: string) {
-  const start = getWeekStart(parseDate(value));
-  const end = new Date(start);
-  end.setDate(end.getDate() + 6);
-  return `${start.toLocaleDateString(undefined, { month: "short", day: "numeric" })} - ${end.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
-}
-
-function getAutoRefreshTrigger(date: Date) {
-  const trigger = new Date(date);
-  trigger.setHours(0, 1, 0, 0);
-  return trigger;
-}
-
-function reloadKioskForCurrentPeriod() {
-  const now = new Date();
-
-  if (window.location.pathname === "/weekly") {
-    window.history.replaceState({}, "", `/weekly?start=${formatDate(getWeekStart(now))}`);
-  } else {
-    window.history.replaceState({}, "", `/daily?date=${formatDate(now)}`);
-  }
-
-  window.location.reload();
-}
 
 export function App() {
   const [route, setRoute] = useState(`${window.location.pathname}${window.location.search}`);
@@ -123,13 +81,6 @@ export function App() {
   const handledAutoRefreshDate = useRef<string | null>(
     initialRefreshCheck >= getAutoRefreshTrigger(initialRefreshCheck) ? formatDate(initialRefreshCheck) : null
   );
-
-  const apiFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-    return fetch(input, {
-      cache: "no-store",
-      ...init
-    });
-  };
 
   const handleToggleTheme = () => {
     setTheme((current) => {
@@ -205,13 +156,7 @@ export function App() {
 
   const fetchData = async (date = dailyDate) => {
     try {
-      const dashboardResponse = await apiFetch(`/api/dashboard?date=${date}`);
-
-      if (!dashboardResponse.ok) {
-        throw new Error(`Dashboard failed with ${dashboardResponse.status}`);
-      }
-
-      setDashboardData((await dashboardResponse.json()) as DashboardResponse);
+      setDashboardData(await getJson<DashboardResponse>(`/api/dashboard?date=${date}`, "Dashboard"));
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -227,57 +172,30 @@ export function App() {
   }, [route]);
 
   const fetchRewards = async () => {
-    const response = await apiFetch("/api/rewards");
-
-    if (!response.ok) {
-      throw new Error(`Rewards failed with ${response.status}`);
-    }
-
-    const payload = (await response.json()) as RewardsResponse;
+    const payload = await getJson<{ rewards: Reward[] }>("/api/rewards", "Rewards");
     setRewards(payload.rewards);
   };
 
   const fetchChildren = async () => {
-    const response = await apiFetch("/api/children");
-
-    if (!response.ok) {
-      throw new Error(`Children failed with ${response.status}`);
-    }
-
-    const payload = (await response.json()) as ChildrenResponse;
+    const payload = await getJson<{ children: Child[] }>("/api/children", "Children");
     setManagedChildren(payload.children);
   };
 
   const fetchManagedRewards = async () => {
-    const response = await apiFetch("/api/rewards?includeInactive=1");
-
-    if (!response.ok) {
-      throw new Error(`Rewards failed with ${response.status}`);
-    }
-
-    const payload = (await response.json()) as RewardsResponse;
+    const payload = await getJson<{ rewards: Reward[] }>("/api/rewards?includeInactive=1", "Rewards");
     setManagedRewards(payload.rewards);
   };
 
   const fetchManagedProgressGoal = async () => {
-    const response = await apiFetch("/api/progress-goals/active");
-
-    if (!response.ok) {
-      throw new Error(`Progress goal failed with ${response.status}`);
-    }
-
-    const payload = (await response.json()) as ProgressGoalResponse;
+    const payload = await getJson<{ progressGoal: ProgressGoal | null }>(
+      "/api/progress-goals/active",
+      "Progress goal"
+    );
     setManagedProgressGoal(payload.progressGoal);
   };
 
   const fetchHistory = async () => {
-    const response = await apiFetch("/api/history/recent?limit=20");
-
-    if (!response.ok) {
-      throw new Error(`History failed with ${response.status}`);
-    }
-
-    const payload = (await response.json()) as HistoryResponse;
+    const payload = await getJson<{ entries: HistoryEntry[] }>("/api/history/recent?limit=20", "History");
     setHistoryEntries(payload.entries);
   };
 
@@ -286,18 +204,7 @@ export function App() {
       setAddSubmitting(true);
       setAddError(null);
 
-      const response = await apiFetch("/api/chores", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(input)
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? `Create chore failed with ${response.status}`);
-      }
+      await sendJson("/api/chores", "POST", input, "Create chore");
 
       setAddModalOpen(false);
       await fetchData();
@@ -314,18 +221,7 @@ export function App() {
       setAddSubmitting(true);
       setAddError(null);
 
-      const response = await apiFetch("/api/tasks", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(input)
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? `Create task failed with ${response.status}`);
-      }
+      await sendJson("/api/tasks", "POST", input, "Create task");
 
       setAddModalOpen(false);
       await fetchData();
@@ -342,13 +238,10 @@ export function App() {
       return;
     }
 
-    const response = await apiFetch(`/api/${kind === "task" ? "tasks" : "chores"}/${id}`, {
-      method: "DELETE"
-    });
-
-    if (!response.ok) {
-      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-      setError(payload?.error ?? `Delete ${kind} failed with ${response.status}`);
+    try {
+      await sendEmpty(`/api/${kind === "task" ? "tasks" : "chores"}/${id}`, "DELETE", `Delete ${kind}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
       return;
     }
 
@@ -367,18 +260,7 @@ export function App() {
       setDetailSubmitting(true);
       setDetailError(null);
 
-      const response = await apiFetch(`/api/chores/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(input)
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? `Update chore failed with ${response.status}`);
-      }
+      await sendJson(`/api/chores/${id}`, "PATCH", input, "Update chore");
 
       setDetailModalChoreId(null);
       setDetailAssignmentChildId(null);
@@ -403,18 +285,16 @@ export function App() {
       return;
     }
 
-    const endpoint = done ? "uncomplete" : "complete";
-    const response = await apiFetch(`/api/${kind === "task" ? "tasks" : "chores"}/${id}/${endpoint}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(kind === "chore" ? { childId } : {})
-    });
-
-    if (!response.ok) {
-      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-      setError(payload?.error ?? `Update ${kind} failed with ${response.status}`);
+    try {
+      const endpoint = done ? "uncomplete" : "complete";
+      await sendJson(
+        `/api/${kind === "task" ? "tasks" : "chores"}/${id}/${endpoint}`,
+        "POST",
+        kind === "chore" ? { childId } : {},
+        `Update ${kind}`
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
       return;
     }
 
@@ -458,18 +338,7 @@ export function App() {
     try {
       setHistorySubmitting(true);
       setHistoryError(null);
-      const response = await apiFetch("/api/ledger/adjustments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(input)
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? `Point adjustment failed with ${response.status}`);
-      }
+      await sendJson("/api/ledger/adjustments", "POST", input, "Point adjustment");
 
       await Promise.all([fetchData(), fetchHistory()]);
       showSuccess("Points adjusted");
@@ -503,16 +372,7 @@ export function App() {
       setManageSaving(true);
       setManageError(null);
 
-      const response = await apiFetch("/api/children", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input)
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? `Create child failed with ${response.status}`);
-      }
+      await sendJson("/api/children", "POST", input, "Create child");
 
       await Promise.all([fetchData(), refreshManagementData()]);
       showSuccess("Kid added");
@@ -529,16 +389,7 @@ export function App() {
       setManageSaving(true);
       setManageError(null);
 
-      const response = await apiFetch(`/api/children/${childId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input)
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? `Update child failed with ${response.status}`);
-      }
+      await sendJson(`/api/children/${childId}`, "PATCH", input, "Update child");
 
       await Promise.all([fetchData(), refreshManagementData()]);
       showSuccess("Kid updated");
@@ -559,16 +410,7 @@ export function App() {
       setAvatarPickerSaving(true);
       setAvatarPickerError(null);
 
-      const response = await apiFetch(`/api/children/${avatarPickerChild.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ avatarKey })
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? `Update avatar failed with ${response.status}`);
-      }
+      await sendJson(`/api/children/${avatarPickerChild.id}`, "PATCH", { avatarKey }, "Update avatar");
 
       await Promise.all([fetchData(), refreshManagementData()]);
       setAvatarPickerChild(null);
@@ -585,16 +427,7 @@ export function App() {
       setManageSaving(true);
       setManageError(null);
 
-      const response = await apiFetch("/api/rewards", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input)
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? `Create reward failed with ${response.status}`);
-      }
+      await sendJson("/api/rewards", "POST", input, "Create reward");
 
       await Promise.all([fetchRewards(), refreshManagementData()]);
       showSuccess("Reward added");
@@ -611,16 +444,7 @@ export function App() {
       setManageSaving(true);
       setManageError(null);
 
-      const response = await apiFetch(`/api/rewards/${rewardId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input)
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? `Update reward failed with ${response.status}`);
-      }
+      await sendJson(`/api/rewards/${rewardId}`, "PATCH", input, "Update reward");
 
       await Promise.all([fetchRewards(), refreshManagementData()]);
       showSuccess("Reward updated");
@@ -637,14 +461,7 @@ export function App() {
       setManageSaving(true);
       setManageError(null);
 
-      const response = await apiFetch(`/api/rewards/${rewardId}`, {
-        method: "DELETE"
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? `Deactivate reward failed with ${response.status}`);
-      }
+      await sendEmpty(`/api/rewards/${rewardId}`, "DELETE", "Deactivate reward");
 
       await Promise.all([fetchRewards(), refreshManagementData()]);
       showSuccess("Reward deactivated");
@@ -661,16 +478,7 @@ export function App() {
       setManageSaving(true);
       setManageError(null);
 
-      const response = await apiFetch("/api/progress-goals", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input)
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? `Create progress goal failed with ${response.status}`);
-      }
+      await sendJson("/api/progress-goals", "POST", input, "Create progress goal");
 
       await Promise.all([fetchData(), refreshManagementData()]);
       showSuccess("Progress goal created");
@@ -687,16 +495,7 @@ export function App() {
       setManageSaving(true);
       setManageError(null);
 
-      const response = await apiFetch(`/api/progress-goals/${goalId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input)
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? `Update progress goal failed with ${response.status}`);
-      }
+      await sendJson(`/api/progress-goals/${goalId}`, "PATCH", input, "Update progress goal");
 
       await Promise.all([fetchData(), refreshManagementData()]);
       showSuccess("Progress goal updated");
@@ -713,14 +512,7 @@ export function App() {
       setManageSaving(true);
       setManageError(null);
 
-      const response = await apiFetch(`/api/progress-goals/${goalId}/award`, {
-        method: "POST"
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? `Award progress goal failed with ${response.status}`);
-      }
+      await sendEmpty(`/api/progress-goals/${goalId}/award`, "POST", "Award progress goal");
 
       await Promise.all([fetchData(), refreshManagementData()]);
       showSuccess("Progress goal awarded");
@@ -737,14 +529,7 @@ export function App() {
       setProgressGoalCompleting(true);
       setError(null);
 
-      const response = await apiFetch(`/api/progress-goals/${goalId}/award`, {
-        method: "POST"
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? `Complete progress goal failed with ${response.status}`);
-      }
+      await sendEmpty(`/api/progress-goals/${goalId}/award`, "POST", "Complete progress goal");
 
       await Promise.all([fetchData(), fetchManagedProgressGoal()]);
       showSuccess("Goal completed");
@@ -764,20 +549,12 @@ export function App() {
       setRewardsLoading(true);
       setRewardsError(null);
 
-      const response = await apiFetch(`/api/rewards/${rewardId}/redeem`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ childId: rewardModalChildId })
-      });
-
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? `Redeem reward failed with ${response.status}`);
-      }
-
-      setRedeemResult((await response.json()) as RedeemRewardResult);
+      setRedeemResult(await sendJsonForResult<RedeemRewardResult>(
+        `/api/rewards/${rewardId}/redeem`,
+        "POST",
+        { childId: rewardModalChildId },
+        "Redeem reward"
+      ));
       await fetchData();
       showSuccess("Reward redeemed");
       window.setTimeout(() => {
@@ -793,28 +570,14 @@ export function App() {
   };
 
   const handleWeeklyUpdateChore = async (id: string, input: UpdateChoreInput) => {
-    const response = await apiFetch(`/api/chores/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input)
-    });
-
-    if (!response.ok) {
-      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-      throw new Error(payload?.error ?? `Update chore failed with ${response.status}`);
-    }
+    await sendJson(`/api/chores/${id}`, "PATCH", input, "Update chore");
 
     await fetchData();
     showSuccess("Chore updated");
   };
 
   const handleWeeklyDeleteChore = async (id: string) => {
-    const response = await apiFetch(`/api/chores/${id}`, { method: "DELETE" });
-
-    if (!response.ok) {
-      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-      throw new Error(payload?.error ?? `Delete chore failed with ${response.status}`);
-    }
+    await sendEmpty(`/api/chores/${id}`, "DELETE", "Delete chore");
 
     await fetchData();
     showSuccess("Chore deleted");

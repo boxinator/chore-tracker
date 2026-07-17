@@ -123,14 +123,6 @@ export type HistoryEntry = {
   timestamp: string;
 };
 
-export type RewardsResponse = {
-  rewards: Reward[];
-};
-
-export type ChildrenResponse = {
-  children: Child[];
-};
-
 export type RewardInput = {
   name: string;
   description: string;
@@ -148,18 +140,10 @@ export type ProgressGoal = {
   percentComplete: number;
 };
 
-export type ProgressGoalResponse = {
-  progressGoal: ProgressGoal | null;
-};
-
 export type ProgressGoalInput = {
   name: string;
   targetPoints: number;
   startDateLocal: string;
-};
-
-export type HistoryResponse = {
-  entries: HistoryEntry[];
 };
 
 export type AdjustmentInput = {

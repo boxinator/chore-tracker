@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { ChoreAssignment, ChoreRotation, DashboardChild } from "../types";
+import { allDays } from "./choreForm";
 
 type ChoreAssignmentEditorProps = {
   children: DashboardChild[];
@@ -12,7 +13,6 @@ type ChoreAssignmentEditorProps = {
 };
 
 const weekdayLabels = ["S", "M", "T", "W", "T", "F", "S"];
-const allDays = [0, 1, 2, 3, 4, 5, 6];
 
 function normalizeDays(days: number[]) {
   return [...new Set(days)].sort((left, right) => left - right);
