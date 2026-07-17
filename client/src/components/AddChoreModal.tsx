@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import type { ChoreAssignment, ChoreRotation, CreateChoreInput, CreateTaskInput, DashboardChild } from "../types";
 import { useModalDismiss } from "./modalDismiss";
 import { ChoreAssignmentEditor } from "./ChoreAssignmentEditor";
+import { allDays, buildChoreInput, isChoreDraftValid } from "./choreForm";
 
 type AddChoreModalProps = {
   children: DashboardChild[];
@@ -13,7 +14,6 @@ type AddChoreModalProps = {
   onSubmitTask: (input: CreateTaskInput) => Promise<void>;
 };
 
-const allDays = [0, 1, 2, 3, 4, 5, 6];
 type AddMode = "chore" | "task";
 
 export function AddChoreModal({
@@ -39,11 +39,7 @@ export function AddChoreModal({
       return title.trim().length > 0 && taskChildId.length > 0;
     }
 
-    return (
-      title.trim().length > 0 &&
-      Number(pointValue) > 0 &&
-      (!rotation || (rotation.childIds.length >= 2 && rotation.days.length > 0))
-    );
+    return isChoreDraftValid(title, pointValue, rotation);
   }, [
     mode,
     title,
@@ -68,14 +64,14 @@ export function AddChoreModal({
       return;
     }
 
-    await onSubmit({
-        title,
-        description,
-        pointValue: Number(pointValue),
-        assignments: rotation ? [] : assignments,
-        unassignedScheduleDays: assignments.length === 0 && !rotation ? unassignedScheduleDays : [],
-        rotation
-      });
+    await onSubmit(buildChoreInput({
+      title,
+      description,
+      pointValue,
+      assignments,
+      unassignedScheduleDays,
+      rotation
+    }));
   };
 
   return (

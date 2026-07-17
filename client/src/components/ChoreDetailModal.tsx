@@ -3,6 +3,12 @@ import { Trash2, X, Zap } from "lucide-react";
 import type { ChoreAssignment, ChoreRotation, DashboardChild, UpdateChoreInput, VisibleChore } from "../types";
 import { useModalDismiss } from "./modalDismiss";
 import { ChoreAssignmentEditor } from "./ChoreAssignmentEditor";
+import {
+  buildChoreInput,
+  getInitialDetailAssignments,
+  getInitialUnassignedScheduleDays,
+  isChoreDraftValid
+} from "./choreForm";
 
 type ChoreDetailModalProps = {
   chore: VisibleChore;
@@ -15,8 +21,6 @@ type ChoreDetailModalProps = {
   onDelete: (choreId: string) => Promise<void>;
   onSubmit: (choreId: string, input: UpdateChoreInput) => Promise<void>;
 };
-
-const allDays = [0, 1, 2, 3, 4, 5, 6];
 
 export function ChoreDetailModal({
   chore,
@@ -33,39 +37,15 @@ export function ChoreDetailModal({
   const { backdropProps, closeButtonProps } = useModalDismiss(onClose);
   const [description, setDescription] = useState(chore.description);
   const [pointValue, setPointValue] = useState(String(chore.pointValue));
-  const [assignments, setAssignments] = useState<ChoreAssignment[]>(() => {
-    if (!initialAssignmentChildId) {
-      return chore.assignments;
-    }
-
-    const existing = chore.assignments.find(
-      (assignment) => assignment.childId === initialAssignmentChildId
-    );
-
-    if (existing) {
-      return chore.assignments.map((assignment) =>
-        assignment.childId === initialAssignmentChildId &&
-        !assignment.days.includes(currentDayOfWeek)
-          ? { ...assignment, days: [...assignment.days, currentDayOfWeek].sort((a, b) => a - b) }
-          : assignment
-      );
-    }
-
-    return [
-      ...chore.assignments,
-      { childId: initialAssignmentChildId, days: [currentDayOfWeek] }
-    ].sort((left, right) => left.childId.localeCompare(right.childId));
-  });
+  const [assignments, setAssignments] = useState<ChoreAssignment[]>(() =>
+    getInitialDetailAssignments(chore, initialAssignmentChildId, currentDayOfWeek)
+  );
   const [unassignedScheduleDays, setUnassignedScheduleDays] = useState<number[]>(
-    chore.unassignedScheduleDays.length > 0 ? chore.unassignedScheduleDays : allDays
+    getInitialUnassignedScheduleDays(chore)
   );
   const [rotation, setRotation] = useState<ChoreRotation | null>(chore.rotation);
 
-  const canSubmit = useMemo(() => (
-    title.trim().length > 0 &&
-    Number(pointValue) > 0 &&
-    (!rotation || (rotation.childIds.length >= 2 && rotation.days.length > 0))
-  ), [
+  const canSubmit = useMemo(() => isChoreDraftValid(title, pointValue, rotation), [
     pointValue,
     rotation,
     title
@@ -78,14 +58,14 @@ export function ChoreDetailModal({
       return;
     }
 
-    await onSubmit(chore.id, {
+    await onSubmit(chore.id, buildChoreInput({
       title,
       description,
-      pointValue: Number(pointValue),
-      assignments: rotation ? [] : assignments,
-      unassignedScheduleDays: assignments.length === 0 && !rotation ? unassignedScheduleDays : [],
+      pointValue,
+      assignments,
+      unassignedScheduleDays,
       rotation
-    });
+    }));
   };
 
   const handleDelete = async () => {
