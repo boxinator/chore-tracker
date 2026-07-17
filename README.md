@@ -64,6 +64,15 @@ The screenshots below use mocked household data and the built-in Space theme.
 
 <img src="./docs/screenshots/feature-rewards.png" alt="Reward modal showing available rewards and point costs" width="420">
 
+### Shared Progress Goal
+
+- Shows the active household goal above the swim lanes on the daily board.
+- Tracks points earned since the goal's start date and excludes reward redemptions from progress.
+- Changes to a reached state when the earned total meets or exceeds the target.
+- Lets the household mark a reached goal complete, which awards it and hides the goal bar until the next goal is set.
+
+<img src="./docs/screenshots/feature-progress-goal.png" alt="Completed family progress goal bar with a Complete goal button" width="560">
+
 ### Household Management And Goals
 
 - Add and rename children/people from the Manage modal.
@@ -122,6 +131,12 @@ The screenshots below use mocked household data and the built-in Space theme.
 4. The app creates a redemption ledger entry and refreshes the child's total.
 
 <img src="./docs/screenshots/use-redeem-reward.png" alt="Reward confirmation view showing current points minus reward cost equals new total" width="420">
+
+### Complete A Shared Goal
+
+1. Set a progress goal from `Manage`.
+2. When household earned points reach the target, use `Complete goal` on the board goal bar.
+3. The app awards the goal and removes the goal bar until another goal is configured.
 
 ### Manage People, Rewards, Goals, And Theme
 

@@ -764,6 +764,7 @@ async function main() {
       await expandUnassigned.click();
     }
     await screenshot(page, "space-board-overview.png");
+    await screenshotLocator(page.locator(".progress-goal-bar"), "feature-progress-goal.png");
     await screenshotLocator(page.locator(".board-shell"), "feature-kiosk-board.png", { maxHeight: 700 });
 
     await page.locator("section.lane").filter({ hasText: "Unassigned" }).locator(".lane-footer").getByRole("button", { name: "Add chore" }).click();

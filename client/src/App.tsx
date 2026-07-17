@@ -117,6 +117,7 @@ export function App() {
   const [rewardsLoading, setRewardsLoading] = useState(false);
   const [rewardsError, setRewardsError] = useState<string | null>(null);
   const [redeemResult, setRedeemResult] = useState<RedeemRewardResult | null>(null);
+  const [progressGoalCompleting, setProgressGoalCompleting] = useState(false);
   const [refreshCountdown, setRefreshCountdown] = useState<number | null>(null);
   const initialRefreshCheck = new Date();
   const handledAutoRefreshDate = useRef<string | null>(
@@ -731,6 +732,29 @@ export function App() {
     }
   };
 
+  const handleCompleteProgressGoal = async (goalId: string) => {
+    try {
+      setProgressGoalCompleting(true);
+      setError(null);
+
+      const response = await apiFetch(`/api/progress-goals/${goalId}/award`, {
+        method: "POST"
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? `Complete progress goal failed with ${response.status}`);
+      }
+
+      await Promise.all([fetchData(), fetchManagedProgressGoal()]);
+      showSuccess("Goal completed");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setProgressGoalCompleting(false);
+    }
+  };
+
   const handleRedeemReward = async (rewardId: string) => {
     if (!rewardModalChildId) {
       return;
@@ -903,6 +927,8 @@ export function App() {
         setRedeemResult(null);
       }}
       onRedeemReward={handleRedeemReward}
+      progressGoalCompleting={progressGoalCompleting}
+      onCompleteProgressGoal={handleCompleteProgressGoal}
     />
     )}
     {manageModalOpen && (

@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type {
   AdjustmentInput,
@@ -102,6 +102,8 @@ type DashboardPageProps = {
   onOpenRewards: (childId: string) => void;
   onCloseRewards: () => void;
   onRedeemReward: (rewardId: string) => Promise<void>;
+  progressGoalCompleting: boolean;
+  onCompleteProgressGoal: (goalId: string) => Promise<void>;
 };
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -189,7 +191,15 @@ function buildLanes(data: DashboardResponse | null): Lane[] {
   ];
 }
 
-function ProgressGoalBar({ goal }: { goal: ProgressGoal }) {
+function ProgressGoalBar({
+  goal,
+  completing,
+  onComplete
+}: {
+  goal: ProgressGoal;
+  completing: boolean;
+  onComplete: (goalId: string) => Promise<void>;
+}) {
   const reached = goal.earnedPoints >= goal.targetPoints;
 
   return (
@@ -208,6 +218,17 @@ function ProgressGoalBar({ goal }: { goal: ProgressGoal }) {
         <strong>{goal.earnedPoints}</strong>
         <span>/ {goal.targetPoints} pts</span>
       </div>
+      {reached && (
+        <button
+          className="primary-button progress-goal-complete-button"
+          type="button"
+          disabled={completing}
+          onClick={() => void onComplete(goal.id)}
+        >
+          <CheckCircle2 aria-hidden="true" />
+          <span>{completing ? "Completing" : "Complete goal"}</span>
+        </button>
+      )}
     </section>
   );
 }
@@ -257,7 +278,9 @@ export function DashboardPage({
   redeemResult,
   onOpenRewards,
   onCloseRewards,
-  onRedeemReward
+  onRedeemReward,
+  progressGoalCompleting,
+  onCompleteProgressGoal
 }: DashboardPageProps) {
   const boardRef = useRef<HTMLElement | null>(null);
   const [boardScrollState, setBoardScrollState] = useState({ canScrollLeft: false, canScrollRight: false });
@@ -335,7 +358,11 @@ export function DashboardPage({
         </div>
 
         {!loading && !error && dashboardData?.progressGoal && (
-          <ProgressGoalBar goal={dashboardData.progressGoal} />
+          <ProgressGoalBar
+            goal={dashboardData.progressGoal}
+            completing={progressGoalCompleting}
+            onComplete={onCompleteProgressGoal}
+          />
         )}
       </div>
 

@@ -150,7 +150,7 @@
 
 .progress-goal-bar {
   display: grid;
-  grid-template-columns: minmax(140px, 0.8fr) minmax(180px, 2fr) auto;
+  grid-template-columns: minmax(140px, 0.8fr) minmax(180px, 2fr) auto auto;
   align-items: center;
   gap: 14px;
   padding: 14px 16px;
@@ -218,6 +218,10 @@
 .progress-goal-points strong {
   color: var(--color-text-strong);
   font-size: 1.22rem;
+}
+
+.progress-goal-complete-button {
+  min-height: 40px;
 }
 
 .board {
@@ -308,6 +312,7 @@
   }
 
   .progress-goal-bar {
+    grid-template-columns: minmax(140px, 0.8fr) minmax(180px, 2fr) auto auto;
     gap: 10px;
     padding: 10px 12px;
   }
@@ -346,6 +351,12 @@
   .progress-goal-track {
     grid-column: 1 / -1;
     order: 3;
+  }
+
+  .progress-goal-complete-button {
+    grid-column: 1 / -1;
+    order: 4;
+    width: 100%;
   }
 
 }
