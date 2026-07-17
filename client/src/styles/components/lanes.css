@@ -140,6 +140,10 @@
   min-height: 48px;
 }
 
+.lane-footer .lane-add-button-icon {
+  aspect-ratio: auto;
+}
+
 .empty-copy {
   margin: 0;
   color: var(--color-text-muted);
